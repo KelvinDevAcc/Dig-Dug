@@ -1,22 +1,22 @@
 #pragma once
-#include <chrono>
 #include <string>
 #include <functional>
 
 namespace dae
 {
-	class Minigin
-	{
-	public:
-		explicit Minigin(const std::string& dataPath);
-		~Minigin();
-		static void Run(const std::function<void()>& load);
+    class minigin
+    {
+    public:
+        explicit minigin(const std::string& dataPath);
+        ~minigin();
+        void Run(const std::function<void()>& load);
 
-		Minigin(const Minigin& other) = delete;
-		Minigin(Minigin&& other) = delete;
-		Minigin& operator=(const Minigin& other) = delete;
-		Minigin& operator=(Minigin&& other) = delete;
-	private:
-		inline static int m_FrameRate = 60;
-	};
+        minigin(const minigin& other) = delete;
+        minigin(minigin&& other) = delete;
+        minigin& operator=(const minigin& other) = delete;
+        minigin& operator=(minigin&& other) = delete;
+
+    private:
+        int m_FrameRate = 60;
+    };
 }

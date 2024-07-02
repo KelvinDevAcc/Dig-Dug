@@ -26,18 +26,27 @@ int GetOpenGLDriverIndex()
 void dae::Renderer::Init(SDL_Window* window)
 {
 	m_window = window;
-	m_renderer = SDL_CreateRenderer(window, GetOpenGLDriverIndex(), SDL_RENDERER_ACCELERATED);
-	if (m_renderer == nullptr) 
+
+	// Create OpenGL context
+	SDL_GLContext glContext = SDL_GL_CreateContext(window);
+	if (!glContext)
+	{
+		throw std::runtime_error(std::string("SDL_GL_CreateContext Error: ") + SDL_GetError());
+	}
+
+	// Initialize renderer with VSync enabled
+	m_renderer = SDL_CreateRenderer(window, GetOpenGLDriverIndex(), SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+	if (m_renderer == nullptr)
 	{
 		throw std::runtime_error(std::string("SDL_CreateRenderer Error: ") + SDL_GetError());
 	}
 
+	// Initialize ImGui if needed (assuming you're using ImGui)
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	ImGui_ImplSDL2_InitForOpenGL(window, SDL_GL_GetCurrentContext());
+	ImGui_ImplSDL2_InitForOpenGL(window, glContext);
 	ImGui_ImplOpenGL3_Init();
 }
-
 
 void dae::Renderer::Render() const
 {
@@ -49,7 +58,6 @@ void dae::Renderer::Render() const
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplSDL2_NewFrame();
 	ImGui::NewFrame();
-
 
 	// Render ImGui
 	ImGui::Render();
@@ -121,7 +129,7 @@ void dae::Renderer::RenderTexture(const dae::Texture2D& texture, glm::vec2 drawL
 	SDL_Renderer* sdlRenderer = GetInstance().GetSDLRenderer();
 
 	if (sdlRenderer == nullptr || texture.GetSDLTexture() == nullptr)
-		return; 
+		return;
 
 	SDL_Rect srcRect;
 	srcRect.x = static_cast<int>(srcLocation.x * cellSize.x);
@@ -136,7 +144,7 @@ void dae::Renderer::RenderTexture(const dae::Texture2D& texture, glm::vec2 drawL
 	dstRect.h = static_cast<int>(height);
 
 	SDL_RendererFlip flip = SDL_FLIP_NONE;
-	if (flipX and flipY)
+	if (flipX && flipY)
 		flip = static_cast<SDL_RendererFlip>(SDL_FLIP_HORIZONTAL | SDL_FLIP_VERTICAL);
 	else if (flipX)
 		flip = SDL_FLIP_HORIZONTAL;

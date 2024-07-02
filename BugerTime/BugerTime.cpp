@@ -309,6 +309,7 @@ void BindExtraControlls(dae::InputManager& inputManager)
     inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::RightBumper), KeyState::Up, std::make_unique<DecreaseVolumeCommand>(&servicelocator::get_sound_system()), InputType::Controller);
 
 }
+
 void UnBindMenuCommands(dae::InputManager& inputManager)
 {
     // Unbind keyboard commands

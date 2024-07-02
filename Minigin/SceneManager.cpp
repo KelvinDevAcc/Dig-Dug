@@ -6,7 +6,7 @@
 
 #include "SceneData.h"
 #include "servicelocator.h"
-#include "../BugerTime/GameData.h"
+//#include "../BugerTime/GameData.h"
 
 
 namespace dae
@@ -30,7 +30,7 @@ namespace dae
         {
             if ((*it)->GetName() == name)
             {
-                GameData::GetInstance().FindAndStorePlayerData();
+                //GameData::GetInstance().FindAndStorePlayerData();
                 m_activeSceneIterator = it;
 
                 (*m_activeSceneIterator)->RemoveAll();
@@ -55,10 +55,6 @@ namespace dae
                 {
                     soundSystem.play(soundID);
                 }
-                else
-                {
-                    std::cerr << "Failed to load background music for scene: " << name << std::endl;
-                }
 
                 // Store the previous active scene iterator for future reference
                 m_previousActiveSceneIterator = m_activeSceneIterator;
@@ -73,7 +69,7 @@ namespace dae
 
     void SceneManager::GoToNextScene()
     {
-        GameData::GetInstance().FindAndStorePlayerData();
+        //GameData::GetInstance().FindAndStorePlayerData();
             m_previousActiveSceneIterator = m_activeSceneIterator;
         // Advance to the next scene
             ++m_activeSceneIterator;
@@ -94,6 +90,9 @@ namespace dae
 
     void SceneManager::Update() const
     {
+	    if (m_scenes.empty())
+            return;
+
         if (m_activeSceneIterator != m_scenes.end())
         {
             (*m_activeSceneIterator)->Update();
@@ -102,6 +101,9 @@ namespace dae
 
     void SceneManager::Render() const
     {
+        if (m_scenes.empty())
+            return;
+
         if (m_activeSceneIterator != m_scenes.end())
         {
             (*m_activeSceneIterator)->Render();

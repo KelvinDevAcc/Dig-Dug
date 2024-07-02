@@ -4,8 +4,8 @@
 #include "SceneData.h"
 #include "SceneManager.h"
 #include "servicelocator.h"
-#include "../BugerTime/GameData.h"
-#include "../BugerTime/Player.h"
+//#include "../BugerTime/GameData.h"
+//#include "../BugerTime/Player.h"
 
 
 MoveCommand::MoveCommand(int playerNumber, float deltaX, float deltaY)
@@ -39,9 +39,9 @@ MoveCommand::MoveCommand(int playerNumber, float deltaX, float deltaY)
 
 void MoveCommand::Execute()
 {
-	if (m_gameObject) {
-        m_gameObject->GetComponent<game::Player>()->Move(m_deltaX, m_deltaY);
-    }
+	//if (m_gameObject) {
+ //       m_gameObject->GetComponent<game::Player>()->Move(m_deltaX, m_deltaY);
+ //   }
 }
 
 
@@ -58,7 +58,7 @@ DamageCommand::DamageCommand(int playerNumber)
 
 void DamageCommand::Execute()
 {
-    m_gameObject->GetComponent<game::Player>()->Die();
+    /*m_gameObject->GetComponent<game::Player>()->Die();*/
 }
 
 
@@ -74,7 +74,7 @@ ScorePointCommand::ScorePointCommand(int playerNumber)
 
 void ScorePointCommand::Execute()
 {
-    m_gameObject->GetComponent<game::Player>()->Attack();
+   /* m_gameObject->GetComponent<game::Player>()->Attack();*/
 }
 
 
@@ -283,19 +283,19 @@ SelectNameComponent* SelectOptionLetterCommand::FindSelectNameComponent() const
 }
 
 void saveScoreCommand::Execute() {
-    auto& gameData = GameData::GetInstance();
-    int numberOfPlayers = gameData.GetNumberOfPlayers();
+   ///* auto& gameData = GameData::GetInstance();*/
+   // int numberOfPlayers = gameData.GetNumberOfPlayers();
 
-    for (int i = 0; i < numberOfPlayers; ++i) {
-        std::string currentName = "";
-        if (const auto selectName = FindSelectNameComponent(i)) {
-            currentName = selectName->GetCurrentName();
-            HighScores::GetInstance().saveNewScore(currentName, gameData.GetPlayerData(i).score);
-        }
-        gameData.ResetPlayerData(i);
-    }
+   // for (int i = 0; i < numberOfPlayers; ++i) {
+   //     std::string currentName = "";
+   //     if (const auto selectName = FindSelectNameComponent(i)) {
+   //         currentName = selectName->GetCurrentName();
+   //         HighScores::GetInstance().saveNewScore(currentName, gameData.GetPlayerData(i).score);
+   //     }
+   //     gameData.ResetPlayerData(i);
+   // }
 
-    dae::SceneManager::GetInstance().SetActiveScene("ScoreboardScene");
+   // dae::SceneManager::GetInstance().SetActiveScene("ScoreboardScene");
 }
 
 SelectNameComponent* saveScoreCommand::FindSelectNameComponent(int playerId) {
