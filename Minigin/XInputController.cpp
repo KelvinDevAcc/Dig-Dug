@@ -1,5 +1,7 @@
 #include "XInputController.h"
 
+#include <iostream>
+
 XInputController::XInputController(DWORD controllerIndex)
 	: m_controllerIndex(controllerIndex), m_PreviousState(), m_CurrentState(), m_ButtonsPressedThisFrame(0),
 	  m_ButtonsReleasedThisFrame(0),
@@ -17,12 +19,19 @@ void XInputController::UpdateState()
     CopyMemory(&m_PreviousState, &m_CurrentState, sizeof(XINPUT_STATE));
     ZeroMemory(&m_CurrentState, sizeof(XINPUT_STATE));
 
-    if (XInputGetState(m_controllerIndex, &m_CurrentState) == ERROR_SUCCESS)
+    DWORD result = XInputGetState(m_controllerIndex, &m_CurrentState);
+    if (result == ERROR_SUCCESS)
     {
+        if (!m_connected) {
+            std::cout << "Controller " << m_controllerIndex << " connected." << std::endl; // Debugging output
+        }
         m_connected = true;
     }
     else
     {
+        if (m_connected) {
+            std::cout << "Controller " << m_controllerIndex << " disconnected." << std::endl; // Debugging output
+        }
         m_connected = false;
     }
 

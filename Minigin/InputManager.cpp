@@ -1,5 +1,6 @@
 #include "InputManager.h"
 
+#include <iostream>
 #include <SDL.h>
 
 #include "backends/imgui_impl_sdl2.h"
@@ -149,32 +150,43 @@ int InputManager::GetConnectedControllerCount()
             connectedCount++;
         }
     }
+    std::cout << "Connected controllers: " << connectedCount << std::endl; // Debugging output
     return connectedCount;
 }
 
-void InputManager::HandleControllerInput() {
-    for (int i = 0; i <static_cast<int>(m_gameControllers.size()); ++i) {
+void InputManager::HandleControllerInput()
+{
+    for (int i = 0; i < static_cast<int>(m_gameControllers.size()); ++i)
+    {
         if (!m_gameControllers[i].IsConnected()) {
-            continue; 
+            continue;
         }
 
-        for (const auto& binding : m_controllerBindings[i]) {
+        for (const auto& binding : m_controllerBindings[i])
+        {
             const auto button = binding.first.first;
 
-            switch (const auto state = binding.first.second) {
-            case KeyState::Down: 
-                if (m_gameControllers[i].IsButtonDown(button)) {
+            switch (const auto state = binding.first.second)
+            {
+            case KeyState::Down:
+                if (m_gameControllers[i].IsButtonDown(button))
+                {
                     binding.second->Execute();
+                    std::cout << "Controller " << i << " bindings: " << m_controllerBindings[i].size() << std::endl;
                 }
                 break;
             case KeyState::Up:
-                if (m_gameControllers[i].IsButtonUp(button)) {
+                if (m_gameControllers[i].IsButtonUp(button))
+                {
                     binding.second->Execute();
+                    std::cout << "Controller " << i << " bindings: " << m_controllerBindings[i].size() << std::endl;
                 }
                 break;
-            case KeyState::Pressed: 
-                if (m_gameControllers[i].IsButtonPressed(button)) {
+            case KeyState::Pressed:
+                if (m_gameControllers[i].IsButtonPressed(button))
+                {
                     binding.second->Execute();
+                    std::cout << "Controller " << i << " bindings: " << m_controllerBindings[i].size() << std::endl;
                 }
                 break;
             }

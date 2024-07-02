@@ -4,7 +4,7 @@
 class GameControllerImpl
 {
 public:
-    GameControllerImpl(int controllerIndex = 0) : m_xinputController(controllerIndex) {}
+    GameControllerImpl(int controllerIndex = 0) : m_xinputController(controllerIndex) { m_xinputController.UpdateState(); }
 
     bool IsConnected() const { return m_xinputController.IsConnected(); }
     void UpdateState() { m_xinputController.UpdateState(); }

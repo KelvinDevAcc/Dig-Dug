@@ -31,40 +31,39 @@ void loadResources()
 
 }
 
-//void BindMenuCommands(dae::InputManager& inputManager)
-//{
-//    // Bind keyboard commands
-//    inputManager.BindCommand(SDL_SCANCODE_W, KeyState::Up, std::make_unique<NavigateUpCommand>(), InputType::Keyboard);
-//    inputManager.BindCommand(SDL_SCANCODE_S, KeyState::Up, std::make_unique<NavigateDownCommand>(), InputType::Keyboard);
-//    inputManager.BindCommand(SDL_SCANCODE_RETURN, KeyState::Up, std::make_unique<SelectOptionCommand>(), InputType::Keyboard);
-//
-//    // Bind controller commands
-//    inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadUp), KeyState::Up, std::make_unique<NavigateUpCommand>(), InputType::Controller);
-//    inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadDown), KeyState::Up, std::make_unique<NavigateDownCommand>(), InputType::Controller);
-//    inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::Y), KeyState::Up, std::make_unique<SelectOptionCommand>(), InputType::Controller);
-//}
-//
-//void UnBindMenuCommands(dae::InputManager& inputManager)
-//{
-//    // Unbind keyboard commands
-//    inputManager.UnbindCommand(SDL_SCANCODE_W, KeyState::Up, InputType::Keyboard);
-//    inputManager.UnbindCommand(SDL_SCANCODE_S, KeyState::Up, InputType::Keyboard);
-//    inputManager.UnbindCommand(SDL_SCANCODE_RETURN, KeyState::Up, InputType::Keyboard);
-//
-//    // Unbind controller commands
-//    inputManager.UnbindCommand(GameController::GetButtonMapping(GameController::Button::DPadUp), KeyState::Up, InputType::Controller);
-//    inputManager.UnbindCommand(GameController::GetButtonMapping(GameController::Button::DPadDown), KeyState::Up, InputType::Controller);
-//    inputManager.UnbindCommand(GameController::GetButtonMapping(GameController::Button::X), KeyState::Up, InputType::Controller);
-//    inputManager.UnbindCommand(GameController::GetButtonMapping(GameController::Button::Y), KeyState::Up, InputType::Controller);
-//
-//}
+void BindMenuCommands(dae::InputManager& inputManager)
+{
+    // Bind keyboard commands
+    inputManager.BindCommand(SDL_SCANCODE_W, KeyState::Up, std::make_unique<NavigateUpCommand>(), InputType::Keyboard);
+    inputManager.BindCommand(SDL_SCANCODE_S, KeyState::Up, std::make_unique<NavigateDownCommand>(), InputType::Keyboard);
+    inputManager.BindCommand(SDL_SCANCODE_RETURN, KeyState::Up, std::make_unique<SelectOptionCommand>(), InputType::Keyboard);
+
+    // Bind controller commands
+    inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadUp), KeyState::Up, std::make_unique<NavigateUpCommand>(), InputType::Controller);
+    inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadDown), KeyState::Up, std::make_unique<NavigateDownCommand>(), InputType::Controller);
+    inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::A), KeyState::Up, std::make_unique<SelectOptionCommand>(), InputType::Controller);
+}
+
+void UnBindMenuCommands(dae::InputManager& inputManager)
+{
+    // Unbind keyboard commands
+    inputManager.UnbindCommand(SDL_SCANCODE_W, KeyState::Up, InputType::Keyboard);
+    inputManager.UnbindCommand(SDL_SCANCODE_S, KeyState::Up, InputType::Keyboard);
+    inputManager.UnbindCommand(SDL_SCANCODE_RETURN, KeyState::Up, InputType::Keyboard);
+
+    // Unbind controller commands
+    inputManager.UnbindCommand(GameController::GetButtonMapping(GameController::Button::DPadUp), KeyState::Up, InputType::Controller);
+    inputManager.UnbindCommand(GameController::GetButtonMapping(GameController::Button::DPadDown), KeyState::Up, InputType::Controller);
+    inputManager.UnbindCommand(GameController::GetButtonMapping(GameController::Button::A), KeyState::Up, InputType::Controller);
+
+}
 
 
 void LoadStartMenu(dae::Scene* startMenuScene)
 {
     auto& inputManager = dae::InputManager::GetInstance();
     const int numControllers = inputManager.GetConnectedControllerCount();
-    //BindMenuCommands(inputManager);
+    BindMenuCommands(inputManager);
 
     // Create GameObject for FPS counter
     auto fpsCounterObject = std::make_unique<dae::GameObject>();
@@ -131,19 +130,17 @@ void LoadStartMenu(dae::Scene* startMenuScene)
     std::vector<std::function<void()>> callbacks =
     {
         []() {
-            std::cout << "single player";
+            std::cout << "single player" << std::endl;
         },
         []() {
-            std::cout << "multiplayer";
+            std::cout << "multiplayer" << std::endl;
 
         },
         []() {
-            std::cout << "versus Mode";
+            std::cout << "versus Mode" << std::endl;
 
         },
-        []() {
-            std::cout << "ScoreBord";
-        }
+    	[]() { dae::SceneManager::GetInstance().SetActiveScene("ScoreboardScene"); }
     };
 
 
@@ -182,14 +179,61 @@ void LoadStartMenu(dae::Scene* startMenuScene)
 
 }
 
+void LoadScoreboard(dae::Scene* ScoreBoardScene)
+{
+	const auto& highscore = HighScores::GetInstance();
+
+    const auto& scores = highscore.getHighScores();
+
+    for (size_t i = 0; i < scores.size(); ++i) {
+        const auto& playerName = scores[i].first;
+        const auto score = scores[i].second;
+
+        auto gameObject = std::make_unique<dae::GameObject>();
+
+        std::string text = playerName.data() + std::string(": ") + std::to_string(score);
+        auto textComponent = std::make_unique<dae::TextComponent>(text, dae::ResourceManager::GetFont("arcadeBig"), SDL_Color{ 255, 0, 0, 255 }, *gameObject);
+
+        gameObject->SetLocalPosition(glm::vec3(635, 190 + i * 50, 0.f));
+
+        gameObject->AddComponent(std::move(textComponent));
+
+        ScoreBoardScene->Add(std::move(gameObject));
+    }
+
+
+    // Create GameObject for Title
+    auto TitleObject02 = std::make_unique<dae::GameObject>();
+    auto titleTextComponent02 = std::make_unique<dae::TextComponent>("BURGERTIME", dae::ResourceManager::GetFont("arcadeBig"), SDL_Color{ 255, 0, 0, 255 }, *TitleObject02); // Pass the GameObject reference here
+    TitleObject02->SetLocalPosition(glm::vec3(635, 70, 0.f));
+    TitleObject02->AddComponent(std::move(titleTextComponent02));
+    ScoreBoardScene->Add(std::move(TitleObject02));
+
+
+    std::vector<std::string> options2 = { "back to menu" };
+    std::vector<std::function<void()>> callbacks2 =
+    {
+        []() { dae::SceneManager::GetInstance().SetActiveScene("StartMenu"); }
+    };
+
+    // Create the GameObject for the menu
+    auto menuObject = std::make_unique<dae::GameObject>();
+    menuObject->SetLocalPosition(glm::vec3(635, 600, 0.f));
+    auto menuComponent = std::make_unique<dae::MenuComponent>(menuObject.get(), options2, callbacks2, dae::ResourceManager::GetFont("arcadeBig"), 70.0f);
+    menuComponent->SetTextColor(SDL_Color{ 220,200,100,255 });
+    menuObject->AddComponent(std::move(menuComponent));
+    ScoreBoardScene->Add(std::move(menuObject));
+}
 void load()
 {
     loadResources();
     auto& sceneManager = dae::SceneManager::GetInstance();
 
     const auto& startMenuScene = sceneManager.CreateScene("StartMenu");
+    const auto& ScoreBoardScene = sceneManager.CreateScene("ScoreboardScene");
 
     startMenuScene->SetOnActivateCallback([startMenuScene]() { LoadStartMenu(startMenuScene); });
+    ScoreBoardScene->SetOnActivateCallback([ScoreBoardScene]() {LoadScoreboard(ScoreBoardScene); });
 
 
     sceneManager.SetActiveScene("StartMenu");
