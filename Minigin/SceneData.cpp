@@ -3,7 +3,7 @@
 #include <SDL_rect.h>
 
 #include "SceneHelpers.h"
-//#include "../BugerTime/Player.h"
+#include "../DigDug2/Player.h"
 
 namespace dae {
     SceneData& SceneData::GetInstance() {
@@ -70,11 +70,11 @@ namespace dae {
 
     void SceneData::Update() const
     {
-       /* for (GameObject* player : GetPlayers()) {
+        for (GameObject* player : GetPlayers()) {
             if (player && isOnEnemy(*player)) {
                 player->GetComponent<game::Player>()->Die(); 
             }
-        }*/
+        }
     }
 
     bool SceneData::IsOnSpecificObjectType(GameObject& object, const std::vector<GameObject*>& objects)

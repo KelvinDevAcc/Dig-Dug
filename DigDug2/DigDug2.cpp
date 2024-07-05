@@ -10,16 +10,23 @@
 #include <iostream>
 #include <random>
 
+#include "AnimationComponent.h"
 #include "FPSCounterComponent.h"
+#include "GameData.h"
 #include "HighScores.h"
 #include "InputManager.h"
+#include "LivesDisplayComponent.h"
 #include "MenuComponent.h"
 #include "Minigin.h"
+#include "Player.h"
+#include "PointComponent.h"
+#include "PointsDisplayComponent.h"
 #include "ResourceManager.h"
 #include "SceneData.h"
 #include "SceneHelpers.h"
 #include "SceneManager.h"
 #include "servicelocator.h"
+#include "SpriteRendererComponent.h"
 #include "TextComponent.h"
 #include "TweenManager.h"
 
@@ -32,6 +39,22 @@ void loadResources()
     dae::ResourceManager::LoadFont("TITLEBig", "font.ttf", 144);
     dae::ResourceManager::LoadFont("arcadeBig", "arcade-legacy.ttf", 28);
     dae::ResourceManager::LoadFont("arcade", "arcade-legacy.ttf", 24);
+
+    dae::ResourceManager::LoadSprite("Player",
+        "spritesheetemty.png",
+        26,  // rowCount
+        16,  // colCount
+        {
+            { "Idle", { { { 1, 0 }}, 1 } },
+            { "Walk_Right", { {  { 4, 0 }, { 5, 0 } }, 4 } },
+            { "Walk_Left", { { { 4, 0 }, { 5, 0 } }, 4 } },
+            { "Walk_Up", { { { 2, 0 }, { 3, 0 } }, 4 } },
+            { "Walk_Down", { { { 6, 0 }, { 7,0 } }, 4 } },
+            { "Dying", { { { 3, 1 }, { 4, 1 }, { 5, 1 }, { 6, 1 }, { 7, 1 }, { 8, 1 } }, 2 } },
+            { "Attacking", { { { 1, 1 } }, 1 } },
+            { "Victory", { { { 3, 1 }, { 1, 0 }}, 3 } }
+
+        });
 
 }
 void UnBindMenuCommands(dae::InputManager& inputManager)
@@ -421,7 +444,7 @@ void LoadUi(dae::Scene* scene)
         SDL_Color{ 255, 0, 0, 255 },
         *HighScoretextObject
     );
-    HighScoretextObject->SetLocalPosition(glm::vec3(630, 5, 0.f));
+    HighScoretextObject->SetLocalPosition(glm::vec3(1040, 50, 0.f));
     HighScoretextObject->AddComponent(std::move(titleTextComponent02));
 
     scene->Add(std::move(HighScoretextObject));
@@ -433,106 +456,63 @@ void LoadUi(dae::Scene* scene)
 
     // Create the high score value text component using the string
     auto scoreTextComponent = std::make_unique<dae::TextComponent>(topScoreStr, dae::ResourceManager::GetFont("arcade"), SDL_Color{ 255, 255, 255, 255 }, *HighScoreObject);
-    HighScoreObject->SetLocalPosition(glm::vec3(640, 33, 0.f));
+    HighScoreObject->SetLocalPosition(glm::vec3(1040, 70, 0.f));
     HighScoreObject->AddComponent(std::move(scoreTextComponent));
 
     // Add HighScoreObject to the scene (assuming 'this' is a scene class)
     scene->Add(std::move(HighScoreObject));
 
+    glm::vec3 initialPositionpoints(1040, 235, 0.f);
+    // Define the distance between points display objects
+    float distanceBetweenPoints = 50.0f;
 
-    //glm::vec3 initialPositionPepper(100, 170, 0.f);
-    //// Define the distance between points display objects
-    //float distanceBetweenPepper = 150.0f;
+    for (size_t i = 0; i < players.size(); ++i) {
+        auto player = players[i];
+        if (auto scoreComponent = player->GetComponent<dae::PointComponent>()) {
+            auto pointsDisplayObject = std::make_unique<dae::GameObject>();
+            auto pointsDisplayComponent = std::make_unique<dae::PointsDisplayComponent>(dae::ResourceManager::GetFont("arcade"), *pointsDisplayObject);
 
-    //for (size_t i = 0; i < players.size(); ++i) {
-    //    auto player = players[i];
-    //    if (auto scoreComponent = player->GetComponent<dae::PointComponent>()) {
-    //        auto PepertextObject = std::make_unique<dae::GameObject>();
+            // Attach the points display component to the player's point component
+            pointsDisplayComponent->AttachToPointComponent(scoreComponent);
+            pointsDisplayObject->AddComponent(std::move(pointsDisplayComponent));
 
-    //        auto PeperComponent = std::make_unique<dae::TextComponent>(
-    //            "PEPPER",
-    //            dae::ResourceManager::GetFont("arcade"),
-    //            SDL_Color{ 0, 255, 0, 255 },
-    //            *PepertextObject
-    //        );
-    //        glm::vec3 position = initialPositionPepper + glm::vec3(0.0f, i * distanceBetweenPepper, 0.0f);
-    //        PepertextObject->SetLocalPosition(glm::vec3(position));
-    //        PepertextObject->AddComponent(std::move(PeperComponent));
+            // Calculate the position of the points display object based on the index and distance
+            glm::vec3 position = initialPositionpoints + glm::vec3(0.0f, i * distanceBetweenPoints, 0.0f);
+            pointsDisplayObject->SetLocalPosition(position);
 
-    //        scene->Add(std::move(PepertextObject));
-
-    //        auto PeperscoretextObject = std::make_unique<dae::GameObject>();
-
-    //        auto PeperscoreComponent = std::make_unique<dae::TextComponent>(
-    //            "4",
-    //            dae::ResourceManager::GetFont("arcade"),
-    //            SDL_Color{ 255, 255, 255, 255 },
-    //            *PeperscoretextObject
-    //        );
-    //        glm::vec3 positionscore = initialPositionPepper + glm::vec3(0.0f, i * distanceBetweenPepper + 20, 0.0f);
-    //        PeperscoretextObject->SetLocalPosition(positionscore);
-    //        PeperscoretextObject->AddComponent(std::move(PeperscoreComponent));
-
-    //        scene->Add(std::move(PeperscoretextObject));
-    //    }
-    //}
+            // Add the points display object to the scene
+            scene->Add(std::move(pointsDisplayObject));
+        }
+    }
 
 
+    glm::vec3 initialPositionHealth(1040, 535, 0.f);
+    // Define the distance between lives display objects
+    float distanceBetweenLives = 50.0f;
 
+    for (size_t i = 0; i < players.size(); ++i) {
+        auto player = players[i];
+        if (auto healthComponent = player->GetComponent<dae::HealthComponent>()) {
+            auto livesDisplayObject = std::make_unique<dae::GameObject>();
+            auto livesDisplayComponent = std::make_unique<dae::LivesDisplayComponent>(dae::ResourceManager::GetFont("arcade"), *livesDisplayObject);
 
-    //glm::vec3 initialPositionpoints(100, 235, 0.f);
-    //// Define the distance between points display objects
-    //float distanceBetweenPoints = 50.0f;
+            // Attach the lives display component to the player's health component
+            livesDisplayComponent->AttachToHealthComponent(healthComponent);
+            livesDisplayObject->AddComponent(std::move(livesDisplayComponent));
 
-    //for (size_t i = 0; i < players.size(); ++i) {
-    //    auto player = players[i];
-    //    if (auto scoreComponent = player->GetComponent<dae::PointComponent>()) {
-    //        auto pointsDisplayObject = std::make_unique<dae::GameObject>();
-    //        auto pointsDisplayComponent = std::make_unique<dae::PointsDisplayComponent>(dae::ResourceManager::GetFont("arcade"), *pointsDisplayObject);
+            // Calculate the position of the lives display object based on the index and distance
+            glm::vec3 position = initialPositionHealth + glm::vec3(0.0f, i * distanceBetweenLives, 0.0f);
+            livesDisplayObject->SetLocalPosition(position);
 
-    //        // Attach the points display component to the player's point component
-    //        pointsDisplayComponent->AttachToPointComponent(scoreComponent);
-    //        pointsDisplayObject->AddComponent(std::move(pointsDisplayComponent));
-
-    //        // Calculate the position of the points display object based on the index and distance
-    //        glm::vec3 position = initialPositionpoints + glm::vec3(0.0f, i * distanceBetweenPoints, 0.0f);
-    //        pointsDisplayObject->SetLocalPosition(position);
-
-    //        // Add the points display object to the scene
-    //        scene->Add(std::move(pointsDisplayObject));
-    //    }
-    //}
-
-
-    //glm::vec3 initialPositionHealth(100, 215, 0.f);
-    //// Define the distance between lives display objects
-    //float distanceBetweenLives = 50.0f;
-
-    //for (size_t i = 0; i < players.size(); ++i) {
-    //    auto player = players[i];
-    //    if (auto healthComponent = player->GetComponent<dae::HealthComponent>()) {
-    //        auto livesDisplayObject = std::make_unique<dae::GameObject>();
-    //        auto livesDisplayComponent = std::make_unique<dae::LivesDisplayComponent>(dae::ResourceManager::GetFont("arcade"), *livesDisplayObject);
-
-    //        // Attach the lives display component to the player's health component
-    //        livesDisplayComponent->AttachToHealthComponent(healthComponent);
-    //        livesDisplayObject->AddComponent(std::move(livesDisplayComponent));
-
-    //        // Calculate the position of the lives display object based on the index and distance
-    //        glm::vec3 position = initialPositionHealth + glm::vec3(0.0f, i * distanceBetweenLives, 0.0f);
-    //        livesDisplayObject->SetLocalPosition(position);
-
-    //        // Add the lives display object to the scene
-    //        scene->Add(std::move(livesDisplayObject));
-    //    }
-    //}
+            // Add the lives display object to the scene
+            scene->Add(std::move(livesDisplayObject));
+        }
+    }
 }
 
 void GameScene(dae::Scene* scene)
 {
     auto& inputManager = dae::InputManager::GetInstance();
-    HandlePlayerInput(inputManager,0);
-    LoadUi(scene);
 
     // Create GameObject for FPS counter
     auto fpsCounterObject = std::make_unique<dae::GameObject>();
@@ -544,14 +524,57 @@ void GameScene(dae::Scene* scene)
     fpsCounterObject->SetLocalPosition(glm::vec3(100.f, 20.f, 0.0f));
     scene->Add(std::move(fpsCounterObject));
 
-    constexpr glm::vec3 startPos(335, 70, 0.0f);
-    constexpr glm::vec2 mapScale(40, 26.f);
+    //constexpr glm::vec3 startPos(335, 70, 0.0f);
+    //constexpr glm::vec2 mapScale(40, 26.f);
 
-    const LoadMap loadMap("../Data/maps/map1.map", "../Data/maps/" + Ingrediantmap);
-    SceneHelpers::LoadMapIntoScene(loadMap, scene, startPos, mapScale);
+    //const LoadMap loadMap("../Data/maps/map1.map", "../Data/maps/" + Ingrediantmap);
+    //SceneHelpers::LoadMapIntoScene(loadMap, scene, startPos, mapScale);
 
-    SceneHelpers::LoadIngMapIntoScene(loadMap, scene, startPos, mapScale);
+   // SceneHelpers::LoadIngMapIntoScene(loadMap, scene, startPos, mapScale);
 
+
+    int score;
+        int lives;
+        auto PlayerObject = std::make_unique<dae::GameObject>();
+        if (GameData::GetInstance().GetPlayerData(0).score != 0)
+            score = GameData::GetInstance().GetPlayerData(0).score;
+        else
+            score = 0;
+    
+        auto Character1points = std::make_unique<dae::PointComponent>(score);
+        PlayerObject->AddComponent(std::move(Character1points));
+    
+        if (GameData::GetInstance().GetPlayerData(0).lives != 3)
+            lives = GameData::GetInstance().GetPlayerData(0).lives;
+        else
+            lives = 3;
+    
+        auto Character1Health = std::make_unique<dae::HealthComponent>(100, lives);
+        PlayerObject->AddComponent(std::move(Character1Health));
+    
+        auto spriteRenderComponent = std::make_unique<dae::SpriteRendererComponent>(PlayerObject.get(), dae::ResourceManager::GetSprite("Player"));
+        spriteRenderComponent->SetDimensions(40, 40);
+        PlayerObject->AddComponent(std::move(spriteRenderComponent));
+    
+        auto animationComponent = std::make_unique<dae::AnimationComponent>(PlayerObject.get(), PlayerObject->GetComponent<dae::SpriteRendererComponent>(), "Idle");
+        animationComponent->Play("Walk_Right", true);
+        PlayerObject->AddComponent(std::move(animationComponent));
+        PlayerObject->SetLocalPosition(glm::vec3(100, 100, 0.0f));
+    
+        auto hitBox = std::make_unique<HitBox>(glm::vec2(40,40));
+        hitBox->SetGameObject(PlayerObject.get());
+        PlayerObject->AddComponent(std::move(hitBox));
+    
+        auto PlayerComponent = std::make_unique<game::Player>(PlayerObject.get());
+        PlayerObject->AddComponent(std::move(PlayerComponent));
+    
+    
+        dae::SceneData::GetInstance().AddGameObject(PlayerObject.get(), dae::GameObjectType::Player);
+    
+        scene->Add(std::move(PlayerObject));
+    
+        HandlePlayerInput(inputManager, 0);
+        LoadUi(scene);
 
 }
 

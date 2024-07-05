@@ -14,7 +14,7 @@ namespace dae
         m_textComponent->Update();
         if (m_pointComponent)
         {
-	        const std::string text = "Points: " + std::to_string(m_pointComponent->GetScore());
+	        const std::string text = std::to_string(m_pointComponent->GetScore());
             m_textComponent->SetText(text);
         }
     }

@@ -6,7 +6,7 @@
 #include "servicelocator.h"
 //#include "../BugerTime/GameData.h"
 //#include "../BugerTime/Player.h"
-
+#include  "../DigDug2/Player.h"
 
 MoveCommand::MoveCommand(int playerNumber, float deltaX, float deltaY)
 	: m_deltaX(deltaX), m_deltaY(deltaY)
@@ -39,9 +39,9 @@ MoveCommand::MoveCommand(int playerNumber, float deltaX, float deltaY)
 
 void MoveCommand::Execute()
 {
-	//if (m_gameObject) {
- //       m_gameObject->GetComponent<game::Player>()->Move(m_deltaX, m_deltaY);
- //   }
+	if (m_gameObject) {
+        m_gameObject->GetComponent<game::Player>()->Move(m_deltaX, m_deltaY);
+    }
 }
 
 
@@ -58,7 +58,7 @@ DamageCommand::DamageCommand(int playerNumber)
 
 void DamageCommand::Execute()
 {
-    /*m_gameObject->GetComponent<game::Player>()->Die();*/
+    m_gameObject->GetComponent<game::Player>()->Die();
 }
 
 
@@ -74,7 +74,7 @@ ScorePointCommand::ScorePointCommand(int playerNumber)
 
 void ScorePointCommand::Execute()
 {
-   /* m_gameObject->GetComponent<game::Player>()->Attack();*/
+    m_gameObject->GetComponent<game::Player>()->Attack();
 }
 
 

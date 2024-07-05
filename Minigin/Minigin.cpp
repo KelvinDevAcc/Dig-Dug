@@ -8,6 +8,7 @@
 
 #include <thread>
 
+#include "GameData.h"
 #include "InputManager.h"
 #include "SceneManager.h"
 #include "Renderer.h"
@@ -109,6 +110,8 @@ void dae::minigin::Run(const std::function<void()>& load)
         sceneManager.Update();
 
         TweenManager::GetInstance().Update();
+
+        SceneData::GetInstance().Update();
 
         renderer.Render();
 

@@ -1,7 +1,17 @@
 #include "GameData.h"
 
-#include "Player.h"
+#include <vector>
+
+#include "HealthComponent.h"
+#include "PointComponent.h"
 #include "SceneData.h"
+
+namespace dae
+{
+	class HealthComponent;
+	class PointComponent;
+	class GameObject;
+}
 
 GameData::GameData() : m_gameState(GameState::SINGLE_PLAYER) {}
 
@@ -25,7 +35,7 @@ void GameData::FindAndStorePlayerData()
 
         PlayerData playerData;
         playerData.score = pointComponent->GetScore();
-        playerData.lives = healthComponent->GetLives();
+        playerData.lives = healthComponent->GetLives();;
 
         m_playerData[i] = playerData;
     }

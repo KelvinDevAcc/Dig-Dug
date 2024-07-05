@@ -207,6 +207,7 @@
     <ClInclude Include="Font.h" />
     <ClInclude Include="FPSCounterComponent.h" />
     <ClInclude Include="GameController.h" />
+    <ClInclude Include="GameData.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameObjectBenchmark.h" />
     <ClInclude Include="GameTime.h" />
@@ -260,6 +261,7 @@
     <ClCompile Include="Font.cpp" />
     <ClCompile Include="FPSCounterComponent.cpp" />
     <ClCompile Include="GameController.cpp" />
+    <ClCompile Include="GameData.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GameObjectBenchmark.cpp" />
     <ClCompile Include="HealthComponent.cpp" />

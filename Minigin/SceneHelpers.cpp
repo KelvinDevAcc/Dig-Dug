@@ -1,11 +1,13 @@
 #include "SceneHelpers.h"
-//#include "BurgerComponent.h"
+
+#include "AnimationComponent.h"
+#include "BurgerComponent.h"
 #include "InputManager.h"
 #include "ResourceManager.h"
 #include "SceneData.h"
+#include "GameData.h"
 #include "SpriteRendererComponent.h"
 //#include "../BugerTime/EnemyComponent.h"
-//#include "../BugerTime/GameData.h"
 //#include "../BugerTime/Player.h"
 //#include "../BugerTime/MrHotDogAIComponent.h"
 //#include "../BugerTime/MrPickleAIComponent.h"
@@ -315,7 +317,7 @@ void SceneHelpers::CreatePlatformRight(dae::Scene* scene, float x, float y, glm:
 //    // Add the GameObject to the scene
 //    scene->Add(std::move(BurgerBottomObject));
 //}
-
+//
 //void SceneHelpers::SpawnSauge(dae::Scene* scene, float x, float y, glm::vec2 scale)
 //{
 //    auto SaugeObject = std::make_unique<dae::GameObject>();
@@ -560,33 +562,33 @@ void SceneHelpers::LoadIngMapIntoScene(const LoadMap& loadMap, dae::Scene* /*sce
     for (int y = 0; y < static_cast<int>(map.size()); ++y) {
         for (int x = 0; x < static_cast<int>(map[y].size()); ++x) {
             const char tile = map[y][x];
-           /* const float posX = startPos.x + x * scale.x;
-            const float posY = startPos.y + y * scale.y;*/
+            //const float posX = startPos.x + x * scale.x;
+            //const float posY = startPos.y + y * scale.y;
 
             switch (tile) {
             case '^':
-                //CreateBurgerTop(scene, posX, posY, glm::vec2(scale.x *3, scale.y));
+               // CreateBurgerTop(scene, posX, posY, glm::vec2(scale.x *3, scale.y));
                 break;
             case 'L':
                 //CreateLettuce(scene, posX, posY, glm::vec2(scale.x * 3, scale.y));
                 break;
             case 'M':
-                //CreateMeat(scene, posX, posY, glm::vec2(scale.x * 3, scale.y));
+               // CreateMeat(scene, posX, posY, glm::vec2(scale.x * 3, scale.y));
                 break;
             case 'v':
-                //CreateBurgerBottom(scene, posX, posY, glm::vec2(scale.x * 3, scale.y));
+               // CreateBurgerBottom(scene, posX, posY, glm::vec2(scale.x * 3, scale.y));
                 break;
             case 'C':
-                //CreateCheese(scene, posX, posY, glm::vec2(scale.x * 3, scale.y));
+               // CreateCheese(scene, posX, posY, glm::vec2(scale.x * 3, scale.y));
                 break;
             case 'T':
-                //CreateTomato(scene, posX, posY, glm::vec2(scale.x * 3, scale.y));
+               // CreateTomato(scene, posX, posY, glm::vec2(scale.x * 3, scale.y));
                 break;
             case 'S':
 				//SpawnSauge(scene, posX, posY, glm::vec2(scale.x, scale.y + 10));
                 break;
             case 'E':
-                //SpawnEgg(scene, posX, posY, glm::vec2(scale.x, scale.y + 10));
+               // SpawnEgg(scene, posX, posY, glm::vec2(scale.x, scale.y + 10));
                 break;
             case 'D':
                // SpawnPickle(scene, posX, posY, scale);
@@ -596,7 +598,7 @@ void SceneHelpers::LoadIngMapIntoScene(const LoadMap& loadMap, dae::Scene* /*sce
                 playerCount += 1;
                 break;
             case '1':
-                //SpawnPlayerEnemy(scene, posX, posY, scale);
+               // SpawnPlayerEnemy(scene, posX, posY, scale);
                 break;
             default:
                 break;

@@ -1,35 +1,32 @@
 #pragma once
 
 #include <memory>
+#include <string>
+#include <vector>
+
 #include "Component.h"
 #include "HealthComponent.h"
-#include "Observer.h"
-#include "TextComponent.h"
 
 
 namespace dae
 {
-    class LivesDisplayComponent final : public Component, public Observer
+    class LivesDisplayComponent : public Component
     {
     public:
-        LivesDisplayComponent(Font* font, GameObject& gameObject);
-        ~LivesDisplayComponent() override = default;
+        LivesDisplayComponent(GameObject& gameObject, const std::string& spritePath, int spriteWidth, int spriteHeight);
 
-        LivesDisplayComponent(const LivesDisplayComponent& other) = delete;
-        LivesDisplayComponent(LivesDisplayComponent&& other) noexcept = delete;
-        LivesDisplayComponent& operator=(const LivesDisplayComponent& other) = delete;
-        LivesDisplayComponent& operator=(LivesDisplayComponent&& other) noexcept = delete;
-
-        void Render() const override;
         void Update() override;
-
+        void Render() const override;
         void AttachToHealthComponent(HealthComponent* healthComponent);
 
-        std::type_info const& GetComponentType() const override { return typeid(LivesDisplayComponent); }
-
-
     private:
-        std::unique_ptr<TextComponent> m_textComponent;
+        void UpdateLivesSprites();
+
+        std::vector<std::unique_ptr<GameObject>> m_LivesSprites;
         HealthComponent* m_healthComponent;
+        std::string m_spritePath;
+        int m_spriteWidth;
+        int m_spriteHeight;
+        GameObject& m_gameObject;
     };
 }
