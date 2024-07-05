@@ -30,6 +30,7 @@
 #include "SelectNameComponent.h"
 #include "servicelocator.h"
 #include "../3rdParty/imgui-1.90.4/imgui.h"
+#include <GameTime.h>
 
 void LoadResources()
 {
@@ -800,7 +801,7 @@ void load()
 }
 
 int main(int, char* []) {
-    dae::Minigin engine("../Data/");
+    dae::minigin engine("../Data/");
     engine.Run(load);
     return 0;
 }

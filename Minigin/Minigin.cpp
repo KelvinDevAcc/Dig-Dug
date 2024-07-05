@@ -14,6 +14,7 @@
 #include "ResourceManager.h"
 #include "GameTime.h"
 #include "SceneData.h"
+#include "TweenManager.h"
 
 SDL_Window* g_window{};
 
@@ -106,6 +107,8 @@ void dae::minigin::Run(const std::function<void()>& load)
         GameTime::Update();
 
         sceneManager.Update();
+
+        TweenManager::GetInstance().Update();
 
         renderer.Render();
 

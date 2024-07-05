@@ -5,7 +5,7 @@
 namespace dae
 {
     MenuComponent::MenuComponent(GameObject* owner, const std::vector<std::string>& options, const std::vector<std::function<void()>>& callbacks, Font* font, float textSpace)
-        : m_Options(options), m_Callbacks(callbacks), m_owner(owner), m_TextSpace(textSpace)
+        : m_Options(options), m_Callbacks(callbacks), m_owner(owner), m_TextSpace(textSpace), m_IsActive(false)
     {
         float yPos = m_owner->GetWorldPosition().y;
         for (const auto& option : options)
@@ -23,28 +23,38 @@ namespace dae
 
     void MenuComponent::Render() const
     {
+        float yPos = m_owner->GetWorldPosition().y;
+
         for (size_t i = 0; i < m_OptionObjects.size(); ++i)
         {
-            const auto textComponent = m_OptionObjects[i]->GetComponent<TextComponent>();
-            if (textComponent == nullptr)
+            auto& optionObject = m_OptionObjects[i];
+            optionObject->SetLocalPosition(glm::vec3(m_owner->GetWorldPosition().x, yPos, 0.f));
+
+            yPos += m_TextSpace;
+            for (size_t j = 0; j < m_OptionObjects.size(); ++j)
             {
-                std::cerr << "Error: TextComponent is null\n";
-                continue;
+                const auto textComponent = m_OptionObjects[j]->GetComponent<TextComponent>();
+                if (textComponent == nullptr)
+                {
+                    std::cerr << "Error: TextComponent is null\n";
+                    continue;
+                }
+                if (j == m_SelectedOption)
+                {
+                    textComponent->SetColor(m_SelectedColor);
+                }
+                else
+                {
+                    textComponent->SetColor(m_NormalColor);
+                }
+                textComponent->Render();
             }
-            if (i == m_SelectedOption)
-            {
-                textComponent->SetColor(m_SelectedColor);
-            }
-            else
-            {
-                textComponent->SetColor(m_NormalColor);
-            }
-            textComponent->Render();
         }
     }
 
     void MenuComponent::Update()
     {
+
         for (auto& optionObject : m_OptionObjects)
         {
             if (optionObject)
@@ -62,7 +72,7 @@ namespace dae
     {
         for (const auto& optionObject : m_OptionObjects)
         {
-	        if (const auto textComponent = optionObject->GetComponent<TextComponent>())
+            if (const auto textComponent = optionObject->GetComponent<TextComponent>())
             {
                 textComponent->SetColor(color);
                 m_NormalColor = color;
@@ -80,10 +90,11 @@ namespace dae
         m_SelectedColor = color;
     }
 
-
-
     void MenuComponent::NavigateUp()
     {
+        if (!m_IsActive)
+            return;
+
         if (m_SelectedOption > 0)
         {
             --m_SelectedOption;
@@ -92,6 +103,9 @@ namespace dae
 
     void MenuComponent::NavigateDown()
     {
+        if (!m_IsActive)
+            return;
+
         if (m_SelectedOption < m_Options.size() - 1)
         {
             ++m_SelectedOption;
@@ -100,10 +114,18 @@ namespace dae
 
     void MenuComponent::SelectOption()
     {
+        if (!m_IsActive)
+            return;
+
         if (m_SelectedOption < m_Callbacks.size())
         {
             m_Callbacks[m_SelectedOption]();
             m_SelectedOption = 0;
         }
+    }
+
+    void MenuComponent::SetActive(bool active)
+    {
+        m_IsActive = active;
     }
 }

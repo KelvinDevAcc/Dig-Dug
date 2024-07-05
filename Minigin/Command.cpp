@@ -143,6 +143,10 @@ void NavigateUpCommand::Execute() {
         dae::EventQueue::Broadcast(message);
         menu->NavigateUp();
     }
+
+    else {
+        std::cerr << "NavigateUpCommand: Menu component not found!\n";
+    }
 }
 
 dae::MenuComponent* NavigateUpCommand::FindMenuComponent() {
@@ -168,6 +172,9 @@ void NavigateDownCommand::Execute() {
         dae::EventQueue::Broadcast(message);
         menu->NavigateDown();
     }
+    else {
+        std::cerr << "NavigateUpCommand: Menu component not found!\n";
+    }
 }
 
 dae::MenuComponent* NavigateDownCommand::FindMenuComponent() {
@@ -192,6 +199,9 @@ void SelectOptionCommand::Execute() {
 
         dae::EventQueue::Broadcast(message);
         menu->SelectOption();
+    }
+    else {
+        std::cerr << "NavigateUpCommand: Menu component not found!\n";
     }
 }
 

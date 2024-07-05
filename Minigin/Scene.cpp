@@ -10,8 +10,6 @@ namespace dae
 {
     Scene::Scene(std::string name) : m_name(std::move(name)) {}
 
-   
-
     void Scene::Add(std::unique_ptr<GameObject> object)
     {
         m_objects.push_back(std::move(object));

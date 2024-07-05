@@ -12,7 +12,7 @@ namespace dae
     class MenuComponent final : public Component
     {
     public:
-        MenuComponent(GameObject* owner, const std::vector<std::string>& options, const std::vector<std::function<void()>>& callbacks, Font* font, float textspace);
+        MenuComponent(GameObject* owner, const std::vector<std::string>& options, const std::vector<std::function<void()>>& callbacks, Font* font, float textSpace);
         ~MenuComponent() override = default; 
 
         MenuComponent(const MenuComponent& other) = default;
@@ -26,6 +26,7 @@ namespace dae
         void NavigateUp();
         void NavigateDown();
         void SelectOption();
+        void SetActive(bool active);
 
        void SetTextColor(const SDL_Color& color);
        void SeSelectColor(const SDL_Color& color);
@@ -41,5 +42,6 @@ namespace dae
         SDL_Color m_NormalColor{ 255, 255, 255, 255 };
         SDL_Color m_SelectedColor{ 255, 0, 0, 255 };
         size_t m_SelectedOption{ 0 };
+        bool m_IsActive;
     };
 }
