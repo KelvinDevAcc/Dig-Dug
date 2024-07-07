@@ -4,6 +4,7 @@
 #include <ostream>
 #include <stdexcept>
 
+#include "GameData.h"
 #include "SceneData.h"
 #include "servicelocator.h"
 //#include "../BugerTime/GameData.h"
@@ -30,7 +31,7 @@ namespace dae
         {
             if ((*it)->GetName() == name)
             {
-                //GameData::GetInstance().FindAndStorePlayerData();
+                GameData::GetInstance().FindAndStorePlayerData();
                 m_activeSceneIterator = it;
 
                 (*m_activeSceneIterator)->RemoveAll();
@@ -69,23 +70,23 @@ namespace dae
 
     void SceneManager::GoToNextScene()
     {
-        //GameData::GetInstance().FindAndStorePlayerData();
-            m_previousActiveSceneIterator = m_activeSceneIterator;
+        GameData::GetInstance().FindAndStorePlayerData();
+        m_previousActiveSceneIterator = m_activeSceneIterator;
         // Advance to the next scene
-            ++m_activeSceneIterator;
-            if (m_activeSceneIterator == m_scenes.end())
-                m_activeSceneIterator = m_scenes.begin();
-            SceneData::GetInstance().RemoveAllGameObjects();
-            (*m_activeSceneIterator)->RemoveAll();
-            (*m_activeSceneIterator)->Activate();
+        ++m_activeSceneIterator;
+        if (m_activeSceneIterator == m_scenes.end())
+            m_activeSceneIterator = m_scenes.begin();
+        SceneData::GetInstance().RemoveAllGameObjects();
+        (*m_activeSceneIterator)->RemoveAll();
+        (*m_activeSceneIterator)->Activate();
 
 
-            auto& soundSystem = servicelocator::get_sound_system();
-            const sound_id soundID = (*m_activeSceneIterator)->GetBackgroundMusicID();
-            if (soundID != 0)
-            {
-                soundSystem.play(soundID);
-            }
+        auto& soundSystem = servicelocator::get_sound_system();
+        const sound_id soundID = (*m_activeSceneIterator)->GetBackgroundMusicID();
+        if (soundID != 0)
+        {
+            soundSystem.play(soundID);
+        }
     }
 
     void SceneManager::Update() const

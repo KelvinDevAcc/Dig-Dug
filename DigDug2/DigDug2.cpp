@@ -40,6 +40,7 @@ void loadResources()
     dae::ResourceManager::LoadFont("arcadeBig", "arcade-legacy.ttf", 28);
     dae::ResourceManager::LoadFont("arcade", "arcade-legacy.ttf", 24);
 
+    dae::ResourceManager::LoadTexture("Lives.png");
     dae::ResourceManager::LoadSprite("Player",
         "spritesheetemty.png",
         26,  // rowCount
@@ -92,10 +93,27 @@ void UnBindPlayerCommands(dae::InputManager& inputManager)
     inputManager.UnbindCommand(GameController::GetButtonMapping(GameController::Button::X), KeyState::Up, InputType::Controller);
 }
 
+void UnBindNameCommands(dae::InputManager& inputManager)
+{
+    // Unbind keyboard commands
+    inputManager.UnbindCommand(SDL_SCANCODE_W, KeyState::Up, InputType::Keyboard);
+    inputManager.UnbindCommand(SDL_SCANCODE_S, KeyState::Up, InputType::Keyboard);
+    inputManager.UnbindCommand(SDL_SCANCODE_D, KeyState::Up, InputType::Keyboard);
+    inputManager.UnbindCommand(SDL_SCANCODE_RETURN, KeyState::Up, InputType::Keyboard);
+
+    // Unbind controller commands
+    inputManager.UnbindCommand(GameController::GetButtonMapping(GameController::Button::DPadUp), KeyState::Up, InputType::Controller);
+    inputManager.UnbindCommand(GameController::GetButtonMapping(GameController::Button::DPadDown), KeyState::Up, InputType::Controller);
+    inputManager.UnbindCommand(GameController::GetButtonMapping(GameController::Button::X), KeyState::Up, InputType::Controller);
+    inputManager.UnbindCommand(GameController::GetButtonMapping(GameController::Button::Y), KeyState::Up, InputType::Controller);
+
+}
+
 void BindMenuCommands(dae::InputManager& inputManager)
 {
     UnBindPlayerCommands(inputManager);
     UnBindMenuCommands(inputManager);
+    UnBindNameCommands(inputManager);
     // Bind keyboard commands
     inputManager.BindCommand(SDL_SCANCODE_W, KeyState::Up, std::make_unique<NavigateUpCommand>(), InputType::Keyboard);
     inputManager.BindCommand(SDL_SCANCODE_S, KeyState::Up, std::make_unique<NavigateDownCommand>(), InputType::Keyboard);
@@ -106,8 +124,6 @@ void BindMenuCommands(dae::InputManager& inputManager)
     inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadDown), KeyState::Up, std::make_unique<NavigateDownCommand>(), InputType::Controller);
     inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::A), KeyState::Up, std::make_unique<SelectOptionCommand>(), InputType::Controller);
 }
-
-
 
 void BindKeyboardCommands(dae::InputManager& inputManager, int playerId) {
     inputManager.BindCommand(SDL_SCANCODE_W, KeyState::Pressed, std::make_unique<MoveCommand>(playerId, 0.0f, -1.5f), InputType::Keyboard);
@@ -127,6 +143,7 @@ void BindControllerCommands(dae::InputManager& inputManager, int playerId, int c
     inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::A), KeyState::Up, std::make_unique<ScorePointCommand>(playerId), InputType::Controller, controllerIndex);
     inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::X), KeyState::Up, std::make_unique<DamageCommand>(playerId), InputType::Controller, controllerIndex);
 }
+
 void HandlePlayerInput(dae::InputManager& inputManager, int playerId)
 {
     UnBindMenuCommands(inputManager);
@@ -185,6 +202,42 @@ void BindExtraControlls(dae::InputManager& inputManager)
     inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::RightBumper), KeyState::Up, std::make_unique<DecreaseVolumeCommand>(&servicelocator::get_sound_system()), InputType::Controller);
 
 }
+
+void BindKeyBordNameCommands(dae::InputManager& inputManager, int playerId, InputType inputType) {
+    inputManager.BindCommand(SDL_SCANCODE_W, KeyState::Up, std::make_unique<NavigateUpLetterCommand>(playerId), inputType);
+    inputManager.BindCommand(SDL_SCANCODE_S, KeyState::Up, std::make_unique<NavigateDownLetterCommand>(playerId), inputType);
+    inputManager.BindCommand(SDL_SCANCODE_D, KeyState::Up, std::make_unique<SelectOptionLetterCommand>(playerId), inputType);
+    inputManager.BindCommand(SDL_SCANCODE_RETURN, KeyState::Up, std::make_unique<saveScoreCommand>(playerId), inputType);
+}
+
+void BindControllerNameCommands(dae::InputManager& inputManager, int playerId, InputType inputType, int controllerId = 0) {
+    inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadUp), KeyState::Up, std::make_unique<NavigateUpLetterCommand>(playerId), inputType, controllerId);
+    inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadDown), KeyState::Up, std::make_unique<NavigateDownLetterCommand>(playerId), inputType, controllerId);
+    inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::X), KeyState::Up, std::make_unique<SelectOptionLetterCommand>(playerId), inputType, controllerId);
+    inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::Y), KeyState::Up, std::make_unique<saveScoreCommand>(playerId), inputType, controllerId);
+}
+
+void BindNameCommands(dae::InputManager& inputManager)
+{
+    UnBindPlayerCommands(inputManager);
+    UnBindMenuCommands(inputManager);
+    const int numControllers = inputManager.GetConnectedControllerCount();
+    const int numPlayers = GameData::GetInstance().GetNumberOfPlayers();
+
+    BindKeyBordNameCommands(inputManager, 0, InputType::Keyboard);
+
+    for (int playerId = 0; playerId < numPlayers; ++playerId) {
+        // Bind controller commands
+        if (numControllers > 1) {
+            BindControllerNameCommands(inputManager, playerId, InputType::Controller, playerId);
+        }
+        else {
+            BindControllerNameCommands(inputManager, playerId, InputType::Controller);
+        }
+    }
+}
+
+
 
 void LoadStartMenu(dae::Scene* startMenuScene)
 {
@@ -463,13 +516,12 @@ void LoadUi(dae::Scene* scene)
     scene->Add(std::move(HighScoreObject));
 
     glm::vec3 initialPositionpoints(1040, 235, 0.f);
-    // Define the distance between points display objects
-    float distanceBetweenPoints = 50.0f;
 
     for (size_t i = 0; i < players.size(); ++i) {
         auto player = players[i];
         if (auto scoreComponent = player->GetComponent<dae::PointComponent>()) {
-            auto pointsDisplayObject = std::make_unique<dae::GameObject>();
+	        float distanceBetweenPoints = 50.0f;
+	        auto pointsDisplayObject = std::make_unique<dae::GameObject>();
             auto pointsDisplayComponent = std::make_unique<dae::PointsDisplayComponent>(dae::ResourceManager::GetFont("arcade"), *pointsDisplayObject);
 
             // Attach the points display component to the player's point component
@@ -480,34 +532,75 @@ void LoadUi(dae::Scene* scene)
             glm::vec3 position = initialPositionpoints + glm::vec3(0.0f, i * distanceBetweenPoints, 0.0f);
             pointsDisplayObject->SetLocalPosition(position);
 
-            // Add the points display object to the scene
             scene->Add(std::move(pointsDisplayObject));
         }
     }
 
 
     glm::vec3 initialPositionHealth(1040, 535, 0.f);
-    // Define the distance between lives display objects
-    float distanceBetweenLives = 50.0f;
 
     for (size_t i = 0; i < players.size(); ++i) {
         auto player = players[i];
         if (auto healthComponent = player->GetComponent<dae::HealthComponent>()) {
-            auto livesDisplayObject = std::make_unique<dae::GameObject>();
-            auto livesDisplayComponent = std::make_unique<dae::LivesDisplayComponent>(dae::ResourceManager::GetFont("arcade"), *livesDisplayObject);
-
-            // Attach the lives display component to the player's health component
-            livesDisplayComponent->AttachToHealthComponent(healthComponent);
-            livesDisplayObject->AddComponent(std::move(livesDisplayComponent));
-
-            // Calculate the position of the lives display object based on the index and distance
+	        float distanceBetweenLives = 50.0f;
+	        auto livesDisplayObject = std::make_unique<dae::GameObject>();
             glm::vec3 position = initialPositionHealth + glm::vec3(0.0f, i * distanceBetweenLives, 0.0f);
             livesDisplayObject->SetLocalPosition(position);
 
+            auto livesDisplayComponent = std::make_unique<dae::LivesDisplayComponent>(*livesDisplayObject,50,50,"Lives.png");
+            // Attach the lives display component to the player's health component
+            livesDisplayComponent->AttachToHealthComponent(healthComponent);
+            // Calculate the position of the lives display object based on the index and distance
+            livesDisplayObject->AddComponent(std::move(livesDisplayComponent));
             // Add the lives display object to the scene
             scene->Add(std::move(livesDisplayObject));
         }
     }
+}
+
+void loadInputScore(dae::Scene* scene)
+{
+    auto& inputManager = dae::InputManager::GetInstance();
+
+    constexpr glm::vec3 initialPositionNameInput(630, 400, 0.f);
+    constexpr glm::vec3 initialPositionScore(635, 350, 0.f);
+
+    for (int i = 0; i < GameData::GetInstance().GetNumberOfPlayers(); ++i)
+    {
+	    constexpr float distanceBetweenScore = 150.0f;
+	    constexpr float distanceBetweenInput = 150.0f;
+	    auto nameInputObject = std::make_unique<dae::GameObject>();
+        glm::vec3 positionInput = initialPositionNameInput + glm::vec3(0.0f, i * distanceBetweenInput, 0.0f);
+        nameInputObject->SetLocalPosition(positionInput);
+
+        std::unique_ptr<SelectNameComponent> nameInputComponent = std::make_unique<SelectNameComponent>(nameInputObject.get(), 6, dae::ResourceManager::GetFont("arcade"), SDL_Color{ 255, 255, 255, 255 }, i);
+        nameInputObject->AddComponent(std::move(nameInputComponent));
+        scene->Add(std::move(nameInputObject));
+
+        auto ScoreObject = std::make_unique<dae::GameObject>();
+        auto ScoreTextComponent = std::make_unique<dae::TextComponent>(std::to_string(GameData::GetInstance().GetPlayerData(i).score), dae::ResourceManager::GetFont("arcade"), SDL_Color{ 255, 0, 0, 255 }, *ScoreObject); // Specify color here
+        ScoreTextComponent->SetColor(SDL_Color{ 255, 255, 0, 255 });
+        ScoreObject->AddComponent(std::move(ScoreTextComponent));
+        glm::vec3 position = initialPositionScore + glm::vec3(0.0f, i * distanceBetweenScore, 0.0f);
+        ScoreObject->SetLocalPosition(position);
+        scene->Add(std::move(ScoreObject));
+    }
+
+    // Create GameObject for Title
+    auto TitleObject02 = std::make_unique<dae::GameObject>();
+    auto titleTextComponent02 = std::make_unique<dae::TextComponent>("DIG DUG", dae::ResourceManager::GetFont("TITLEBig"), SDL_Color{ 0, 0, 255, 255 }, *TitleObject02);
+    TitleObject02->SetLocalPosition(glm::vec3(635, 70, 0.f));
+    TitleObject02->AddComponent(std::move(titleTextComponent02));
+    scene->Add(std::move(TitleObject02));
+
+    // Create GameObject for Title
+    auto TitleObject = std::make_unique<dae::GameObject>();
+    auto titleTextComponent = std::make_unique<dae::TextComponent>("DIG DUG", dae::ResourceManager::GetFont("TITLE"), SDL_Color{ 247, 190, 57, 255 }, *TitleObject);
+    TitleObject->SetLocalPosition(glm::vec3(635, 70, 0.f));
+    TitleObject->AddComponent(std::move(titleTextComponent));
+    scene->Add(std::move(TitleObject));
+
+    BindNameCommands(inputManager);
 }
 
 void GameScene(dae::Scene* scene)
@@ -534,47 +627,47 @@ void GameScene(dae::Scene* scene)
 
 
     int score;
-        int lives;
-        auto PlayerObject = std::make_unique<dae::GameObject>();
-        if (GameData::GetInstance().GetPlayerData(0).score != 0)
-            score = GameData::GetInstance().GetPlayerData(0).score;
-        else
-            score = 0;
-    
-        auto Character1points = std::make_unique<dae::PointComponent>(score);
-        PlayerObject->AddComponent(std::move(Character1points));
-    
-        if (GameData::GetInstance().GetPlayerData(0).lives != 3)
-            lives = GameData::GetInstance().GetPlayerData(0).lives;
-        else
-            lives = 3;
-    
-        auto Character1Health = std::make_unique<dae::HealthComponent>(100, lives);
-        PlayerObject->AddComponent(std::move(Character1Health));
-    
-        auto spriteRenderComponent = std::make_unique<dae::SpriteRendererComponent>(PlayerObject.get(), dae::ResourceManager::GetSprite("Player"));
-        spriteRenderComponent->SetDimensions(40, 40);
-        PlayerObject->AddComponent(std::move(spriteRenderComponent));
-    
-        auto animationComponent = std::make_unique<dae::AnimationComponent>(PlayerObject.get(), PlayerObject->GetComponent<dae::SpriteRendererComponent>(), "Idle");
-        animationComponent->Play("Walk_Right", true);
-        PlayerObject->AddComponent(std::move(animationComponent));
-        PlayerObject->SetLocalPosition(glm::vec3(100, 100, 0.0f));
-    
-        auto hitBox = std::make_unique<HitBox>(glm::vec2(40,40));
-        hitBox->SetGameObject(PlayerObject.get());
-        PlayerObject->AddComponent(std::move(hitBox));
-    
-        auto PlayerComponent = std::make_unique<game::Player>(PlayerObject.get());
-        PlayerObject->AddComponent(std::move(PlayerComponent));
-    
-    
-        dae::SceneData::GetInstance().AddGameObject(PlayerObject.get(), dae::GameObjectType::Player);
-    
-        scene->Add(std::move(PlayerObject));
-    
-        HandlePlayerInput(inputManager, 0);
-        LoadUi(scene);
+    int lives;
+    auto PlayerObject = std::make_unique<dae::GameObject>();
+    if (GameData::GetInstance().GetPlayerData(0).score != 0)
+        score = GameData::GetInstance().GetPlayerData(0).score;
+    else
+        score = 0;
+
+    auto Character1points = std::make_unique<dae::PointComponent>(score);
+    PlayerObject->AddComponent(std::move(Character1points));
+
+    if (GameData::GetInstance().GetPlayerData(0).lives != 3)
+        lives = GameData::GetInstance().GetPlayerData(0).lives;
+    else
+        lives = 3;
+
+    auto Character1Health = std::make_unique<dae::HealthComponent>(100, lives);
+    PlayerObject->AddComponent(std::move(Character1Health));
+
+    auto spriteRenderComponent = std::make_unique<dae::SpriteRendererComponent>(PlayerObject.get(), dae::ResourceManager::GetSprite("Player"));
+    spriteRenderComponent->SetDimensions(40, 40);
+    PlayerObject->AddComponent(std::move(spriteRenderComponent));
+
+    auto animationComponent = std::make_unique<dae::AnimationComponent>(PlayerObject.get(), PlayerObject->GetComponent<dae::SpriteRendererComponent>(), "Idle");
+    animationComponent->Play("Walk_Right", true);
+    PlayerObject->AddComponent(std::move(animationComponent));
+    PlayerObject->SetLocalPosition(glm::vec3(100, 100, 0.0f));
+
+    auto hitBox = std::make_unique<HitBox>(glm::vec2(40, 40));
+    hitBox->SetGameObject(PlayerObject.get());
+    PlayerObject->AddComponent(std::move(hitBox));
+
+    auto PlayerComponent = std::make_unique<game::Player>(PlayerObject.get());
+    PlayerObject->AddComponent(std::move(PlayerComponent));
+
+
+    dae::SceneData::GetInstance().AddGameObject(PlayerObject.get(), dae::GameObjectType::Player);
+
+    scene->Add(std::move(PlayerObject));
+
+    HandlePlayerInput(inputManager, 0);
+    LoadUi(scene);
 
 }
 
@@ -587,11 +680,13 @@ void load()
     const auto& startMenuScene = sceneManager.CreateScene("StartMenu");
     const auto& ScoreBoardScene = sceneManager.CreateScene("ScoreboardScene");
     const auto& Game = sceneManager.CreateScene("Game");
+    const auto& SaveSoreScene = sceneManager.CreateScene("SaveScoreScene");
+
 
     startMenuScene->SetOnActivateCallback([startMenuScene]() { LoadStartMenu(startMenuScene); });
     ScoreBoardScene->SetOnActivateCallback([ScoreBoardScene]() {LoadScoreboard(ScoreBoardScene); });
     Game->SetOnActivateCallback([Game]() { GameScene(Game); });
-
+    SaveSoreScene->SetOnActivateCallback([SaveSoreScene]() { loadInputScore(SaveSoreScene); });
 
 
     sceneManager.SetActiveScene("StartMenu");

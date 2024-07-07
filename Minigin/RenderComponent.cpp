@@ -65,20 +65,20 @@ namespace dae
         m_height = height;
     }
 
-    void RenderComponent::SetAnimationFrames(int frameWidth, int frameHeight, int numFrames) {
+    void RenderComponent::SetAnimationFrames(int /*frameWidth*/, int /*frameHeight*/, int numFrames) {
         m_animationFrames.clear();
         m_animationFrames.reserve(numFrames);
 
         if (m_texture) {
             for (int i = 0; i < numFrames; ++i) {
                 // Calculate source rectangle for each frame
-                SDL_Rect srcRect;
+                /*SDL_Rect srcRect;
                 srcRect.x = i * frameWidth; 
                 srcRect.y = 0; 
                 srcRect.w = frameWidth;
-                srcRect.h = frameHeight;
+                srcRect.h = frameHeight;*/
                 
-                auto frameTexture = std::make_unique<Texture2D>(m_texture->GetSDLTexture(), srcRect);
+                auto frameTexture = std::make_unique<Texture2D>(m_texture->GetSDLTexture());
                 m_animationFrames.push_back(std::move(frameTexture));
             }
             m_renderMode = RenderMode::Animated;

@@ -37,15 +37,31 @@ dae::Texture2D* dae::ResourceManager::LoadTexture(const std::string& fileName)
 	SDL_Texture* texture = IMG_LoadTexture(Renderer::GetInstance().GetSDLRenderer(), fullPath.c_str());
 
 	if (texture == nullptr)
+	{
 		std::cerr << "Error: Failed to load texture '" << fileName << "': " << IMG_GetError() << '\n';
+		return nullptr;
+	}
 
-
-	return m_LoadedTextures.emplace_back(std::make_unique<Texture2D>(texture)).get();
+	return m_LoadedTextures.emplace_back(std::make_unique<Texture2D>(texture, fileName)).get();
 }
 
 dae::Sprite* dae::ResourceManager::LoadSprite(const std::string& name, const std::string& fileName, int rowCount, int colCount, const std::map<std::string, SpriteAnimation>& animations)
 {
-	return m_SpriteMap.emplace(name,std::make_unique<Sprite>(LoadTexture(m_dataPath + fileName), rowCount, colCount, animations)).first->second.get();
+	return m_SpriteMap.emplace(name,std::make_unique<Sprite>(LoadTexture(fileName), rowCount, colCount, animations)).first->second.get();
+}
+
+dae::Texture2D* dae::ResourceManager::GetTexture(const std::string& fileName)
+{
+	for (const auto& texture : m_LoadedTextures)
+	{
+		if (texture->GetFileName() == fileName)  // Assuming Texture2D has a GetFileName() method
+		{
+			return texture.get();
+		}
+	}
+
+	std::cerr << "Error: Texture '" << fileName << "' not found.\n";
+	return nullptr;
 }
 
 dae::Sprite* dae::ResourceManager::GetSprite(const std::string& name)

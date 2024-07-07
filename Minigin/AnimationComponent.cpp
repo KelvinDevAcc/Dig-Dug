@@ -70,6 +70,6 @@ namespace dae
 
     void AnimationComponent::FlipSprite(bool flipHorizontally, bool flipVertically) const
     {
-        m_spriteRenderer->Setflip(flipHorizontally, flipVertically);
+        m_spriteRenderer->SetFlip(flipHorizontally, flipVertically);
     }
 }

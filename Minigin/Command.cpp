@@ -6,6 +6,7 @@
 #include "servicelocator.h"
 //#include "../BugerTime/GameData.h"
 //#include "../BugerTime/Player.h"
+#include "GameData.h"
 #include  "../DigDug2/Player.h"
 
 MoveCommand::MoveCommand(int playerNumber, float deltaX, float deltaY)
@@ -293,19 +294,19 @@ SelectNameComponent* SelectOptionLetterCommand::FindSelectNameComponent() const
 }
 
 void saveScoreCommand::Execute() {
-   ///* auto& gameData = GameData::GetInstance();*/
-   // int numberOfPlayers = gameData.GetNumberOfPlayers();
+    auto& gameData = GameData::GetInstance();
+    const int numberOfPlayers = gameData.GetNumberOfPlayers();
 
-   // for (int i = 0; i < numberOfPlayers; ++i) {
-   //     std::string currentName = "";
-   //     if (const auto selectName = FindSelectNameComponent(i)) {
-   //         currentName = selectName->GetCurrentName();
-   //         HighScores::GetInstance().saveNewScore(currentName, gameData.GetPlayerData(i).score);
-   //     }
-   //     gameData.ResetPlayerData(i);
-   // }
+    for (int i = 0; i < numberOfPlayers; ++i) {
+	    if (const auto selectName = FindSelectNameComponent(i)) {
+		    std::string currentName;
+		    currentName = selectName->GetCurrentName();
+            HighScores::GetInstance().saveNewScore(currentName, gameData.GetPlayerData(i).score);
+        }
+        gameData.ResetPlayerData(i);
+    }
 
-   // dae::SceneManager::GetInstance().SetActiveScene("ScoreboardScene");
+    dae::SceneManager::GetInstance().SetActiveScene("ScoreboardScene");
 }
 
 SelectNameComponent* saveScoreCommand::FindSelectNameComponent(int playerId) {
