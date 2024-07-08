@@ -1,4 +1,7 @@
 #include "PlayerState.h"
+
+#include <iostream>
+
 #include "EnventQueue.h"
 #include "GameData.h"
 #include "Player.h"
@@ -54,7 +57,7 @@ namespace game
     //dyingstate
     void DyingState::OnEnterState(Player& player)
     {
-        player.m_animationComponent->Play("Dying", false);
+       player.m_animationComponent->Play("Dying", false);
 
         dae::Message message;
 
@@ -75,17 +78,26 @@ namespace game
         if (player.m_healthComponent->GetLives() < 0)
         {
             player.m_healthComponent->SetLives(-1);
-            if (dae::SceneData::GetInstance().GetPlayers().size() <= 1)
+
+            const auto playersize = dae::SceneData::GetInstance().GetPlayers().size();
+            if (playersize == 1)
             {
-                dae::SceneManager::GetInstance().SetActiveScene("SaveScoreScene");
+                std::cout << "1 player";
+                if (player.GetParentObject())
+                {
+                    GameData::GetInstance().FindAndStorePlayerData();
+                    dae::SceneData::GetInstance().RemoveGameObject(player.GetParentObject(), dae::GameObjectType::Player);
+                    dae::SceneManager::GetInstance().GetActiveScene()->Remove(player.GetParentObject());
+                    dae::SceneManager::GetInstance().SetActiveScene("SaveScoreScene");
+                }
             }
-            else
-            {
-                dae::SceneManager::GetInstance().SetActiveScene("SaveScoreScene");
-               // dae::SceneData::GetInstance().RemoveGameObject(player.GetParentObject(), dae::GameObjectType::Player);
-                //dae::SceneManager::GetInstance().GetActiveScene()->Remove(player.GetParentObject());
-				//dae::SceneManager::GetInstance().SetActiveScene("SaveScoreScene");
-            }
+    //        else if (playersize > 1)
+    //        {
+    //            //dae::SceneManager::GetInstance().SetActiveScene("SaveScoreScene");
+				////dae::SceneData::GetInstance().RemoveGameObject(player.GetParentObject(), dae::GameObjectType::Player);
+    //            dae::SceneManager::GetInstance().GetActiveScene()->Remove(player.GetParentObject());
+				////dae::SceneManager::GetInstance().SetActiveScene("SaveScoreScene");
+    //        }
         }
     }
 
@@ -93,11 +105,17 @@ namespace game
     //idlestate
     void IdleState::OnEnterState(Player& player)
     {
-        player.m_animationComponent->Play("Idle", true);
+	    if (player.m_animationComponent)
+	    {
+            player.m_animationComponent->Play("Idle", true);
+	    }
     }
 
     void IdleState::OnExitState(Player& player)
     {
-        player.m_animationComponent->Stop();
+        if (player.m_animationComponent)
+        {
+            player.m_animationComponent->Stop();
+        }
     }
 }

@@ -1,17 +1,7 @@
 #include "SceneHelpers.h"
-
-#include "AnimationComponent.h"
-#include "BurgerComponent.h"
-#include "InputManager.h"
 #include "ResourceManager.h"
 #include "SceneData.h"
-#include "GameData.h"
 #include "SpriteRendererComponent.h"
-//#include "../BugerTime/EnemyComponent.h"
-//#include "../BugerTime/Player.h"
-//#include "../BugerTime/MrHotDogAIComponent.h"
-//#include "../BugerTime/MrPickleAIComponent.h"
-//#include "../BugerTime/Pepper.h"
 
 glm::vec2 s_MinCoordinates;
 glm::vec2 s_MaxCoordinates; 
@@ -38,7 +28,7 @@ void SceneHelpers::CreateFloor(dae::Scene* scene, float x, float y, glm::vec2 sc
 
 void SceneHelpers::CreateLadderUp(dae::Scene* scene, float x, float y, glm::vec2 scale) {
     auto ladderObject = std::make_unique<dae::GameObject>();
-    auto spriteRenderer = std::make_unique<dae::SpriteRendererComponent>(ladderObject.get(), dae::ResourceManager::GetSprite("ladder_up"));
+    auto spriteRenderer = std::make_unique<dae::SpriteRendererComponent>(ladderObject.get(), dae::ResourceManager::GetSprite("Test"));
     spriteRenderer->SetDimensions(scale.x, scale.y);
     ladderObject->AddComponent(std::move(spriteRenderer));
     ladderObject->SetLocalPosition(glm::vec3(x, y, 0.0f));
@@ -54,7 +44,7 @@ void SceneHelpers::CreateLadderUp(dae::Scene* scene, float x, float y, glm::vec2
 
 void SceneHelpers::CreateLadderUpDown(dae::Scene* scene, float x, float y, glm::vec2 scale) {
     auto ladderObject = std::make_unique<dae::GameObject>();
-    auto spriteRenderer = std::make_unique<dae::SpriteRendererComponent>(ladderObject.get(), dae::ResourceManager::GetSprite("ladder_up"));
+    auto spriteRenderer = std::make_unique<dae::SpriteRendererComponent>(ladderObject.get(), dae::ResourceManager::GetSprite("Test1"));
     spriteRenderer->SetDimensions(scale.x, scale.y);
     ladderObject->AddComponent(std::move(spriteRenderer));
     ladderObject->SetLocalPosition(glm::vec3(x, y, 0.0f));
@@ -67,112 +57,6 @@ void SceneHelpers::CreateLadderUpDown(dae::Scene* scene, float x, float y, glm::
 
     scene->Add(std::move(ladderObject));
 }
-
-
-void SceneHelpers::CreateLadderDown(dae::Scene* scene, float x, float y, glm::vec2 scale) {
-    auto ladderObject = std::make_unique<dae::GameObject>();
-    auto spriteRenderer = std::make_unique<dae::SpriteRendererComponent>(ladderObject.get(), dae::ResourceManager::GetSprite("ladder_down"));
-    spriteRenderer->SetDimensions(scale.x, scale.y);
-    ladderObject->AddComponent(std::move(spriteRenderer));
-    ladderObject->SetLocalPosition(glm::vec3(x, y, 0.0f));
-
-    auto hitBox = std::make_unique<HitBox>(scale);
-    hitBox->SetGameObject(ladderObject.get());
-    ladderObject->AddComponent(std::move(hitBox));
-
-    dae::SceneData::GetInstance().AddGameObject(ladderObject.get(), dae::GameObjectType::LadderDown);
-
-    scene->Add(std::move(ladderObject));
-}
-
-void SceneHelpers::CreateSolidLadder(dae::Scene* scene, float x, float y, glm::vec2 scale) {
-    auto solidLadderObject = std::make_unique<dae::GameObject>();
-    auto spriteRenderer = std::make_unique<dae::SpriteRendererComponent>(solidLadderObject.get(), dae::ResourceManager::GetSprite("stairs"));
-    spriteRenderer->SetDimensions(scale.x, scale.y);
-    solidLadderObject->AddComponent(std::move(spriteRenderer));
-    solidLadderObject->SetLocalPosition(glm::vec3(x, y, 0.0f));
-
-    auto hitBox = std::make_unique<HitBox>(scale);
-    hitBox->SetGameObject(solidLadderObject.get());
-    solidLadderObject->AddComponent(std::move(hitBox));
-
-    dae::SceneData::GetInstance().AddGameObject(solidLadderObject.get(), dae::GameObjectType::SolidLadder);
-
-    scene->Add(std::move(solidLadderObject));
-}
-
-
-
-void SceneHelpers::CreatePlatformLeft(dae::Scene* scene, float x, float y, glm::vec2 scale) {
-    // Create the left part of the platform
-    auto leftObject = std::make_unique<dae::GameObject>();
-    auto leftSpriteRenderer = std::make_unique<dae::SpriteRendererComponent>(leftObject.get(), dae::ResourceManager::GetSprite("left_basket"));
-    leftSpriteRenderer->SetDimensions(scale.x, scale.y);
-    leftObject->AddComponent(std::move(leftSpriteRenderer));
-    leftObject->SetLocalPosition(glm::vec3(x, y, 0.0f));
-
-    auto hitBox = std::make_unique<HitBox>(scale);
-    hitBox->SetGameObject(leftObject.get());
-    leftObject->AddComponent(std::move(hitBox));
-
-    dae::SceneData::GetInstance().AddGameObject(leftObject.get(), dae::GameObjectType::Basket);
-
-    scene->Add(std::move(leftObject));
-}
-
-void SceneHelpers::CreatePlatformCombined(dae::Scene* scene, float x, float y, glm::vec2 scale) {
-    // Create the left part of the platform
-    auto combinedObject = std::make_unique<dae::GameObject>();
-    auto leftSpriteRenderer = std::make_unique<dae::SpriteRendererComponent>(combinedObject.get(), dae::ResourceManager::GetSprite("combined_basket"));
-    leftSpriteRenderer->SetDimensions(scale.x, scale.y);
-    combinedObject->AddComponent(std::move(leftSpriteRenderer));
-    combinedObject->SetLocalPosition(glm::vec3(x, y, 0.0f));
-
-    auto hitBox = std::make_unique<HitBox>(scale);
-    hitBox->SetGameObject(combinedObject.get());
-    combinedObject->AddComponent(std::move(hitBox));
-
-    dae::SceneData::GetInstance().AddGameObject(combinedObject.get(), dae::GameObjectType::Basket);
-
-    scene->Add(std::move(combinedObject));
-}
-
-void SceneHelpers::CreatePlatformMiddle(dae::Scene* scene, float x, float y, glm::vec2 scale) {
-
-    // Create the middle part of the platform
-    auto midObject = std::make_unique<dae::GameObject>();
-    auto midSpriteRenderer = std::make_unique<dae::SpriteRendererComponent>(midObject.get(), dae::ResourceManager::GetSprite("mid_basket"));
-    midSpriteRenderer->SetDimensions(scale.x, scale.y);
-    midObject->AddComponent(std::move(midSpriteRenderer));
-    midObject->SetLocalPosition(glm::vec3(x, y, 0.0f));
-
-    auto hitBox = std::make_unique<HitBox>(scale);
-    hitBox->SetGameObject(midObject.get());
-    midObject->AddComponent(std::move(hitBox));
-
-    dae::SceneData::GetInstance().AddGameObject(midObject.get(), dae::GameObjectType::Basket);
-
-    scene->Add(std::move(midObject));
-}
-
-void SceneHelpers::CreatePlatformRight(dae::Scene* scene, float x, float y, glm::vec2 scale) {
-
-    // Create the right part of the platform
-    auto rightObject = std::make_unique<dae::GameObject>();
-    auto rightSpriteRenderer = std::make_unique<dae::SpriteRendererComponent>(rightObject.get(), dae::ResourceManager::GetSprite("right_basket"));
-    rightSpriteRenderer->SetDimensions(scale.x, scale.y);
-    rightObject->AddComponent(std::move(rightSpriteRenderer));
-    rightObject->SetLocalPosition(glm::vec3(x, y, 0.0f));
-
-    auto hitBox = std::make_unique<HitBox>(scale);
-    hitBox->SetGameObject(rightObject.get());
-    rightObject->AddComponent(std::move(hitBox));
-
-    dae::SceneData::GetInstance().AddGameObject(rightObject.get(), dae::GameObjectType::Basket);
-
-    scene->Add(std::move(rightObject));
-}
-
 
 //void SceneHelpers::CreateBurgerTop(dae::Scene* scene, float x, float y, glm::vec2 scale)
 //{
@@ -521,10 +405,10 @@ void SceneHelpers::LoadMapIntoScene(const LoadMap& loadMap, dae::Scene* scene, c
 
             switch (tile) {
             case 'v':
-                CreateLadderDown(scene, posX, posY, scale);
+                //CreateLadderDown(scene, posX, posY, scale);
                 break;
             case '#':
-                CreateSolidLadder(scene, posX, posY, scale);
+               // CreateSolidLadder(scene, posX, posY, scale);
                 break;
             case '^':
                 CreateLadderUp(scene, posX, posY, scale);
@@ -536,16 +420,16 @@ void SceneHelpers::LoadMapIntoScene(const LoadMap& loadMap, dae::Scene* scene, c
                 CreateFloor(scene, posX, posY, scale);
                 break;
             case 'u':
-                CreatePlatformMiddle(scene, posX, posY, scale);
+                //CreatePlatformMiddle(scene, posX, posY, scale);
                 break;
             case 'l':
-                CreatePlatformLeft(scene, posX, posY, scale);
+                //CreatePlatformLeft(scene, posX, posY, scale);
                 break;
             case 'r':
-                CreatePlatformRight(scene, posX, posY, scale);
+                //CreatePlatformRight(scene, posX, posY, scale);
                 break;
             case 'c':
-                CreatePlatformCombined(scene, posX, posY, scale);
+                //CreatePlatformCombined(scene, posX, posY, scale);
                 break;
             default:
                 break;

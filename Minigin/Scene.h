@@ -7,7 +7,6 @@
 
 namespace dae
 {
-
     class Scene final
     {
     public:
@@ -31,9 +30,9 @@ namespace dae
         Scene& operator=(Scene&& other) = delete;
 
         void SetBackgroundMusic(const std::string& musicFilePath);
-        void SetBackgroundMusic(int musicid);
-        void PlayBackgroundMusic();
-        void StopBackgroundMusic();
+        void SetBackgroundMusic(int musicId);
+        void PlayBackgroundMusic() const;
+        void StopBackgroundMusic() const;
         sound_id GetBackgroundMusicID() const { return  m_backgroundMusicID; }
 
 
@@ -42,7 +41,7 @@ namespace dae
             m_onActivateCallback = std::move(callback);
         }
 
-        void Activate()
+        void Activate() const
         {
             if (m_onActivateCallback)
             {

@@ -27,7 +27,8 @@ namespace dae
         std::pair<float, float> GetDimensions() const;
         void AddComponent(std::unique_ptr<Component> component);
         void RemoveComponent(Component* component); 
-        void SetParent(GameObject* parent, bool keepWorldPosition = false);
+        void RemoveAllComponents();
+    	void SetParent(GameObject* parent, bool keepWorldPosition = false);
 
         void SetLocalPosition(const glm::vec3& pos);
         const glm::vec3& GetWorldPosition();

@@ -41,6 +41,15 @@ void loadResources()
     dae::ResourceManager::LoadFont("arcade", "arcade-legacy.ttf", 24);
 
     dae::ResourceManager::LoadTexture("Lives.png");
+
+
+    dae::ResourceManager::LoadSprite("floor", "ground1.png");
+    dae::ResourceManager::LoadSprite("BackGround", "background.png");
+    dae::ResourceManager::LoadSprite("Test", "ground3.png");
+    dae::ResourceManager::LoadSprite("Test1", "ground2.png");
+
+
+
     dae::ResourceManager::LoadSprite("Player",
         "spritesheetemty.png",
         26,  // rowCount
@@ -51,7 +60,7 @@ void loadResources()
             { "Walk_Left", { { { 4, 0 }, { 5, 0 } }, 4 } },
             { "Walk_Up", { { { 2, 0 }, { 3, 0 } }, 4 } },
             { "Walk_Down", { { { 6, 0 }, { 7,0 } }, 4 } },
-            { "Dying", { { { 3, 1 }, { 4, 1 }, { 5, 1 }, { 6, 1 }, { 7, 1 }, { 8, 1 } }, 2 } },
+            { "Dying", { { { 0, 7 }, { 1, 7 }, { 2, 7 }, { 3, 7 } }, 1 } },
             { "Attacking", { { { 1, 1 } }, 1 } },
             { "Victory", { { { 3, 1 }, { 1, 0 }}, 3 } }
 
@@ -359,12 +368,7 @@ void LoadStartMenu(dae::Scene* startMenuScene)
         }
         });
     TweenManager::GetInstance().AddTween(std::move(moveTweenmenuObject));
-
-
-    // Add the menu GameObject to the scene
     startMenuScene->Add(std::move(menuObject));
-
-
 
     // Creating the InfoTxt GameObject and adding a TextComponent
     auto InfoTxt = std::make_unique<dae::GameObject>();
@@ -394,10 +398,6 @@ void LoadStartMenu(dae::Scene* startMenuScene)
     auto moveTweenInfocharacter2Txt02 = std::make_unique<Tween>(Infocharacter2Txt02.get(), finalPositionInfocharacter2Txt02, 10.0f, Easing::Linear);
     TweenManager::GetInstance().AddTween(std::move(moveTweenInfocharacter2Txt02));
     startMenuScene->Add(std::move(Infocharacter2Txt02));
-
-
-  
-
 }
 
 void LoadScoreboard(dae::Scene* ScoreBoardScene)
@@ -497,7 +497,7 @@ void LoadUi(dae::Scene* scene)
         SDL_Color{ 255, 0, 0, 255 },
         *HighScoretextObject
     );
-    HighScoretextObject->SetLocalPosition(glm::vec3(1040, 50, 0.f));
+    HighScoretextObject->SetLocalPosition(glm::vec3(1090, 50, 0.f));
     HighScoretextObject->AddComponent(std::move(titleTextComponent02));
 
     scene->Add(std::move(HighScoretextObject));
@@ -509,52 +509,48 @@ void LoadUi(dae::Scene* scene)
 
     // Create the high score value text component using the string
     auto scoreTextComponent = std::make_unique<dae::TextComponent>(topScoreStr, dae::ResourceManager::GetFont("arcade"), SDL_Color{ 255, 255, 255, 255 }, *HighScoreObject);
-    HighScoreObject->SetLocalPosition(glm::vec3(1040, 70, 0.f));
+    HighScoreObject->SetLocalPosition(glm::vec3(1090, 70, 0.f));
     HighScoreObject->AddComponent(std::move(scoreTextComponent));
 
     // Add HighScoreObject to the scene (assuming 'this' is a scene class)
     scene->Add(std::move(HighScoreObject));
 
-    glm::vec3 initialPositionpoints(1040, 235, 0.f);
+    glm::vec3 initialPositionpoints(1090, 235, 0.f);
 
     for (size_t i = 0; i < players.size(); ++i) {
         auto player = players[i];
         if (auto scoreComponent = player->GetComponent<dae::PointComponent>()) {
-	        float distanceBetweenPoints = 50.0f;
-	        auto pointsDisplayObject = std::make_unique<dae::GameObject>();
-            auto pointsDisplayComponent = std::make_unique<dae::PointsDisplayComponent>(dae::ResourceManager::GetFont("arcade"), *pointsDisplayObject);
+	        constexpr float distanceBetweenPoints = 50.0f;
+	        //auto pointsDisplayObject = std::make_unique<dae::GameObject>();
+            auto pointsDisplayComponent = std::make_unique<dae::PointsDisplayComponent>(dae::ResourceManager::GetFont("arcade"), *player, scoreComponent);
 
             // Attach the points display component to the player's point component
-            pointsDisplayComponent->AttachToPointComponent(scoreComponent);
-            pointsDisplayObject->AddComponent(std::move(pointsDisplayComponent));
-
+            player->AddComponent(std::move(pointsDisplayComponent));
             // Calculate the position of the points display object based on the index and distance
             glm::vec3 position = initialPositionpoints + glm::vec3(0.0f, i * distanceBetweenPoints, 0.0f);
-            pointsDisplayObject->SetLocalPosition(position);
+            //pointsDisplayObject->SetLocalPosition(position);
 
-            scene->Add(std::move(pointsDisplayObject));
+            //scene->Add(std::move(pointsDisplayObject));
         }
     }
 
 
-    glm::vec3 initialPositionHealth(1040, 535, 0.f);
+    glm::vec3 initialPositionHealth(1090, 535, 0.f);
 
     for (size_t i = 0; i < players.size(); ++i) {
-        auto player = players[i];
-        if (auto healthComponent = player->GetComponent<dae::HealthComponent>()) {
-	        float distanceBetweenLives = 50.0f;
-	        auto livesDisplayObject = std::make_unique<dae::GameObject>();
-            glm::vec3 position = initialPositionHealth + glm::vec3(0.0f, i * distanceBetweenLives, 0.0f);
-            livesDisplayObject->SetLocalPosition(position);
+	    const auto player = players[i];
+        //if (auto healthComponent = player->GetComponent<dae::HealthComponent>()) {
+	        //float distanceBetweenLives = 50.0f;
+	        //auto livesDisplayObject = std::make_unique<dae::GameObject>();
+           // glm::vec3 position = initialPositionHealth + glm::vec3(0.0f, i * distanceBetweenLives, 0.0f);
+            //livesDisplayObject->SetLocalPosition(position);
 
-            auto livesDisplayComponent = std::make_unique<dae::LivesDisplayComponent>(*livesDisplayObject,50,50,"Lives.png");
-            // Attach the lives display component to the player's health component
-            livesDisplayComponent->AttachToHealthComponent(healthComponent);
+            auto livesDisplayComponent = std::make_unique<dae::LivesDisplayComponent>(*player,50,50,"Lives.png");
             // Calculate the position of the lives display object based on the index and distance
-            livesDisplayObject->AddComponent(std::move(livesDisplayComponent));
+            player->AddComponent(std::move(livesDisplayComponent));
             // Add the lives display object to the scene
-            scene->Add(std::move(livesDisplayObject));
-        }
+            //scene->Add(std::move(livesDisplayObject));
+       // }
     }
 }
 
@@ -617,14 +613,102 @@ void GameScene(dae::Scene* scene)
     fpsCounterObject->SetLocalPosition(glm::vec3(100.f, 20.f, 0.0f));
     scene->Add(std::move(fpsCounterObject));
 
-    //constexpr glm::vec3 startPos(335, 70, 0.0f);
-    //constexpr glm::vec2 mapScale(40, 26.f);
+    constexpr glm::vec3 startPos(335, 70, 0.0f);
+    constexpr glm::vec2 mapScale(40, 26.f);
 
-    //const LoadMap loadMap("../Data/maps/map1.map", "../Data/maps/" + Ingrediantmap);
-    //SceneHelpers::LoadMapIntoScene(loadMap, scene, startPos, mapScale);
+    
 
-   // SceneHelpers::LoadIngMapIntoScene(loadMap, scene, startPos, mapScale);
+    const LoadMap loadMap("../Data/maps/map1.map", "../Data/maps/map1.ingmap");
+    SceneHelpers::LoadMapIntoScene(loadMap, scene, startPos, mapScale);
 
+    SceneHelpers::LoadIngMapIntoScene(loadMap, scene, startPos, mapScale);
+
+    auto lifeSprite = std::make_unique<dae::GameObject>();
+    auto spriteComponent = std::make_unique<dae::SpriteRendererComponent>(lifeSprite.get(), dae::ResourceManager::GetInstance().GetSprite("BackGround"));
+    spriteComponent->SetDimensions(SceneHelpers::GetGridSize().x, SceneHelpers::GetGridSize().y);
+    lifeSprite->AddComponent(std::move(spriteComponent));
+    lifeSprite->SetLocalPosition(glm::vec3((SceneHelpers::GetMinCoordinates().x + SceneHelpers::GetMaxCoordinates().x) / 2, (SceneHelpers::GetMinCoordinates().y + SceneHelpers::GetMaxCoordinates().y) / 2, -1.0f)); // Adjust position for each sprite
+    scene->Add(std::move(lifeSprite));
+
+    SceneHelpers::LoadMapIntoScene(loadMap, scene, startPos, mapScale);
+
+    int score;
+    int lives;
+    auto PlayerObject = std::make_unique<dae::GameObject>();
+    if (GameData::GetInstance().GetPlayerData(0).score != 0)
+        score = GameData::GetInstance().GetPlayerData(0).score;
+    else
+        score = 0;
+
+    auto Character1points = std::make_unique<dae::PointComponent>(score);
+    PlayerObject->AddComponent(std::move(Character1points));
+
+    if (GameData::GetInstance().GetPlayerData(0).lives != 3)
+        lives = GameData::GetInstance().GetPlayerData(0).lives;
+    else
+        lives = 3;
+
+    auto Character1Health = std::make_unique<dae::HealthComponent>(100, lives);
+    PlayerObject->AddComponent(std::move(Character1Health));
+
+    auto spriteRenderComponent = std::make_unique<dae::SpriteRendererComponent>(PlayerObject.get(), dae::ResourceManager::GetSprite("Player"));
+    spriteRenderComponent->SetDimensions(40, 40);
+    PlayerObject->AddComponent(std::move(spriteRenderComponent));
+
+    auto animationComponent = std::make_unique<dae::AnimationComponent>(PlayerObject.get(), PlayerObject->GetComponent<dae::SpriteRendererComponent>(), "Idle");
+    animationComponent->Play("Walk_Right", true);
+    PlayerObject->AddComponent(std::move(animationComponent));
+    PlayerObject->SetLocalPosition(glm::vec3(100, 100, 0.0f));
+
+    auto hitBox = std::make_unique<HitBox>(glm::vec2(40, 40));
+    hitBox->SetGameObject(PlayerObject.get());
+    PlayerObject->AddComponent(std::move(hitBox));
+
+    auto PlayerComponent = std::make_unique<game::Player>(PlayerObject.get());
+    PlayerObject->AddComponent(std::move(PlayerComponent));
+
+
+    dae::SceneData::GetInstance().AddGameObject(PlayerObject.get(), dae::GameObjectType::Player);
+
+    scene->Add(std::move(PlayerObject));
+
+    HandlePlayerInput(inputManager, 0);
+    LoadUi(scene);
+
+}
+
+void GameScene2(dae::Scene* scene)
+{
+    auto& inputManager = dae::InputManager::GetInstance();
+
+    // Create GameObject for FPS counter
+    auto fpsCounterObject = std::make_unique<dae::GameObject>();
+    auto fpsTextComponent = std::make_unique<dae::TextComponent>("FPS: ", dae::ResourceManager::GetFont("font"), SDL_Color{ 252, 157, 3, 255 }, *fpsCounterObject);
+    fpsCounterObject->AddComponent(std::move(fpsTextComponent));
+    auto fpsTextComponentPtr = fpsCounterObject->GetComponent<dae::TextComponent>();
+    auto fpsCounterComponent = std::make_unique<dae::FPSCounterComponent>(fpsTextComponentPtr);
+    fpsCounterObject->AddComponent(std::move(fpsCounterComponent));
+    fpsCounterObject->SetLocalPosition(glm::vec3(100.f, 20.f, 0.0f));
+    scene->Add(std::move(fpsCounterObject));
+
+    constexpr glm::vec3 startPos(335, 70, 0.0f);
+    constexpr glm::vec2 mapScale(40, 26.f);
+
+
+
+    const LoadMap loadMap("../Data/maps/map1.map", "../Data/maps/map1.ingmap");
+    SceneHelpers::LoadMapIntoScene(loadMap, scene, startPos, mapScale);
+
+    SceneHelpers::LoadIngMapIntoScene(loadMap, scene, startPos, mapScale);
+
+    auto lifeSprite = std::make_unique<dae::GameObject>();
+    auto spriteComponent = std::make_unique<dae::SpriteRendererComponent>(lifeSprite.get(), dae::ResourceManager::GetInstance().GetSprite("BackGround"));
+    spriteComponent->SetDimensions(SceneHelpers::GetGridSize().x, SceneHelpers::GetGridSize().y);
+    lifeSprite->AddComponent(std::move(spriteComponent));
+    lifeSprite->SetLocalPosition(glm::vec3((SceneHelpers::GetMinCoordinates().x + SceneHelpers::GetMaxCoordinates().x) / 2, (SceneHelpers::GetMinCoordinates().y + SceneHelpers::GetMaxCoordinates().y) / 2, -1.0f)); // Adjust position for each sprite
+    scene->Add(std::move(lifeSprite));
+
+    SceneHelpers::LoadMapIntoScene(loadMap, scene, startPos, mapScale);
 
     int score;
     int lives;
@@ -680,12 +764,14 @@ void load()
     const auto& startMenuScene = sceneManager.CreateScene("StartMenu");
     const auto& ScoreBoardScene = sceneManager.CreateScene("ScoreboardScene");
     const auto& Game = sceneManager.CreateScene("Game");
+    const auto& Game2 = sceneManager.CreateScene("Game2");
     const auto& SaveSoreScene = sceneManager.CreateScene("SaveScoreScene");
 
 
     startMenuScene->SetOnActivateCallback([startMenuScene]() { LoadStartMenu(startMenuScene); });
     ScoreBoardScene->SetOnActivateCallback([ScoreBoardScene]() {LoadScoreboard(ScoreBoardScene); });
     Game->SetOnActivateCallback([Game]() { GameScene(Game); });
+    Game2->SetOnActivateCallback([Game2]() { GameScene2(Game2); });
     SaveSoreScene->SetOnActivateCallback([SaveSoreScene]() { loadInputScore(SaveSoreScene); });
 
 

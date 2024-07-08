@@ -16,12 +16,8 @@ namespace dae {
         case GameObjectType::Floor: m_floors.push_back(gameObject); break;
         case GameObjectType::LadderUp: m_ladderUp.push_back(gameObject); break;
         case GameObjectType::LadderUpDown: m_ladderUpDown.push_back(gameObject); break;
-        case GameObjectType::LadderDown: m_ladderDown.push_back(gameObject); break;
-        case GameObjectType::SolidLadder: m_solidLadders.push_back(gameObject); break;
         case GameObjectType::Player: m_players.push_back(gameObject); break;
         case GameObjectType::enemy: m_enemys.push_back(gameObject); break;
-        case GameObjectType::BurgerPart: m_burgerParts.push_back(gameObject); break;
-        case GameObjectType::Basket: m_baskets.push_back(gameObject); break;
         case GameObjectType::enemyPlayers: m_enemyPlayers.push_back(gameObject);break;
         }
     }
@@ -30,14 +26,10 @@ namespace dae {
     {
         m_floors.clear();
         m_ladderUp.clear();
-        m_ladderDown.clear();
         m_ladderUpDown.clear();
-        m_solidLadders.clear();
         m_players.clear();
         m_enemyPlayers.clear();
         m_enemys.clear();
-        m_burgerParts.clear();
-        m_baskets.clear();
     }
 
     void SceneData::RemoveGameObject(GameObject* gameObject, GameObjectType type)
@@ -145,11 +137,9 @@ namespace dae {
             return false; 
             };
 
-        if (checkCollisionsWithObjects(m_solidLadders)) return true;
         if (checkCollisionsWithObjects(m_floors)) return true;
         if (checkCollisionsWithObjects(m_ladderUp)) return true;
         if (checkCollisionsWithObjects(m_ladderUpDown)) return true;
-        if (checkCollisionsWithObjects(m_ladderDown)) return true;
 
         return false; 
     }
@@ -158,14 +148,7 @@ namespace dae {
         return !m_players.empty() ? m_players.front() : nullptr;
     }
 
-    const std::vector<GameObject*>& SceneData::GetBurgerParts() const {
-        return m_burgerParts;
-    }
-
-    const std::vector<GameObject*>& SceneData::GetBasket() const {
-        return m_baskets;
-    }
-
+  
     bool SceneData::IsOnFloor(GameObject& player) const {
         return IsOnSpecificObjectType(player, m_floors);
     }
@@ -176,21 +159,6 @@ namespace dae {
 
     bool SceneData::IsOnLadderUpDown(GameObject& player) const {
         return IsOnSpecificObjectType(player, m_ladderUpDown);
-    }
-
-    bool SceneData::IsOnLadderDown(GameObject& player) const {
-        return IsOnSpecificObjectType(player, m_ladderDown);
-    }
-
-	bool SceneData::IsOnSolidLadder(GameObject& player) const {
-        return IsOnSpecificObjectType(player, m_solidLadders);
-    }
-    bool SceneData::IsInBasket(GameObject& burger) const {
-        return IsOnSpecificObjectType(burger, m_baskets);
-    }
-
-    bool SceneData::IsBurgerPartColliding(GameObject& burgerPart) const {
-        return IsOnSpecificObjectType(burgerPart, m_burgerParts);
     }
 
     bool SceneData::isOnEnemy(GameObject& burgerPart) const {

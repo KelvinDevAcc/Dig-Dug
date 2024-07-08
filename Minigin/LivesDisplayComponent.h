@@ -14,6 +14,12 @@ namespace dae
     {
     public:
         LivesDisplayComponent(GameObject& gameObject, int spriteWidth, int spriteHeight, std::string textureName);
+        ~LivesDisplayComponent() override;
+
+        LivesDisplayComponent(const LivesDisplayComponent& other) = default;
+        LivesDisplayComponent& operator=(const LivesDisplayComponent& other) = delete;
+        LivesDisplayComponent(LivesDisplayComponent&& other) noexcept = default;
+        LivesDisplayComponent& operator=(LivesDisplayComponent&& other) noexcept = delete;
 
         void Update() override;
         void Render() const override;
@@ -22,6 +28,7 @@ namespace dae
         std::type_info const& GetComponentType() const override { return typeid(LivesDisplayComponent); }
     private:
         void UpdateLivesSprites();
+        void CleanUp();
 
         std::vector<std::unique_ptr<GameObject>> m_LivesSprites;
         HealthComponent* m_healthComponent;

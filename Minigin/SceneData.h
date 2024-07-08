@@ -9,13 +9,9 @@ namespace dae {
         Floor,
         LadderUp,
         LadderUpDown,
-        LadderDown,
-        SolidLadder,
-        BurgerPart,
         Player,
         enemyPlayers,
         enemy,
-        Basket
     };
 
     class SceneData final : public Singleton<SceneData> {
@@ -36,7 +32,6 @@ namespace dae {
         std::vector<GameObject*> GetPlayers() const {return m_players;}
         std::vector<GameObject*> GetenemyPlayers() const {return m_enemyPlayers;}
         const std::vector<GameObject*>& GetBurgerParts() const;
-        const std::vector<GameObject*>& GetBasket()const;
         GameObject* GetFloorAt(const glm::vec3& position) const;
 
         bool IsOnFloor(GameObject& player) const;
@@ -44,7 +39,6 @@ namespace dae {
         bool IsOnLadderUpDown(GameObject& player) const;
         bool IsOnLadderDown(GameObject& player) const;
         bool IsOnSolidLadder(GameObject& player) const;
-        bool IsInBasket(GameObject& burger) const;
         bool IsBurgerPartColliding(GameObject& burgerPart) const;
         bool isOnEnemy(GameObject& burgerPart) const;
 
@@ -65,14 +59,9 @@ namespace dae {
         std::vector<GameObject*> m_floors;
         std::vector<GameObject*> m_ladderUp;
         std::vector<GameObject*> m_ladderUpDown;
-        std::vector<GameObject*> m_ladderDown;
-        std::vector<GameObject*> m_solidLadders;
         std::vector<GameObject*> m_players;
         std::vector<GameObject*> m_enemyPlayers;
         std::vector<GameObject*> m_enemys;
-        std::vector<GameObject*> m_burgerParts;
-        std::vector<GameObject*> m_baskets;
-
 
     };
 }

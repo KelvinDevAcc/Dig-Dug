@@ -20,6 +20,11 @@ namespace dae
         m_healthComponent = gameObject.GetComponent<HealthComponent>();
     }
 
+    LivesDisplayComponent::~LivesDisplayComponent()
+    {
+        CleanUp();
+    }
+
     void LivesDisplayComponent::Update()
     {
         if (m_healthComponent)
@@ -39,12 +44,6 @@ namespace dae
         }
     }
 
-    void LivesDisplayComponent::AttachToHealthComponent(HealthComponent* healthComponent)
-    {
-        m_healthComponent = healthComponent;
-        UpdateLivesSprites();
-    }
-
     void LivesDisplayComponent::UpdateLivesSprites()
     {
         if (!m_healthComponent)
@@ -56,6 +55,10 @@ namespace dae
         const int lives = m_healthComponent->GetLives();
         const int currentSpriteCount = static_cast<int>(m_LivesSprites.size());
 
+        if (lives < 0)
+        {
+	        return;
+        }
         if (currentSpriteCount < lives)
         {
             // Add sprites
@@ -89,5 +92,11 @@ namespace dae
             // Remove sprites
             m_LivesSprites.resize(lives);
         }
+    }
+
+    void LivesDisplayComponent::CleanUp()
+    {
+        m_LivesSprites.clear();
+        m_healthComponent = nullptr;
     }
 }

@@ -1,8 +1,6 @@
 #include "Scene.h"
-
 #include <iostream>
 #include <string>
-
 #include "HitBox.h"
 #include "servicelocator.h"
 
@@ -17,7 +15,15 @@ namespace dae
 
     void Scene::Remove(GameObject* object)
     {
-        std::erase_if(m_objects, [object](const auto& ptr) { return ptr.get() == object; });
+        const auto it = std::ranges::find_if(m_objects,
+            [object](const std::unique_ptr<GameObject>& ptr) { return ptr.get() == object; });
+
+        if (it != m_objects.end())
+        {
+            (*it)->RemoveAllComponents();
+
+            m_objects.erase(it);
+        }
     }
 
     void Scene::RemoveAll()
@@ -30,7 +36,14 @@ namespace dae
     {
         for (const auto& object : m_objects)
         {
-            object->Update();
+            if (object) // Check if the object is valid
+            {
+                object->Update();
+            }
+            else
+            {
+                std::cerr << "Null object found in Scene::Update\n";
+            }
         }
     }
 
@@ -53,12 +66,12 @@ namespace dae
         m_backgroundMusicID = soundSystem.get_sound_id_for_file_path(musicFilePath);
     }
 
-    void Scene::SetBackgroundMusic(int musicid)
+    void Scene::SetBackgroundMusic(int musicId)
     {
-        m_backgroundMusicID = static_cast<sound_id>(musicid);
+        m_backgroundMusicID = static_cast<sound_id>(musicId);
     }
 
-    void Scene::PlayBackgroundMusic()
+    void Scene::PlayBackgroundMusic() const
     {
         if (m_backgroundMusicID != 0)
         {
@@ -67,7 +80,7 @@ namespace dae
         }
     }
 
-    void Scene::StopBackgroundMusic()
+    void Scene::StopBackgroundMusic() const
     {
         if (m_backgroundMusicID)
         {

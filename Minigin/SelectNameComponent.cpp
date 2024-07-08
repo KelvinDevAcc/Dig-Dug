@@ -26,6 +26,7 @@ SelectNameComponent::SelectNameComponent(dae::GameObject* owner, size_t maxLengt
 	}
 }
 
+
 void SelectNameComponent::Update() {
     // Update text components with the current state
     if (const auto textComponent = m_NameObject->GetComponent<dae::TextComponent>()) {
@@ -40,6 +41,7 @@ void SelectNameComponent::Update() {
         }
     }
     else {
+        m_LetterObject = nullptr;
         // Hide the letter object when the maximum length is reached
     }
 

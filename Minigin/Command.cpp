@@ -4,44 +4,45 @@
 #include "SceneData.h"
 #include "SceneManager.h"
 #include "servicelocator.h"
-//#include "../BugerTime/GameData.h"
-//#include "../BugerTime/Player.h"
 #include "GameData.h"
 #include  "../DigDug2/Player.h"
 
 MoveCommand::MoveCommand(int playerNumber, float deltaX, float deltaY)
-	: m_deltaX(deltaX), m_deltaY(deltaY)
+    : m_deltaX(deltaX), m_deltaY(deltaY)
 {
-	const std::vector<dae::GameObject*> players = dae::SceneData::GetInstance().GetPlayers();
+    const std::vector<dae::GameObject*> players = dae::SceneData::GetInstance().GetPlayers();
     const std::vector<dae::GameObject*> playerEnemys = dae::SceneData::GetInstance().GetenemyPlayers();
+    const size_t totalPlayers = players.size() + playerEnemys.size();
 
-    if (playerNumber >= 0 && playerNumber < static_cast<int>(players.size()) + static_cast<int>(playerEnemys.size()))
+    if (playerNumber >= 0 && playerNumber < static_cast<int>(totalPlayers))
     {
-	    if (playerNumber == 1)
-	    {
-		    if (!dae::SceneData::GetInstance().GetenemyPlayers().empty())
-		    {
-                m_gameObject = playerEnemys[0];
-		    }
-            else
-            {
-                m_playerNum = playerNumber;
-                m_gameObject = players[playerNumber];
-            }
-	    }
-    	else
-	    {
-            m_playerNum = playerNumber;
+        if (playerNumber == 1 && !playerEnemys.empty())
+        {
+            m_gameObject = playerEnemys[0];
+        }
+        else if (playerNumber < static_cast<int>(players.size()))
+        {
             m_gameObject = players[playerNumber];
-	    }
-        
+        }
     }
 }
 
 void MoveCommand::Execute()
 {
-	if (m_gameObject) {
-        m_gameObject->GetComponent<game::Player>()->Move(m_deltaX, m_deltaY);
+    if (m_gameObject)
+    {
+	    if (const auto playerComponent = m_gameObject->GetComponent<game::Player>())
+        {
+            playerComponent->Move(m_deltaX, m_deltaY);
+        }
+        else
+        {
+            std::cerr << "No Player component found on GameObject.\n";
+        }
+    }
+    else
+    {
+        std::cerr << "Cannot execute MoveCommand: GameObject is null.\n";
     }
 }
 
@@ -59,7 +60,13 @@ DamageCommand::DamageCommand(int playerNumber)
 
 void DamageCommand::Execute()
 {
-    m_gameObject->GetComponent<game::Player>()->Die();
+    if (m_gameObject)
+    {
+	    if (const auto playerComponent = m_gameObject->GetComponent<game::Player>())
+        {
+            playerComponent->Die();
+        }
+    }
 }
 
 
@@ -75,7 +82,13 @@ ScorePointCommand::ScorePointCommand(int playerNumber)
 
 void ScorePointCommand::Execute()
 {
-    m_gameObject->GetComponent<game::Player>()->Attack();
+    if (m_gameObject)
+    {
+	    if (const auto playerComponent = m_gameObject->GetComponent<game::Player>())
+        {
+            playerComponent->Attack();
+        }
+    }
 }
 
 

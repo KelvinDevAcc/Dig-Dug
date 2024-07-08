@@ -11,7 +11,7 @@ class Transform;
 class Tween
 {
 public:
-    Tween(dae::GameObject* gameObject, const glm::vec3& endPosition, float duration, Easing::EasingFunction easingFunction, std::function<void()> onComplete = nullptr);
+    Tween(dae::GameObject* gameObject, const glm::vec3& endPosition, float duration, const Easing::EasingFunction& easingFunction, std::function<void()> onComplete = nullptr);
 
     void Update();
 

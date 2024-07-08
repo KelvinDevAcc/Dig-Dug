@@ -107,11 +107,11 @@ void dae::minigin::Run(const std::function<void()>& load)
 
         GameTime::Update();
 
-        sceneManager.Update();
-
         TweenManager::GetInstance().Update();
 
         SceneData::GetInstance().Update();
+
+        sceneManager.Update();
 
         renderer.Render();
 

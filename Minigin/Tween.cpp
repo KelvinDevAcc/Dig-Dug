@@ -2,10 +2,10 @@
 #include "GameTime.h"
 #include "Transform.h"
 
-Tween::Tween(dae::GameObject* gameObject, const glm::vec3& endPosition, float duration, Easing::EasingFunction easingFunction, std::function<void()> onComplete)
+Tween::Tween(dae::GameObject* gameObject, const glm::vec3& endPosition, float duration, const Easing::EasingFunction& easingFunction, std::function<void()> onComplete)
     : m_GameObject(gameObject), m_StartPosition(gameObject->GetLocalPosition()), m_EndPosition(endPosition),
     m_Duration(duration), m_ElapsedTime(0.0f), m_EasingFunction(easingFunction), m_IsActive(true),
-    m_OnComplete(onComplete) {}
+    m_OnComplete(std::move(onComplete)) {}
 
 
 void Tween::Update() {
@@ -22,7 +22,7 @@ void Tween::Update() {
         }
     }
 
-    glm::vec3 newPosition = m_StartPosition + (m_EndPosition - m_StartPosition) * m_EasingFunction(t);
+    const glm::vec3 newPosition = m_StartPosition + (m_EndPosition - m_StartPosition) * m_EasingFunction(t);
     m_GameObject->SetLocalPosition(newPosition);
 }
 

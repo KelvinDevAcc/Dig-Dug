@@ -73,13 +73,11 @@ void InputManager::BindCommand(unsigned int button, KeyState state, std::unique_
         if (controllerIndex < static_cast<int>(m_controllerBindings.size()))
         {
             m_controllerBindings[controllerIndex][{button, state}] = std::move(command);
-            std::cout << "Bound controller command: button = " << button << ", state = " << static_cast<int>(state) << "\n";
         }
     }
     else
     {
         m_keyboardBindings[{button, state}] = std::move(command);
-        std::cout << "Bound keyboard command: button = " << button << ", state = " << static_cast<int>(state) << "\n";
     }
 }
 
@@ -138,7 +136,6 @@ void InputManager::HandleKeyInput(SDL_Scancode keyCode, KeyState state)
         if (static_cast<SDL_Scancode>(binding.first.first) == keyCode && binding.first.second == state)
         {
             binding.second->Execute();
-            std::cout << "bindingAmount: " << m_keyboardBindings.size(); // Debug output
             break;
         }
     }
@@ -165,9 +162,8 @@ void InputManager::HandleControllerInput() {
 
         for (const auto& binding : m_controllerBindings[i]) {
             const auto button = binding.first.first;
-            const auto state = binding.first.second;
 
-            switch (state) {
+            switch (const auto state = binding.first.second) {
             case KeyState::Down:
                 if (m_gameControllers[i].IsButtonDown(button)) {
                     binding.second->Execute();

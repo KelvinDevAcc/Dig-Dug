@@ -10,6 +10,7 @@ class SelectNameComponent : public dae::Component
 {
 public:
     SelectNameComponent(dae::GameObject* owner, size_t maxLength, dae::Font* font, const SDL_Color& color, int playerId);
+    ~SelectNameComponent() override = default;
 
     void Update() override;
     void Render() const override;

@@ -12,6 +12,7 @@ namespace dae
 	{
 	public:
 		static void Init(const std::string& data);
+		~ResourceManager() override = default;
 
 		static Font* LoadFont(const std::string& name, const std::string& file, unsigned int size);
 

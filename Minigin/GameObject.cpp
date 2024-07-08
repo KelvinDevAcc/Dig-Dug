@@ -52,6 +52,11 @@ namespace dae
         }
     }
 
+    void GameObject::RemoveAllComponents()
+    {
+        m_components.clear();
+    }
+
     void GameObject::SetParent(GameObject* parent, bool keepWorldPosition)
     {
         if (IsChild(parent) || parent == this || m_parent == parent)
