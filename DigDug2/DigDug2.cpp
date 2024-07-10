@@ -40,13 +40,41 @@ void loadResources()
     dae::ResourceManager::LoadFont("arcadeBig", "arcade-legacy.ttf", 28);
     dae::ResourceManager::LoadFont("arcade", "arcade-legacy.ttf", 24);
 
-    dae::ResourceManager::LoadTexture("Lives.png");
+    dae::ResourceManager::LoadTexture("lives","Lives.png");
+    dae::ResourceManager::LoadTexture("sky", "spritesheetMap.png", SDL_Rect(64, 0, 8, 8));
+    dae::ResourceManager::LoadTexture("skyFloor", "spritesheetMap.png", SDL_Rect(64, 8, 8, 8));
+	dae::ResourceManager::LoadTexture("floorblock01","spritesheetMap.png",SDL_Rect(176,0,16,16));
 
+	dae::ResourceManager::LoadTexture("floorblock02","spritesheetMap.png",SDL_Rect(56,0,8,8));
+	dae::ResourceManager::LoadTexture("floorblock021","spritesheetMap.png",SDL_Rect(0,0,8,8));
+	dae::ResourceManager::LoadTexture("floorblock022","spritesheetMap.png",SDL_Rect(8,0,8,8));
+	dae::ResourceManager::LoadTexture("floorblock023","spritesheetMap.png",SDL_Rect(16,0,8,8));
+	dae::ResourceManager::LoadTexture("floorblock024","spritesheetMap.png",SDL_Rect(24,0,8,8));
+	dae::ResourceManager::LoadTexture("floorblock025","spritesheetMap.png",SDL_Rect(32,0,8,8));
+	dae::ResourceManager::LoadTexture("floorblock026","spritesheetMap.png",SDL_Rect(48,0,8,8));
 
-    dae::ResourceManager::LoadSprite("floor", "ground1.png");
-    dae::ResourceManager::LoadSprite("BackGround", "background.png");
-    dae::ResourceManager::LoadSprite("Test", "ground3.png");
-    dae::ResourceManager::LoadSprite("Test1", "ground2.png");
+	dae::ResourceManager::LoadTexture("floorblock03","spritesheetMap.png",SDL_Rect(56,8,8,8));
+    dae::ResourceManager::LoadTexture("floorblock031", "spritesheetMap.png", SDL_Rect(0, 8, 8, 8));
+    dae::ResourceManager::LoadTexture("floorblock032", "spritesheetMap.png", SDL_Rect(8, 8, 8, 8));
+    dae::ResourceManager::LoadTexture("floorblock033", "spritesheetMap.png", SDL_Rect(16, 8, 8, 8));
+    dae::ResourceManager::LoadTexture("floorblock034", "spritesheetMap.png", SDL_Rect(24, 8, 8, 8));
+    dae::ResourceManager::LoadTexture("floorblock035", "spritesheetMap.png", SDL_Rect(32, 8, 8, 8));
+    dae::ResourceManager::LoadTexture("floorblock036", "spritesheetMap.png", SDL_Rect(48, 8, 8, 8));
+
+	dae::ResourceManager::LoadTexture("floorblock04","spritesheetMap.png",SDL_Rect(56,16,8,8));
+	dae::ResourceManager::LoadTexture("floorblock041","spritesheetMap.png",SDL_Rect(0,16,8,8));
+	dae::ResourceManager::LoadTexture("floorblock042","spritesheetMap.png",SDL_Rect(8,16,8,8));
+	dae::ResourceManager::LoadTexture("floorblock043","spritesheetMap.png",SDL_Rect(16,16,8,8));
+	dae::ResourceManager::LoadTexture("floorblock044","spritesheetMap.png",SDL_Rect(24,16,8,8));
+	dae::ResourceManager::LoadTexture("floorblock045","spritesheetMap.png",SDL_Rect(32,16,8,8));
+	dae::ResourceManager::LoadTexture("floorblock046","spritesheetMap.png",SDL_Rect(48,16,8,8));
+
+    dae::ResourceManager::LoadTexture("topEnd", "spritesheetDigging.png", SDL_Rect(0, 0, 16, 16));
+    dae::ResourceManager::LoadTexture("bottomEnd", "spritesheetDigging.png", SDL_Rect(16, 0, 16, 16));
+    dae::ResourceManager::LoadTexture("leftEnd", "spritesheetDigging.png", SDL_Rect(32, 0, 16, 16));
+    dae::ResourceManager::LoadTexture("rightEnd", "spritesheetDigging.png", SDL_Rect(48, 0, 16, 16));
+    dae::ResourceManager::LoadTexture("walkTroughUp", "spritesheetDigging.png", SDL_Rect(64, 0, 16, 16));
+    dae::ResourceManager::LoadTexture("walkTroughLeft", "spritesheetDigging.png", SDL_Rect(80, 0, 16, 16));
 
 
 
@@ -67,6 +95,7 @@ void loadResources()
         });
 
 }
+
 void UnBindMenuCommands(dae::InputManager& inputManager)
 {
     // Unbind keyboard commands
@@ -342,6 +371,7 @@ void LoadStartMenu(dae::Scene* startMenuScene)
         },
         []() {
             std::cout << "multiplayer" << std::endl;
+            dae::SceneManager::GetInstance().SetActiveScene("Game2");
         },
         []() {
             std::cout << "versus Mode" << std::endl;
@@ -545,7 +575,7 @@ void LoadUi(dae::Scene* scene)
            // glm::vec3 position = initialPositionHealth + glm::vec3(0.0f, i * distanceBetweenLives, 0.0f);
             //livesDisplayObject->SetLocalPosition(position);
 
-            auto livesDisplayComponent = std::make_unique<dae::LivesDisplayComponent>(*player,50,50,"Lives.png");
+            auto livesDisplayComponent = std::make_unique<dae::LivesDisplayComponent>(*player,50,50,"lives");
             // Calculate the position of the lives display object based on the index and distance
             player->AddComponent(std::move(livesDisplayComponent));
             // Add the lives display object to the scene
@@ -613,8 +643,8 @@ void GameScene(dae::Scene* scene)
     fpsCounterObject->SetLocalPosition(glm::vec3(100.f, 20.f, 0.0f));
     scene->Add(std::move(fpsCounterObject));
 
-    constexpr glm::vec3 startPos(335, 70, 0.0f);
-    constexpr glm::vec2 mapScale(40, 26.f);
+    constexpr glm::vec3 startPos(300, 50, 0.0f);
+    constexpr glm::vec2 mapScale(40, 40);
 
     
 
@@ -623,14 +653,14 @@ void GameScene(dae::Scene* scene)
 
     SceneHelpers::LoadIngMapIntoScene(loadMap, scene, startPos, mapScale);
 
-    auto lifeSprite = std::make_unique<dae::GameObject>();
-    auto spriteComponent = std::make_unique<dae::SpriteRendererComponent>(lifeSprite.get(), dae::ResourceManager::GetInstance().GetSprite("BackGround"));
-    spriteComponent->SetDimensions(SceneHelpers::GetGridSize().x, SceneHelpers::GetGridSize().y);
-    lifeSprite->AddComponent(std::move(spriteComponent));
-    lifeSprite->SetLocalPosition(glm::vec3((SceneHelpers::GetMinCoordinates().x + SceneHelpers::GetMaxCoordinates().x) / 2, (SceneHelpers::GetMinCoordinates().y + SceneHelpers::GetMaxCoordinates().y) / 2, -1.0f)); // Adjust position for each sprite
-    scene->Add(std::move(lifeSprite));
+    //auto lifeSprite = std::make_unique<dae::GameObject>();
+    //auto spriteComponent = std::make_unique<dae::SpriteRendererComponent>(lifeSprite.get(), dae::ResourceManager::GetInstance().GetTexture("floorblock03"));
+    //spriteComponent->SetDimensions(SceneHelpers::GetGridSize().x, SceneHelpers::GetGridSize().y);
+    //lifeSprite->AddComponent(std::move(spriteComponent));
+    //lifeSprite->SetLocalPosition(glm::vec3((SceneHelpers::GetMinCoordinates().x + SceneHelpers::GetMaxCoordinates().x) / 2, (SceneHelpers::GetMinCoordinates().y + SceneHelpers::GetMaxCoordinates().y) / 2, -1.0f)); // Adjust position for each sprite
+    //scene->Add(std::move(lifeSprite));
 
-    SceneHelpers::LoadMapIntoScene(loadMap, scene, startPos, mapScale);
+    //SceneHelpers::LoadMapIntoScene(loadMap, scene, startPos, mapScale);
 
     int score;
     int lives;
@@ -702,13 +732,13 @@ void GameScene2(dae::Scene* scene)
     SceneHelpers::LoadIngMapIntoScene(loadMap, scene, startPos, mapScale);
 
     auto lifeSprite = std::make_unique<dae::GameObject>();
-    auto spriteComponent = std::make_unique<dae::SpriteRendererComponent>(lifeSprite.get(), dae::ResourceManager::GetInstance().GetSprite("BackGround"));
+    auto spriteComponent = std::make_unique<dae::SpriteRendererComponent>(lifeSprite.get(), dae::ResourceManager::GetInstance().GetSprite("floorblock01"));
     spriteComponent->SetDimensions(SceneHelpers::GetGridSize().x, SceneHelpers::GetGridSize().y);
     lifeSprite->AddComponent(std::move(spriteComponent));
     lifeSprite->SetLocalPosition(glm::vec3((SceneHelpers::GetMinCoordinates().x + SceneHelpers::GetMaxCoordinates().x) / 2, (SceneHelpers::GetMinCoordinates().y + SceneHelpers::GetMaxCoordinates().y) / 2, -1.0f)); // Adjust position for each sprite
     scene->Add(std::move(lifeSprite));
 
-    SceneHelpers::LoadMapIntoScene(loadMap, scene, startPos, mapScale);
+    //SceneHelpers::LoadMapIntoScene(loadMap, scene, startPos, mapScale);
 
     int score;
     int lives;
@@ -750,7 +780,50 @@ void GameScene2(dae::Scene* scene)
 
     scene->Add(std::move(PlayerObject));
 
+
+
+    int score2;
+    int lives2;
+    auto PlayerObject2 = std::make_unique<dae::GameObject>();
+    if (GameData::GetInstance().GetPlayerData(1).score != 0)
+        score2 = GameData::GetInstance().GetPlayerData(1).score;
+    else
+        score2 = 0;
+
+    auto Character1points2 = std::make_unique<dae::PointComponent>(score2);
+    PlayerObject2->AddComponent(std::move(Character1points2));
+
+    if (GameData::GetInstance().GetPlayerData(1).lives != 3)
+        lives2 = GameData::GetInstance().GetPlayerData(1).lives;
+    else
+        lives2 = 3;
+
+    auto Character1Health2 = std::make_unique<dae::HealthComponent>(100, lives2);
+    PlayerObject2->AddComponent(std::move(Character1Health2));
+
+    auto spriteRenderComponent2 = std::make_unique<dae::SpriteRendererComponent>(PlayerObject2.get(), dae::ResourceManager::GetSprite("Player"));
+    spriteRenderComponent2->SetDimensions(40, 40);
+    PlayerObject2->AddComponent(std::move(spriteRenderComponent2));
+
+    auto animationComponent2 = std::make_unique<dae::AnimationComponent>(PlayerObject2.get(), PlayerObject2->GetComponent<dae::SpriteRendererComponent>(), "Idle");
+    animationComponent2->Play("Walk_Right", true);
+    PlayerObject2->AddComponent(std::move(animationComponent2));
+    PlayerObject2->SetLocalPosition(glm::vec3(100, 300, 0.0f));
+
+    auto hitBox2 = std::make_unique<HitBox>(glm::vec2(40, 40));
+    hitBox2->SetGameObject(PlayerObject2.get());
+    PlayerObject2->AddComponent(std::move(hitBox2));
+
+    auto PlayerComponent2 = std::make_unique<game::Player>(PlayerObject2.get());
+    PlayerObject2->AddComponent(std::move(PlayerComponent2));
+
+
+    dae::SceneData::GetInstance().AddGameObject(PlayerObject2.get(), dae::GameObjectType::Player);
+
+    scene->Add(std::move(PlayerObject2));
+
     HandlePlayerInput(inputManager, 0);
+    HandlePlayerInput(inputManager, 1);
     LoadUi(scene);
 
 }

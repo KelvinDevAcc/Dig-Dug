@@ -83,7 +83,7 @@ namespace dae
                 else
                 {
                     // Handle error: texture not loaded
-                    std::cerr << "Error: Failed to load texture 'Lives.png'" << std::endl;
+                    std::cerr << "Error: Failed to load texture 'lives'" << std::endl;
                 }
             }
         }

@@ -17,67 +17,81 @@ void dae::ResourceManager::Init(const std::string& dataPath)
 	}
 }
 
-
 dae::Font* dae::ResourceManager::LoadFont(const std::string& name, const std::string& file, unsigned int size)
 {
-	auto fullPath = m_dataPath + "Font/" + file;
-	auto font = std::make_unique<Font>(fullPath, size);
-	auto [it, success] = m_FontMap.emplace(name, std::move(font));
-	if (!success)
-	{
-		std::cerr << "Error: Font '" << name << "' already loaded.\n";
-		return nullptr;
-	}
-	return it->second.get();
+    auto fullPath = m_dataPath + "Font/" + file;
+    auto font = std::make_unique<Font>(fullPath, size);
+    auto [it, success] = m_FontMap.emplace(name, std::move(font));
+    if (!success)
+    {
+        std::cerr << "Error: Font '" << name << "' already loaded.\n";
+        return nullptr;
+    }
+    return it->second.get();
 }
 
-dae::Texture2D* dae::ResourceManager::LoadTexture(const std::string& fileName)
+dae::Texture2D* dae::ResourceManager::LoadTexture(const std::string& name, const std::string& fileName)
 {
-	const auto& fullPath = m_dataPath + fileName;
-	SDL_Texture* texture = IMG_LoadTexture(Renderer::GetInstance().GetSDLRenderer(), fullPath.c_str());
+    const auto& fullPath = m_dataPath + fileName;
+    SDL_Texture* texture = IMG_LoadTexture(Renderer::GetInstance().GetSDLRenderer(), fullPath.c_str());
 
-	if (texture == nullptr)
-	{
-		std::cerr << "Error: Failed to load texture '" << fileName << "': " << IMG_GetError() << '\n';
-		return nullptr;
-	}
+    if (texture == nullptr)
+    {
+        std::cerr << "Error: Failed to load texture '" << fileName << "': " << IMG_GetError() << '\n';
+        return nullptr;
+    }
 
-	return m_LoadedTextures.emplace_back(std::make_unique<Texture2D>(texture, fileName)).get();
+    return m_LoadedTextures.emplace(name, std::make_unique<Texture2D>(texture, fileName)).first->second.get();
+}
+
+dae::Texture2D* dae::ResourceManager::LoadTexture(const std::string& name, const std::string& fileName, const SDL_Rect& sourceRect)
+{
+    const auto& fullPath = m_dataPath + fileName;
+    SDL_Texture* texture = IMG_LoadTexture(Renderer::GetInstance().GetSDLRenderer(), fullPath.c_str());
+
+    if (texture == nullptr)
+    {
+        std::cerr << "Error: Failed to load texture '" << fileName << "': " << IMG_GetError() << '\n';
+        return nullptr;
+    }
+
+    return m_LoadedTextures.emplace(name, std::make_unique<Texture2D>(texture, sourceRect, fileName)).first->second.get();
 }
 
 dae::Sprite* dae::ResourceManager::LoadSprite(const std::string& name, const std::string& fileName, int rowCount, int colCount, const std::map<std::string, SpriteAnimation>& animations)
 {
-	return m_SpriteMap.emplace(name,std::make_unique<Sprite>(LoadTexture(fileName), rowCount, colCount, animations)).first->second.get();
+    return m_SpriteMap.emplace(name, std::make_unique<Sprite>(LoadTexture(name, fileName), rowCount, colCount, animations)).first->second.get();
 }
 
-dae::Texture2D* dae::ResourceManager::GetTexture(const std::string& fileName)
+dae::Texture2D* dae::ResourceManager::GetTexture(const std::string& name)
 {
-	for (const auto& texture : m_LoadedTextures)
-	{
-		if (texture->GetFileName() == fileName)  // Assuming Texture2D has a GetFileName() method
-		{
-			return texture.get();
-		}
-	}
-
-	std::cerr << "Error: Texture '" << fileName << "' not found.\n";
-	return nullptr;
+	const auto it = m_LoadedTextures.find(name);
+    if (it != m_LoadedTextures.end())
+    {
+        return it->second.get();
+    }
+    std::cerr << "Error: Texture '" << name << "' not found.\n";
+    return nullptr;
 }
 
 dae::Sprite* dae::ResourceManager::GetSprite(const std::string& name)
 {
-	if (m_SpriteMap.contains(name))
-		return m_SpriteMap.at(name).get();
-
-	std::cerr << "Error: Sprite '" << name << "' not found.\n";
-	return nullptr;
+	const auto it = m_SpriteMap.find(name);
+    if (it != m_SpriteMap.end())
+    {
+        return it->second.get();
+    }
+    std::cerr << "Error: Sprite '" << name << "' not found.\n";
+    return nullptr;
 }
 
 dae::Font* dae::ResourceManager::GetFont(const std::string& name)
 {
-	if (m_FontMap.contains(name))
-		return m_FontMap.at(name).get();
-
-	std::cerr << "Error: Font '" << name << "' not found.\n";
-	return nullptr;
+    auto it = m_FontMap.find(name);
+    if (it != m_FontMap.end())
+    {
+        return it->second.get();
+    }
+    std::cerr << "Error: Font '" << name << "' not found.\n";
+    return nullptr;
 }

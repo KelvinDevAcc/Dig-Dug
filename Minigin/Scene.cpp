@@ -36,7 +36,7 @@ namespace dae
     {
         for (const auto& object : m_objects)
         {
-            if (object) // Check if the object is valid
+            if (object)
             {
                 object->Update();
             }

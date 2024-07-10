@@ -86,18 +86,19 @@ namespace game
                 if (player.GetParentObject())
                 {
                     GameData::GetInstance().FindAndStorePlayerData();
-                    dae::SceneData::GetInstance().RemoveGameObject(player.GetParentObject(), dae::GameObjectType::Player);
-                    dae::SceneManager::GetInstance().GetActiveScene()->Remove(player.GetParentObject());
+                    //dae::SceneData::GetInstance().RemoveGameObject(player.GetParentObject(), dae::GameObjectType::Player);
+                    //dae::SceneManager::GetInstance().GetActiveScene()->Remove(player.GetParentObject());
                     dae::SceneManager::GetInstance().SetActiveScene("SaveScoreScene");
                 }
             }
-    //        else if (playersize > 1)
-    //        {
-    //            //dae::SceneManager::GetInstance().SetActiveScene("SaveScoreScene");
-				////dae::SceneData::GetInstance().RemoveGameObject(player.GetParentObject(), dae::GameObjectType::Player);
-    //            dae::SceneManager::GetInstance().GetActiveScene()->Remove(player.GetParentObject());
-				////dae::SceneManager::GetInstance().SetActiveScene("SaveScoreScene");
-    //        }
+            else if (playersize > 1)
+            {
+                //dae::SceneManager::GetInstance().SetActiveScene("SaveScoreScene");
+                GameData::GetInstance().FindAndStorePlayerData();
+				dae::SceneData::GetInstance().RemoveGameObject(player.GetParentObject(), dae::GameObjectType::Player);
+                dae::SceneManager::GetInstance().GetActiveScene()->Remove(player.GetParentObject());
+				//dae::SceneManager::GetInstance().SetActiveScene("SaveScoreScene");
+            }
         }
     }
 

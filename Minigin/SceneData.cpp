@@ -14,19 +14,18 @@ namespace dae {
     void SceneData::AddGameObject(GameObject* gameObject, GameObjectType type) {
         switch (type) {
         case GameObjectType::Floor: m_floors.push_back(gameObject); break;
-        case GameObjectType::LadderUp: m_ladderUp.push_back(gameObject); break;
-        case GameObjectType::LadderUpDown: m_ladderUpDown.push_back(gameObject); break;
         case GameObjectType::Player: m_players.push_back(gameObject); break;
         case GameObjectType::enemy: m_enemys.push_back(gameObject); break;
         case GameObjectType::enemyPlayers: m_enemyPlayers.push_back(gameObject);break;
+        case GameObjectType::WalkThrough: m_WalkThrough.push_back(gameObject);  break;
+        default: ;
         }
     }
 
     void SceneData::RemoveAllGameObjects()
     {
         m_floors.clear();
-        m_ladderUp.clear();
-        m_ladderUpDown.clear();
+        m_WalkThrough.clear();
         m_players.clear();
         m_enemyPlayers.clear();
         m_enemys.clear();
@@ -45,8 +44,13 @@ namespace dae {
         case GameObjectType::enemyPlayers:
             RemoveGameObjectFromList(gameObject, m_enemyPlayers);
             break;
-        default:
+        case GameObjectType::Floor:
+            RemoveGameObjectFromList(gameObject, m_floors);
             break;
+        case GameObjectType::WalkThrough:
+            RemoveGameObjectFromList(gameObject, m_WalkThrough);
+            break;
+
         }
     }
 
@@ -138,9 +142,6 @@ namespace dae {
             };
 
         if (checkCollisionsWithObjects(m_floors)) return true;
-        if (checkCollisionsWithObjects(m_ladderUp)) return true;
-        if (checkCollisionsWithObjects(m_ladderUpDown)) return true;
-
         return false; 
     }
 
@@ -151,14 +152,6 @@ namespace dae {
   
     bool SceneData::IsOnFloor(GameObject& player) const {
         return IsOnSpecificObjectType(player, m_floors);
-    }
-
-    bool SceneData::IsOnLadderUp(GameObject& player) const {
-        return IsOnSpecificObjectType(player, m_ladderUp);
-    }
-
-    bool SceneData::IsOnLadderUpDown(GameObject& player) const {
-        return IsOnSpecificObjectType(player, m_ladderUpDown);
     }
 
     bool SceneData::isOnEnemy(GameObject& burgerPart) const {
