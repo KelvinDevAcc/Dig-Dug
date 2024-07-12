@@ -48,7 +48,7 @@ namespace game
 
             if (m_timeSinceLastAction >= m_inactivityThreshold)
             {
-                Idle();
+            //    Idle();
             }
 
         }
@@ -56,7 +56,7 @@ namespace game
 
     void Player::Move(float deltaX, float deltaY)
     {
-        CheckAndMove(deltaX, deltaY);
+        //CheckAndMove(deltaX, deltaY);
     }
 
     void Player::Attack() {
@@ -75,7 +75,7 @@ namespace game
     }
 
     void Player::Idle() {
-        SetState(m_idleState.get());
+        //SetState(m_idleState.get());
     }
 
     void Player::Respawn()

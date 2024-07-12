@@ -17,7 +17,6 @@ namespace dae
         , m_textureName(std::move(textureName))
 		,m_gameObject(gameObject)
     {
-        m_healthComponent = gameObject.GetComponent<HealthComponent>();
     }
 
     LivesDisplayComponent::~LivesDisplayComponent()
@@ -27,10 +26,7 @@ namespace dae
 
     void LivesDisplayComponent::Update()
     {
-        if (m_healthComponent)
-        {
-            UpdateLivesSprites();
-        }
+       
     }
 
     void LivesDisplayComponent::Render() const
@@ -44,7 +40,7 @@ namespace dae
         }
     }
 
-    void LivesDisplayComponent::UpdateLivesSprites()
+    void LivesDisplayComponent::OnNotify()
     {
         if (!m_healthComponent)
         {
@@ -57,8 +53,9 @@ namespace dae
 
         if (lives < 0)
         {
-	        return;
+            return;
         }
+
         if (currentSpriteCount < lives)
         {
             // Add sprites
@@ -67,11 +64,11 @@ namespace dae
                 auto lifeSprite = std::make_unique<GameObject>();
                 if (auto texture = ResourceManager::GetInstance().GetTexture(m_textureName))
                 {
-	                if (auto spriteComponent = std::make_unique<SpriteRendererComponent>(lifeSprite.get(), texture))
+                    if (auto spriteComponent = std::make_unique<SpriteRendererComponent>(lifeSprite.get(), texture))
                     {
                         spriteComponent->SetDimensions(static_cast<float>(m_spriteWidth), static_cast<float>(m_spriteHeight));
                         lifeSprite->AddComponent(std::move(spriteComponent));
-                        const auto position  = m_gameObject.GetWorldPosition();
+                        const auto position = m_gameObject.GetWorldPosition();
                         lifeSprite->SetLocalPosition(glm::vec3(position.x + i * (m_spriteWidth + 5), position.y, 0)); // Adjust position for each sprite
                         m_LivesSprites.push_back(std::move(lifeSprite));
                     }
@@ -82,7 +79,6 @@ namespace dae
                 }
                 else
                 {
-                    // Handle error: texture not loaded
                     std::cerr << "Error: Failed to load texture 'lives'" << std::endl;
                 }
             }
@@ -94,9 +90,29 @@ namespace dae
         }
     }
 
+    void LivesDisplayComponent::SetHealthComponent(HealthComponent* healthComponent)
+    {
+        if (m_healthComponent)
+        {
+            m_healthComponent->Detach(this);
+        }
+
+        m_healthComponent = healthComponent;
+
+        if (m_healthComponent)
+        {
+            m_healthComponent->Attach(this);
+            OnNotify();
+        }
+    }
+
     void LivesDisplayComponent::CleanUp()
     {
+        if (m_healthComponent)
+        {
+            //m_healthComponent->Detach(this); // Detach from the health component
+            m_healthComponent = nullptr;
+        }
         m_LivesSprites.clear();
-        m_healthComponent = nullptr;
     }
 }

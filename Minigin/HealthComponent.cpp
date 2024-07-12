@@ -25,6 +25,7 @@ namespace dae
 
                 dae::EventQueue::Broadcast(message);
             }
+            Notify();
         }
 
       
@@ -33,7 +34,6 @@ namespace dae
     void HealthComponent::SetHealth(int health)
     {
         m_Health = health;
-        Notify(); // Notify observers after updating health
     }
 
     void HealthComponent::SetLives(int lives)

@@ -10,7 +10,7 @@
 
 namespace dae
 {
-    class LivesDisplayComponent : public Component
+    class LivesDisplayComponent : public Component, public Observer 
     {
     public:
         LivesDisplayComponent(GameObject& gameObject, int spriteWidth, int spriteHeight, std::string textureName);
@@ -23,11 +23,12 @@ namespace dae
 
         void Update() override;
         void Render() const override;
-        void AttachToHealthComponent(HealthComponent* healthComponent);
+        void OnNotify() override;
+
+        void SetHealthComponent(HealthComponent* healthComponent);
 
         std::type_info const& GetComponentType() const override { return typeid(LivesDisplayComponent); }
     private:
-        void UpdateLivesSprites();
         void CleanUp();
 
         std::vector<std::unique_ptr<GameObject>> m_LivesSprites;

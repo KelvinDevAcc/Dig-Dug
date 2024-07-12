@@ -9,7 +9,7 @@ namespace dae
     void PointComponent::SetScore(int score)
     {
         m_Score = score;
-        Notify(); // Notify observers after updating the score
+        Notify(); 
     }
 
     void PointComponent::Update()

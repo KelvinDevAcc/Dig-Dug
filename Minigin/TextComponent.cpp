@@ -28,7 +28,7 @@ void dae::TextComponent::Update()
             throw std::runtime_error(std::string("Render text failed: ") + SDL_GetError());
         }
 
-        SDL_Texture* texture = SDL_CreateTextureFromSurface(dae::Renderer::GetInstance().GetSDLRenderer(), surf);
+        SDL_Texture* texture = SDL_CreateTextureFromSurface(Renderer::GetInstance().GetSDLRenderer(), surf);
         SDL_FreeSurface(surf);
 
         if (!texture)

@@ -93,19 +93,19 @@ void SceneHelpers::LoadIngMapIntoScene(const LoadMap& loadMap, dae::Scene* scene
             case '^':
                CreateWalkThough(scene, posX, posY, glm::vec2(scale.x, scale.y), "topEnd");
                 break;
-            case 'L':
+            case 'v':
                 CreateWalkThough(scene, posX, posY, glm::vec2(scale.x, scale.y), "bottomEnd");
                 break;
-            case 'M':
+            case '<':
                 CreateWalkThough(scene, posX, posY, glm::vec2(scale.x, scale.y), "leftEnd");
                 break;
-            case 'v':
+            case '>':
                 CreateWalkThough(scene, posX, posY, glm::vec2(scale.x, scale.y), "rightEnd");
                 break;
-            case 'C':
+            case ':':
                 CreateWalkThough(scene, posX, posY, glm::vec2(scale.x, scale.y), "walkTroughUp");
                 break;
-            case 'T':
+            case '=':
                 CreateWalkThough(scene, posX, posY, glm::vec2(scale.x, scale.y), "walkTroughLeft");
                 break;
             case 'S':

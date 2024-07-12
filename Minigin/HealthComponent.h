@@ -32,13 +32,13 @@ namespace dae
         {
             for (auto* observer : m_observers)
             {
-                observer->Update();
+                observer->OnNotify();
             }
-        }
+        }    
 
     private:
-        int m_Health = 100;
-        int m_Lives = 3;
+        int m_Health;
+        int m_Lives;
         std::list<Observer*> m_observers;
     };
 }

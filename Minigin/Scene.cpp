@@ -15,21 +15,25 @@ namespace dae
 
     void Scene::Remove(GameObject* object)
     {
-        const auto it = std::ranges::find_if(m_objects,
-            [object](const std::unique_ptr<GameObject>& ptr) { return ptr.get() == object; });
-
-        if (it != m_objects.end())
-        {
-            (*it)->RemoveAllComponents();
-
-            m_objects.erase(it);
-        }
+        m_objects.erase(std::ranges::remove_if(m_objects,
+                                               [object](const std::unique_ptr<GameObject>& ptr)
+                                               {
+	                                               if (ptr.get() == object)
+	                                               {
+		                                               ptr->RemoveAllComponents();
+		                                               return true;
+	                                               }
+	                                               return false;
+                                               }).begin(), m_objects.end());
     }
 
     void Scene::RemoveAll()
     {
+        for (const auto& object : m_objects)
+        {
+            object->RemoveAllComponents();
+        }
         m_objects.clear();
-
     }
 
     void Scene::Update() const

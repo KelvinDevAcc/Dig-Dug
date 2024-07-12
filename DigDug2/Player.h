@@ -27,29 +27,18 @@ namespace game
         Player& operator=(const Player&) = delete;
         Player& operator=(Player&&) noexcept = delete;
 
-        void SetState(PlayerState* state);
 
         void Update() override;
-
         void Move(float deltaX, float deltaY);
         void Attack();
         void Die();
-        void Idle();
-
         void Respawn();
+        void Idle();
 
 
         dae::GameObject* GetParentObject() const { return m_GameObject; }
 
         std::type_info const& GetComponentType() const override { return typeid(Player); }
-
-
-        std::unique_ptr<MovingState> m_walkingState{ std::make_unique<MovingState>() };
-        std::unique_ptr<AttackingState> m_attackignState{ std::make_unique<AttackingState>() };
-        std::unique_ptr<IdleState> m_idleState{ std::make_unique<IdleState>() };
-        std::unique_ptr<DyingState> m_dyingState{ std::make_unique<DyingState>() };
-
-        PlayerState* m_CurrentState;
 
 
         float m_deltaY{ 0 };
@@ -58,20 +47,30 @@ namespace game
     private:
 
         dae::GameObject* m_GameObject;
-
-        dae::HealthComponent* m_healthComponent{};
-        dae::PointComponent* m_pointComponent{};
-        dae::AnimationComponent* m_animationComponent{};
-
-        glm::vec3 m_startPosition{};
-
+        glm::vec3 m_startPosition;
         float m_timeSinceLastAction;
         float m_inactivityThreshold;
 
-        const LoadMap* m_gameMap;
+        dae::AnimationComponent* m_animationComponent;
+        dae::HealthComponent* m_healthComponent;
+        dae::PointComponent* m_pointComponent;
 
         void MoveHorizontally(float deltaX);
         void MoveVertically(float deltaY);
+
+        enum class AnimationState
+        {
+            Idle,
+            Walk_Right,
+            Walk_Left,
+            Walk_Up,
+            Walk_Down,
+            Attacking,
+            Dying
+        };
+
+        AnimationState m_CurrentAnimationState;
+        void SetAnimationState(AnimationState state);
     };
 }
 

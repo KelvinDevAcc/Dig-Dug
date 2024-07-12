@@ -31,7 +31,7 @@ namespace dae
         {
             for (auto* observer : m_observers)
             {
-                observer->Update();
+                observer->OnNotify();
             }
         }
 
