@@ -28,7 +28,7 @@ namespace dae
         }
         else
         {
-            if (m_frameTime >= 1.0f)
+            if (m_frameTime > 1.0f || m_frameTime < 0.0f)
             {
                 m_playingAnimation = false;
                 m_frameTime = 1.0f;

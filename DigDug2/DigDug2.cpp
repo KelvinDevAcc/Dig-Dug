@@ -76,6 +76,8 @@ void loadResources()
     dae::ResourceManager::LoadTexture("walkTroughUp", "spritesheetDigging.png", SDL_Rect(64, 0, 16, 16));
     dae::ResourceManager::LoadTexture("walkTroughLeft", "spritesheetDigging.png", SDL_Rect(80, 0, 16, 16));
 
+    dae::ResourceManager::LoadTexture("ArrowLine", "SpriteSheetFinal.png", SDL_Rect(384, 144, 32, 16));
+    dae::ResourceManager::LoadTexture("ArrowEnd", "SpriteSheetFinal.png", SDL_Rect(352, 144, 32, 16));
 
 
     dae::ResourceManager::LoadSprite("Player",
@@ -93,7 +95,6 @@ void loadResources()
             { "Victory", { { { 3, 1 }, { 1, 0 }}, 3 } }
 
         });
-
 }
 
 void UnBindMenuCommands(dae::InputManager& inputManager)
@@ -639,21 +640,28 @@ void GameScene(dae::Scene* scene)
     fpsCounterObject->AddComponent(std::move(fpsCounterComponent));
     fpsCounterObject->SetLocalPosition(glm::vec3(100.f, 20.f, 0.0f));
     scene->Add(std::move(fpsCounterObject));
+	/*constexpr glm::vec3 startPos(300, 50, 0.0f);
+    constexpr glm::vec2 mapScale(40, 40);
 
-    //constexpr glm::vec3 startPos(300, 50, 0.0f);
-    //constexpr glm::vec2 mapScale(40, 40);
+    const LoadMap loadMap("../Data/maps/map1.map", "../Data/maps/map1.ingmap");
+    SceneHelpers::LoadMapIntoScene(loadMap, scene, startPos, mapScale);
 
-    //const LoadMap loadMap("../Data/maps/map1.map", "../Data/maps/map1.ingmap");
-    //SceneHelpers::LoadMapIntoScene(loadMap, scene, startPos, mapScale);
-
-    //SceneHelpers::LoadIngMapIntoScene(loadMap, scene, startPos, mapScale);
+    SceneHelpers::LoadIngMapIntoScene(loadMap, scene, startPos, mapScale);*/
+   
 
     //auto lifeSprite = std::make_unique<dae::GameObject>();
-    //auto spriteComponent = std::make_unique<dae::SpriteRendererComponent>(lifeSprite.get(), dae::ResourceManager::GetInstance().GetTexture("floorblock03"));
+    //auto spriteComponent = std::make_unique<dae::SpriteRendererComponent>(lifeSprite.get(), dae::ResourceManager::GetInstance().GetTexture("ArrowEnd"));
     //spriteComponent->SetDimensions(SceneHelpers::GetGridSize().x, SceneHelpers::GetGridSize().y);
     //lifeSprite->AddComponent(std::move(spriteComponent));
     //lifeSprite->SetLocalPosition(glm::vec3((SceneHelpers::GetMinCoordinates().x + SceneHelpers::GetMaxCoordinates().x) / 2, (SceneHelpers::GetMinCoordinates().y + SceneHelpers::GetMaxCoordinates().y) / 2, -1.0f)); // Adjust position for each sprite
     //scene->Add(std::move(lifeSprite));
+
+    //auto lifeSprite2 = std::make_unique<dae::GameObject>();
+    //auto spriteComponent2 = std::make_unique<dae::SpriteRendererComponent>(lifeSprite2.get(), dae::ResourceManager::GetInstance().GetTexture("ArrowEnd"));
+    //spriteComponent2->SetDimensions(SceneHelpers::GetGridSize().x, SceneHelpers::GetGridSize().y);
+    //lifeSprite2->AddComponent(std::move(spriteComponent2));
+    //lifeSprite2->SetLocalPosition(glm::vec3((SceneHelpers::GetMinCoordinates().x + SceneHelpers::GetMaxCoordinates().x) / 2, (SceneHelpers::GetMinCoordinates().y + SceneHelpers::GetMaxCoordinates().y) / 2 + 100, -1.0f)); // Adjust position for each sprite
+    //scene->Add(std::move(lifeSprite2));
 
     int score;
     int lives;
@@ -679,7 +687,7 @@ void GameScene(dae::Scene* scene)
     PlayerObject->AddComponent(std::move(spriteRenderComponent));
 
     auto animationComponent = std::make_unique<dae::AnimationComponent>(PlayerObject.get(), PlayerObject->GetComponent<dae::SpriteRendererComponent>(), "Idle");
-    animationComponent->Play("Walk_Right", true);
+    //animationComponent->Play("Walk_Right", true);
     PlayerObject->AddComponent(std::move(animationComponent));
     PlayerObject->SetLocalPosition(glm::vec3(100, 100, 0.0f));
 
@@ -713,10 +721,9 @@ void GameScene2(dae::Scene* scene)
     fpsCounterObject->SetLocalPosition(glm::vec3(100.f, 20.f, 0.0f));
     scene->Add(std::move(fpsCounterObject));
 
-    constexpr glm::vec3 startPos(335, 70, 0.0f);
-    constexpr glm::vec2 mapScale(40, 26.f);
 
-
+    constexpr glm::vec3 startPos(300, 50, 0.0f);
+    constexpr glm::vec2 mapScale(40, 40);
 
     const LoadMap loadMap("../Data/maps/map1.map", "../Data/maps/map1.ingmap");
     SceneHelpers::LoadMapIntoScene(loadMap, scene, startPos, mapScale);
@@ -724,7 +731,7 @@ void GameScene2(dae::Scene* scene)
     SceneHelpers::LoadIngMapIntoScene(loadMap, scene, startPos, mapScale);
 
     auto lifeSprite = std::make_unique<dae::GameObject>();
-    auto spriteComponent = std::make_unique<dae::SpriteRendererComponent>(lifeSprite.get(), dae::ResourceManager::GetInstance().GetSprite("floorblock01"));
+    auto spriteComponent = std::make_unique<dae::SpriteRendererComponent>(lifeSprite.get(), dae::ResourceManager::GetInstance().GetTexture("ArrowLine"));
     spriteComponent->SetDimensions(SceneHelpers::GetGridSize().x, SceneHelpers::GetGridSize().y);
     lifeSprite->AddComponent(std::move(spriteComponent));
     lifeSprite->SetLocalPosition(glm::vec3((SceneHelpers::GetMinCoordinates().x + SceneHelpers::GetMaxCoordinates().x) / 2, (SceneHelpers::GetMinCoordinates().y + SceneHelpers::GetMaxCoordinates().y) / 2, -1.0f)); // Adjust position for each sprite
@@ -840,7 +847,7 @@ void load()
     SaveSoreScene->SetOnActivateCallback([SaveSoreScene]() { loadInputScore(SaveSoreScene); });
 
 
-    sceneManager.SetActiveScene("StartMenu");
+    sceneManager.SetActiveScene("Game");
 }
 
 int main(int, char* []) {
