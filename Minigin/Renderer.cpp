@@ -123,8 +123,8 @@ void dae::Renderer::RenderTexture(const Texture2D& texture, float x, float y, co
 	SDL_RenderCopy(m_renderer, texture.GetSDLTexture(), nullptr, &destRect);
 }
 
-void dae::Renderer::RenderTexture(const dae::Texture2D& texture, glm::vec2 drawLocation,
-	glm::vec2 srcLocation, glm::ivec2 cellSize, float width, float height, bool flipX, bool flipY)
+void dae::Renderer::RenderTexture(const Texture2D& texture, glm::vec2 drawLocation, glm::vec2 srcLocation,
+	glm::ivec2 cellSize, float width, float height, bool flipX, bool flipY, float rotation)
 {
 	SDL_Renderer* sdlRenderer = GetInstance().GetSDLRenderer();
 
@@ -151,9 +151,11 @@ void dae::Renderer::RenderTexture(const dae::Texture2D& texture, glm::vec2 drawL
 	else if (flipY)
 		flip = SDL_FLIP_VERTICAL;
 
-	const SDL_Point center{};
+	// Define the center point for rotation
+	const SDL_Point center = { dstRect.w / 2, dstRect.h / 2 };
 
-	SDL_RenderCopyEx(sdlRenderer, texture.GetSDLTexture(), &srcRect, &dstRect, 0.0f, &center, flip);
+	// Render with rotation
+	SDL_RenderCopyEx(sdlRenderer, texture.GetSDLTexture(), &srcRect, &dstRect, rotation, &center, flip);
 }
 
 void dae::Renderer::RenderRect(const SDL_Rect& rect, SDL_Color color, bool filled) const

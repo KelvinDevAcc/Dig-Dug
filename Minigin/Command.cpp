@@ -86,7 +86,7 @@ void ScorePointCommand::Execute()
     {
 	    if (const auto playerComponent = m_gameObject->GetComponent<game::Player>())
         {
-            playerComponent->ShootArrow();
+            playerComponent->ShootPump();
         }
     }
 }

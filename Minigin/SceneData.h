@@ -29,6 +29,7 @@ namespace dae {
 
         GameObject* GetPlayer() const;
         std::vector<GameObject*> GetPlayers() const {return m_players;}
+        std::vector<GameObject*> GetEnemies() const {return m_enemys;}
         std::vector<GameObject*> GetenemyPlayers() const {return m_enemyPlayers;}
         GameObject* GetFloorAt(const glm::vec3& position) const;
 

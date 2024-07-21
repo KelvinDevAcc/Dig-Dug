@@ -39,5 +39,6 @@ namespace dae
         float m_height;
         bool m_flipX;
         bool m_flipY;
+        float m_rotation;
     };
 }

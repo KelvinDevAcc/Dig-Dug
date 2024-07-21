@@ -72,4 +72,15 @@ namespace dae
     {
         m_spriteRenderer->SetFlip(flipHorizontally, flipVertically);
     }
+
+	int AnimationComponent::GetAnimationDuration() const
+    {
+        if (m_activeAnimation == nullptr)
+            return 0;
+
+        // Calculate the duration of the animation
+        const int duration = m_activeAnimation->frameCount / m_activeAnimation->framesPerSecond;
+        return duration;
+    }
+
 }

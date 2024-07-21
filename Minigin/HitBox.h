@@ -12,7 +12,6 @@ public:
     {
     }
 
-
     SDL_Rect GetRect() const {
         if (const auto parent = GetGameObject()) {
             const glm::vec3 parentPosition = parent->GetWorldPosition();
@@ -52,6 +51,13 @@ public:
 
     const std::type_info& GetComponentType() const override {
         return typeid(HitBox);
+    }
+
+    void Render() const override
+	{
+        const SDL_Rect rect = GetRect();
+        constexpr SDL_Color color = { 255, 0, 0, 255 }; // Red color for the hitbox
+        dae::Renderer::GetInstance().RenderRect(rect, color, false);
     }
 
 private:

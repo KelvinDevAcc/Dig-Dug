@@ -7,13 +7,13 @@
 using namespace dae;
 
 SpriteRendererComponent::SpriteRendererComponent(GameObject* gameObject, const Sprite* sprite)
-    : m_gameObject(gameObject), m_spritePtr(sprite), m_texturePtr(nullptr), m_drawCell(0, 0), m_width(0.0f), m_height(0.0f), m_flipX(false), m_flipY(false)
+    : m_gameObject(gameObject), m_spritePtr(sprite), m_texturePtr(nullptr), m_drawCell(0, 0), m_width(0.0f), m_height(0.0f), m_flipX(false), m_flipY(false), m_rotation(0.0f)
 {
     SetSprite(sprite);
 }
 
 SpriteRendererComponent::SpriteRendererComponent(GameObject* gameObject, const Texture2D* texture)
-    : m_gameObject(gameObject), m_spritePtr(nullptr), m_texturePtr(texture), m_drawCell(0, 0), m_width(0.0f), m_height(0.0f), m_flipX(false), m_flipY(false)
+    : m_gameObject(gameObject), m_spritePtr(nullptr), m_texturePtr(texture), m_drawCell(0, 0), m_width(0.0f), m_height(0.0f), m_flipX(false), m_flipY(false), m_rotation(0.0f)
 {
     SetTexture(texture);
 }
@@ -53,6 +53,7 @@ void SpriteRendererComponent::SetTexture(const Texture2D* texture)
     }
 }
 
+
 const Sprite* SpriteRendererComponent::GetSprite() const
 {
     return m_spritePtr;
@@ -82,42 +83,32 @@ void SpriteRendererComponent::Update()
 
 void SpriteRendererComponent::Render() const
 {
+    const Texture2D* texture = nullptr;
+    glm::ivec2 cellSize(0, 0);
+
     if (m_spritePtr) {
-        const glm::vec2& pos = m_gameObject->GetWorldPosition();
-
-        glm::vec2 middlePoint = pos;
-        middlePoint.x -= m_width / 2.0f;
-        middlePoint.y -= m_height / 2.0f;
-
-        const glm::ivec2& cellSize = m_spritePtr->cellSize;
-
-        Renderer::GetInstance().RenderTexture(m_spritePtr->GetTexture(), // Passing sprite's texture pointer
-            middlePoint,                         // Position
-            m_drawCell,                // Source location
-            cellSize,                    // Cell size
-            m_width,         // Width (for scaling)
-            m_height,        // Height (for scaling)
-            m_flipX,                     // FlipX
-            m_flipY
-        );
+        texture = &m_spritePtr->GetTexture();
+        cellSize = m_spritePtr->cellSize;
     }
-    else if (m_texturePtr)
-    {
+    else if (m_texturePtr) {
+        texture = m_texturePtr;
+        cellSize = texture->GetSize();
+    }
+
+    if (texture) {
         const glm::vec2& pos = m_gameObject->GetWorldPosition();
+        const glm::vec2 middlePoint = pos - glm::vec2(m_width / 2.0f, m_height / 2.0f);
+        float rotation = m_gameObject->GetRotation();
 
-        glm::vec2 middlePoint = pos;
-        middlePoint.x -= m_width / 2.0f;
-        middlePoint.y -= m_height / 2.0f;
-
-        const glm::ivec2 size = m_texturePtr->GetSize();
-        Renderer::GetInstance().RenderTexture(*m_texturePtr,
+        Renderer::GetInstance().RenderTexture(*texture,
             middlePoint,
-            m_drawCell, 
-            size,
+            m_drawCell,
+            cellSize,
             m_width,
             m_height,
             m_flipX,
-            m_flipY
+            m_flipY,
+            rotation
         );
     }
 }

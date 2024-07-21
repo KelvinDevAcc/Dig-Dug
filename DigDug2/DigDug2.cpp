@@ -11,6 +11,7 @@
 #include <random>
 
 #include "AnimationComponent.h"
+#include "EnemyComponent.h"
 #include "FPSCounterComponent.h"
 #include "GameData.h"
 #include "HighScores.h"
@@ -76,8 +77,8 @@ void loadResources()
     dae::ResourceManager::LoadTexture("walkTroughUp", "spritesheetDigging.png", SDL_Rect(64, 0, 16, 16));
     dae::ResourceManager::LoadTexture("walkTroughLeft", "spritesheetDigging.png", SDL_Rect(80, 0, 16, 16));
 
-    dae::ResourceManager::LoadTexture("ArrowLine", "SpriteSheetFinal.png", SDL_Rect(384, 144, 32, 16));
-    dae::ResourceManager::LoadTexture("ArrowEnd", "SpriteSheetFinal.png", SDL_Rect(352, 144, 32, 16));
+    dae::ResourceManager::LoadTexture("PumpLine", "SpriteSheetFinal.png", SDL_Rect(384, 144, 32, 16));
+    dae::ResourceManager::LoadTexture("PumpEnd", "SpriteSheetFinal.png", SDL_Rect(352, 144, 32, 16));
 
 
     dae::ResourceManager::LoadSprite("Player",
@@ -90,10 +91,24 @@ void loadResources()
             { "Walk_Left", { { { 4, 0 }, { 5, 0 } }, 4 } },
             { "Walk_Up", { { { 2, 0 }, { 3, 0 } }, 4 } },
             { "Walk_Down", { { { 6, 0 }, { 7,0 } }, 4 } },
-            { "Dying", { { { 0, 7 }, { 1, 7 }, { 2, 7 }, { 3, 7 } }, 1 } },
+            { "Dying", { { { 0, 7 }, { 1, 7 }, { 2, 7 }, { 3, 7 } }, 2 } },
             { "Attacking", { { { 1, 1 } }, 1 } },
             { "Victory", { { { 3, 1 }, { 1, 0 }}, 3 } }
 
+        });
+
+    dae::ResourceManager::LoadSprite("enemy",
+        "SpriteSheetFinal.png",
+        7,  // rowCount
+        14,   // colCount
+        {
+            { "Idle", { { { 1, 0 }}, 1 } },
+            { "Walk_Right", { {  { 0, 5 }, { 1, 5 } }, 1 } },
+            { "Walk_Left", { {  { 0, 5 }, { 1, 5 } }, 1 } },
+            { "Walk_Up", { { { 0, 5 }, { 1, 5 } }, 1 } },
+            { "Walk_Down", { { { 0, 5 }, { 1, 5 } }, 1 } },
+            { "Dying", { { { 4, 6 }, { 5, 6 }, { 6, 6 }, { 7, 6 } }, 4 } },
+            { "Hovering", { { { 2, 6 }, { 3, 6 }}, 1 } }
         });
 }
 
@@ -670,7 +685,7 @@ void GameScene(dae::Scene* scene)
         score = GameData::GetInstance().GetPlayerData(0).score;
     else
         score = 0;
-
+    
     auto Character1points = std::make_unique<dae::PointComponent>(score);
     PlayerObject->AddComponent(std::move(Character1points));
 
@@ -687,7 +702,6 @@ void GameScene(dae::Scene* scene)
     PlayerObject->AddComponent(std::move(spriteRenderComponent));
 
     auto animationComponent = std::make_unique<dae::AnimationComponent>(PlayerObject.get(), PlayerObject->GetComponent<dae::SpriteRendererComponent>(), "Idle");
-    //animationComponent->Play("Walk_Right", true);
     PlayerObject->AddComponent(std::move(animationComponent));
     PlayerObject->SetLocalPosition(glm::vec3(100, 100, 0.0f));
 
@@ -703,8 +717,57 @@ void GameScene(dae::Scene* scene)
 
     scene->Add(std::move(PlayerObject));
 
+   
+    auto SaugeObject = std::make_unique<dae::GameObject>();
+
+    auto spriterenderComponent2 = std::make_unique<dae::SpriteRendererComponent>(SaugeObject.get(), dae::ResourceManager::GetSprite("enemy"));
+    spriterenderComponent2->SetDimensions(40, 40);
+    SaugeObject->AddComponent(std::move(spriterenderComponent2));
+
+    auto animationComponent2 = std::make_unique<dae::AnimationComponent>(SaugeObject.get(), SaugeObject->GetComponent<dae::SpriteRendererComponent>(), "Idle");
+    animationComponent2->Play("Hovering", true);
+    SaugeObject->AddComponent(std::move(animationComponent2));
+    SaugeObject->SetLocalPosition(glm::vec3(600, 300, 0.0f));
+
+    auto hitBox2 = std::make_unique<HitBox>(glm::vec2(40, 40));
+    hitBox2->SetGameObject(SaugeObject.get());
+    SaugeObject->AddComponent(std::move(hitBox2));
+
+    auto enemyComponent = std::make_unique<game::EnemyComponent>(SaugeObject.get(), scene);
+    SaugeObject->AddComponent(std::move(enemyComponent));
+
+    dae::SceneData::GetInstance().AddGameObject(SaugeObject.get(), dae::GameObjectType::enemy);
+
+    scene->Add(std::move(SaugeObject));
+
+
+
+    auto SaugeObject2 = std::make_unique<dae::GameObject>();
+
+    auto spriterenderComponent3 = std::make_unique<dae::SpriteRendererComponent>(SaugeObject2.get(), dae::ResourceManager::GetSprite("enemy"));
+    spriterenderComponent3->SetDimensions(40, 40);
+    SaugeObject2->AddComponent(std::move(spriterenderComponent3));
+
+    auto animationComponent3 = std::make_unique<dae::AnimationComponent>(SaugeObject2.get(), SaugeObject2->GetComponent<dae::SpriteRendererComponent>(), "Idle");
+    animationComponent3->Play("Hovering", true);
+    SaugeObject2->AddComponent(std::move(animationComponent3));
+    SaugeObject2->SetLocalPosition(glm::vec3(800, 300, 0.0f));
+
+    auto hitBox3 = std::make_unique<HitBox>(glm::vec2(40, 40));
+    hitBox3->SetGameObject(SaugeObject2.get());
+    SaugeObject2->AddComponent(std::move(hitBox3));
+
+    auto enemyComponent2 = std::make_unique<game::EnemyComponent>(SaugeObject2.get(), scene);
+    SaugeObject2->AddComponent(std::move(enemyComponent2));
+
+    dae::SceneData::GetInstance().AddGameObject(SaugeObject2.get(), dae::GameObjectType::enemy);
+
+    scene->Add(std::move(SaugeObject2));
+
     HandlePlayerInput(inputManager, 0);
     LoadUi(scene);
+
+
 }
 
 void GameScene2(dae::Scene* scene)

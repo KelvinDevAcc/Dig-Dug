@@ -1,11 +1,10 @@
 #pragma once
 #include "AnimationComponent.h"
-#include "Arrow.h"
 #include "GameObject.h"
 #include "HealthComponent.h"
 #include "LoadMap.h"
-#include "PlayerState.h" 
 #include "PointComponent.h"
+#include "Pump.h"
 
 namespace game
 {
@@ -22,7 +21,6 @@ namespace game
 
     class Player : public dae::Component
     {
-
         friend class MovingState;
         friend class AttackingState;
         friend class IdleState;
@@ -30,8 +28,6 @@ namespace game
 
     public:
         Player(dae::GameObject* gameObject);
-
-
         ~Player() override = default;
 
         Player(const Player&) = delete;
@@ -39,26 +35,22 @@ namespace game
         Player& operator=(const Player&) = delete;
         Player& operator=(Player&&) noexcept = delete;
 
-
         void Update() override;
         void Render() const override;
-        void Move(float deltaX, float deltaY) const;
+        void Move(float deltaX, float deltaY);
         void Die();
         void ReSpawn();
         void Idle();
-
-        void ShootArrow();
+        void ShootPump();
 
         dae::GameObject* GetParentObject() const { return m_GameObject; }
 
         std::type_info const& GetComponentType() const override { return typeid(Player); }
 
-
         float m_deltaY{ 0 };
         float m_deltaX{ 0 };
 
     private:
-
         dae::GameObject* m_GameObject;
         glm::vec3 m_startPosition;
         float m_timeSinceLastAction;
@@ -68,20 +60,22 @@ namespace game
         dae::HealthComponent* m_healthComponent;
         dae::PointComponent* m_pointComponent;
 
-        void MoveHorizontally(float deltaX) const;
-        void MoveVertically(float deltaY) const;
+        void MoveHorizontally(float deltaX);
+        void MoveVertically(float deltaY);
         void SetAnimationState(AnimationState state);
-        void UpdateArrowTimer(float deltaTime);
-        void AddArrowPart();
-        void UpdateArrowTextures() const;
+        void UpdatePumpTimer(float deltaTime);
+        void AddPumpPart();
+        void UpdatePumpTextures() const;
+        std::unique_ptr<Pump> GetInactivePump();
 
-        float m_timeSinceLastArrowPart{ 0.0f };
-        float m_arrowPartInterval{ 0.1f };
+        float m_timeSinceLastPumpPart{ 0.0f };
+        float m_pumpPartInterval{ 0.1f };
 
-        int m_arrowPartCount;
+        int m_pumpPartCount;
         AnimationState m_CurrentAnimationState;
-        std::vector<std::unique_ptr<Arrow>> m_arrows;
-        glm::vec3 arrowDirection{ 1,0,0 };
+        std::vector<std::unique_ptr<Pump>> m_pumps;
+        std::vector<std::unique_ptr<Pump>> m_pumpPool;
+        glm::vec3 pumpDirection{ 1, 0, 0 };
+        size_t m_maxPumps;
     };
 }
-

@@ -24,7 +24,10 @@
     <ClCompile Include="PlayerState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Arrow.cpp">
+    <ClCompile Include="Pump.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EnemyComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -35,7 +38,10 @@
     <ClInclude Include="PlayerState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Arrow.h">
+    <ClInclude Include="Pump.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EnemyComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

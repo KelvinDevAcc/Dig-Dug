@@ -21,7 +21,7 @@ namespace dae
 		void RenderTexture(const Texture2D& texture, float x, float y, float width, float height) const;
 		void RenderTexture(const Texture2D& texture, float pos_x, float y, float width, float height, float rotation_angle) const;
 		void RenderTexture(const Texture2D& texture, float x, float y, const glm::vec2& cellSize, int pixelsPerUnit) const;
-		static void RenderTexture(const Texture2D& texture, glm::vec2 drawLocation, glm::vec2 srcLocation, glm::ivec2 cellSize, float width, float height, bool flipX, bool flipY);
+		static void RenderTexture(const Texture2D& texture, glm::vec2 drawLocation, glm::vec2 srcLocation, glm::ivec2 cellSize, float width, float height, bool flipX, bool flipY, float rotation = 0);
 		void RenderRect(const SDL_Rect& rect, SDL_Color color, bool filled) const;
 
 		void RenderLine(float x1, float y1, float x2, float y2, const SDL_Color& color) const
