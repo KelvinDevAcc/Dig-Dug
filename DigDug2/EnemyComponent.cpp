@@ -28,6 +28,7 @@ namespace game {
             // Check if the delay has elapsed
             if (m_deathTimer <= 0.0f) {
                 // Remove the enemy from the scene
+                dae::SceneData::GetInstance().RemoveGameObject(m_owner, dae::GameObjectType::enemy);
                 m_scene->Remove(m_owner);
             }
         }
@@ -64,6 +65,7 @@ void EnemyComponent::Die()
     // Play death animation
     m_animationComponent->Play("Dying");
 
+        
     // Set a delay before removing the enemy
     const float totalTime = 2.f;
 

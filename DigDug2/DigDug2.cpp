@@ -93,7 +93,8 @@ void loadResources()
             { "Walk_Down", { { { 6, 0 }, { 7,0 } }, 4 } },
             { "Dying", { { { 0, 7 }, { 1, 7 }, { 2, 7 }, { 3, 7 } }, 2 } },
             { "Attacking", { { { 1, 1 } }, 1 } },
-            { "Victory", { { { 3, 1 }, { 1, 0 }}, 3 } }
+            { "Victory", { { { 3, 1 }, { 1, 0 }}, 3 } },
+            { "digging", { { { 0, 1 }, { 1, 1 }}, 3 } }
 
         });
 
@@ -655,13 +656,13 @@ void GameScene(dae::Scene* scene)
     fpsCounterObject->AddComponent(std::move(fpsCounterComponent));
     fpsCounterObject->SetLocalPosition(glm::vec3(100.f, 20.f, 0.0f));
     scene->Add(std::move(fpsCounterObject));
-	/*constexpr glm::vec3 startPos(300, 50, 0.0f);
+	constexpr glm::vec3 startPos(300, 20, 0.0f);
     constexpr glm::vec2 mapScale(40, 40);
 
     const LoadMap loadMap("../Data/maps/map1.map", "../Data/maps/map1.ingmap");
     SceneHelpers::LoadMapIntoScene(loadMap, scene, startPos, mapScale);
 
-    SceneHelpers::LoadIngMapIntoScene(loadMap, scene, startPos, mapScale);*/
+    SceneHelpers::LoadTunnelMapIntoScene(loadMap, scene, startPos, mapScale);
    
 
     //auto lifeSprite = std::make_unique<dae::GameObject>();
@@ -703,7 +704,7 @@ void GameScene(dae::Scene* scene)
 
     auto animationComponent = std::make_unique<dae::AnimationComponent>(PlayerObject.get(), PlayerObject->GetComponent<dae::SpriteRendererComponent>(), "Idle");
     PlayerObject->AddComponent(std::move(animationComponent));
-    PlayerObject->SetLocalPosition(glm::vec3(100, 100, 0.0f));
+    PlayerObject->SetLocalPosition(glm::vec3(320, 70, 1.0f));
 
     auto hitBox = std::make_unique<HitBox>(glm::vec2(40, 40));
     hitBox->SetGameObject(PlayerObject.get());
@@ -718,7 +719,7 @@ void GameScene(dae::Scene* scene)
     scene->Add(std::move(PlayerObject));
 
    
-    auto SaugeObject = std::make_unique<dae::GameObject>();
+  /*  auto SaugeObject = std::make_unique<dae::GameObject>();
 
     auto spriterenderComponent2 = std::make_unique<dae::SpriteRendererComponent>(SaugeObject.get(), dae::ResourceManager::GetSprite("enemy"));
     spriterenderComponent2->SetDimensions(40, 40);
@@ -762,7 +763,7 @@ void GameScene(dae::Scene* scene)
 
     dae::SceneData::GetInstance().AddGameObject(SaugeObject2.get(), dae::GameObjectType::enemy);
 
-    scene->Add(std::move(SaugeObject2));
+    scene->Add(std::move(SaugeObject2));*/
 
     HandlePlayerInput(inputManager, 0);
     LoadUi(scene);
@@ -791,7 +792,7 @@ void GameScene2(dae::Scene* scene)
     const LoadMap loadMap("../Data/maps/map1.map", "../Data/maps/map1.ingmap");
     SceneHelpers::LoadMapIntoScene(loadMap, scene, startPos, mapScale);
 
-    SceneHelpers::LoadIngMapIntoScene(loadMap, scene, startPos, mapScale);
+    SceneHelpers::LoadTunnelMapIntoScene(loadMap, scene, startPos, mapScale);
 
     auto lifeSprite = std::make_unique<dae::GameObject>();
     auto spriteComponent = std::make_unique<dae::SpriteRendererComponent>(lifeSprite.get(), dae::ResourceManager::GetInstance().GetTexture("ArrowLine"));

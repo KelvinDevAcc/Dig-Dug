@@ -242,6 +242,7 @@
     <ClInclude Include="Subject.h" />
     <ClInclude Include="TextComponent.h" />
     <ClInclude Include="Texture2D.h" />
+    <ClInclude Include="TunnelType.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="Tween.h" />
     <ClInclude Include="TweenManager.h" />

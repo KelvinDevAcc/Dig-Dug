@@ -27,7 +27,8 @@ Pump::Pump(dae::GameObject* owner, const glm::vec3& localPosition, const glm::ve
     PumpObject->AddComponent(std::move(spriteRenderComponent));
 
     // Create and add hitbox component
-    auto hitBox = std::make_unique<HitBox>(glm::vec2(32, 16));
+    glm::vec2 hitBoxSize = (m_direction.y == 1 || m_direction.y == -1) ? glm::vec2(16, 32) : glm::vec2(32, 16);
+    auto hitBox = std::make_unique<HitBox>(hitBoxSize);
     hitBox->SetGameObject(PumpObject.get());  // Correctly set the GameObject for the hitbox
     m_hitBox = hitBox.get();
     PumpObject->AddComponent(std::move(hitBox));

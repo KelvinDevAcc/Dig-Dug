@@ -136,7 +136,10 @@ namespace dae {
             return false;
             };
 
-        if (checkCollisionsWithObjects(m_floors)) return true;
+        if (checkCollisionsWithObjects(m_floors)) 
+            return true;
+        if (checkCollisionsWithObjects(m_WalkThrough)) 
+            return true;
         return false;
     }
 

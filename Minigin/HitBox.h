@@ -8,7 +8,7 @@
 class HitBox final : public dae::Component {
 public:
     HitBox(const glm::vec2& size)
-	    : m_position(0,0), m_size(size)
+        : m_position(0, 0), m_size(size)
     {
     }
 
@@ -30,20 +30,21 @@ public:
         };
     }
 
-
     bool IsColliding(const HitBox& other) const {
         const SDL_Rect rectA = GetRect();
         const SDL_Rect rectB = other.GetRect();
         return SDL_HasIntersection(&rectA, &rectB);
     }
 
-
     void SetPosition(const glm::vec2& position) {
         m_position = position;
     }
 
-    void Update() override
-	{
+    void SetSize(const glm::vec2& size) {
+        m_size = size;
+    }
+
+    void Update() override {
         if (const auto parent = GetGameObject()) {
             m_position = parent->GetWorldPosition();
         }
@@ -53,8 +54,7 @@ public:
         return typeid(HitBox);
     }
 
-    void Render() const override
-	{
+    void Render() const override {
         const SDL_Rect rect = GetRect();
         constexpr SDL_Color color = { 255, 0, 0, 255 }; // Red color for the hitbox
         dae::Renderer::GetInstance().RenderRect(rect, color, false);

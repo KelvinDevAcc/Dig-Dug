@@ -16,7 +16,8 @@ namespace game
         Walk_Up,
         Walk_Down,
         Attacking,
-        Dying
+        Dying,
+        Digging
     };
 
     class Player : public dae::Component

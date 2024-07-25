@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include "SceneHelpers.h"
+#include "TunnelType.h"
 
 LoadMap::LoadMap(const std::string& mapFilePath, const std::string& ingFilePath) {
     loadFromFile(mapFilePath, ingFilePath);
@@ -29,9 +30,11 @@ void LoadMap::loadFromFile(const std::string& mapFilePath, const std::string& in
 
     while (std::getline(ingFile, line)) {
         std::vector<char> row(line.begin(), line.end());
-        m_ingMap.push_back(row);
+        m_tunnelMap.push_back(row);
     }
     ingFile.close();
+
+    printMaps();
 }
 
 void LoadMap::printMap(const std::vector<std::vector<char>>& mapToPrint)
@@ -48,7 +51,7 @@ void LoadMap::printMaps() const {
     std::cout << "Map:" << std::endl;
     printMap(m_map);
     std::cout << "Ingredients Map:" << std::endl;
-    printMap(m_ingMap);
+    printMap(m_tunnelMap);
 }
 
 const std::vector<std::vector<char>>& LoadMap::getMap() const {
@@ -56,11 +59,6 @@ const std::vector<std::vector<char>>& LoadMap::getMap() const {
 }
 
 const std::vector<std::vector<char>>& LoadMap::getIngMap() const {
-    return m_ingMap;
+    return m_tunnelMap;
 }
-
-
-
-
-
 

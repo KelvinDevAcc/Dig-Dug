@@ -11,6 +11,8 @@ namespace dae {
         Player,
         enemyPlayers,
         enemy,
+        Dirt,
+        Rock,
     };
 
     class SceneData final : public Singleton<SceneData> {
