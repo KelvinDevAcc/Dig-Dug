@@ -25,6 +25,9 @@ namespace dae
         TextComponent& operator=(const TextComponent& other) = delete;
         TextComponent& operator=(TextComponent&& other) = delete;
 
+        int GetRenderOrder() const { return m_RenderOrder; }
+        void SetRenderOrder(int order) { m_RenderOrder = order; }
+
         std::type_info const& GetComponentType() const override { return typeid(TextComponent); }
 
     private:
@@ -34,5 +37,7 @@ namespace dae
         Font* m_Font{ nullptr };
         std::unique_ptr<Texture2D> m_TextTexture{};
         GameObject& m_GameObject;
+
+        int m_RenderOrder;
     };
 }

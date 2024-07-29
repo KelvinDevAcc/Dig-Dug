@@ -1,4 +1,7 @@
 #include "GameObject.h"
+
+#include <algorithm>
+
 #include "ResourceManager.h"
 #include "Renderer.h"
 
@@ -82,10 +85,10 @@ namespace dae
         SetPositionDirty();
     }
 
-    const glm::vec3& GameObject::GetWorldPosition()
+    const glm::vec3& GameObject::GetWorldPosition() const
     {
         if (m_positionIsDirty)
-            UpdateWorldPosition();
+            const_cast<GameObject*>(this)->UpdateWorldPosition();
         return m_worldPosition.GetPosition();
     }
 
@@ -119,14 +122,9 @@ namespace dae
 
     bool GameObject::IsChild(GameObject* potentialChild) const
     {
-        for (const auto child : m_children)
-        {
-            if (child == potentialChild || child->IsChild(potentialChild))
-            {
-                return true;
-            }
-        }
-        return false;
+        return std::ranges::any_of(m_children, [potentialChild](const GameObject* child) {
+            return child == potentialChild || child->IsChild(potentialChild);
+            });
     }
 
     void GameObject::SetPositionDirty() {

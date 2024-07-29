@@ -13,6 +13,7 @@ namespace dae {
         enemy,
         Dirt,
         Rock,
+        Empty
     };
 
     class SceneData final : public Singleton<SceneData> {
@@ -38,7 +39,7 @@ namespace dae {
         bool IsOnFloor(GameObject& player) const;
         bool isOnEnemy(GameObject& burgerPart) const;
 
-        bool CanEntityMove(float moveX, float moveY, GameObject& entity) const;
+        bool CanEntityMove(float moveX, float moveY, const GameObject& entity) const;
 
         static bool IsWithinBounds(float x, float y);
 

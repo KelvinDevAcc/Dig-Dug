@@ -10,19 +10,33 @@
 MoveCommand::MoveCommand(int playerNumber, float deltaX, float deltaY)
     : m_deltaX(deltaX), m_deltaY(deltaY)
 {
-    const std::vector<dae::GameObject*> players = dae::SceneData::GetInstance().GetPlayers();
-    const std::vector<dae::GameObject*> playerEnemys = dae::SceneData::GetInstance().GetenemyPlayers();
-    const size_t totalPlayers = players.size() + playerEnemys.size();
+    const auto& players = dae::SceneData::GetInstance().GetPlayers();
+    const auto& playerEnemies = dae::SceneData::GetInstance().GetenemyPlayers();
+    const size_t totalPlayers = players.size() + playerEnemies.size();
 
     if (playerNumber >= 0 && playerNumber < static_cast<int>(totalPlayers))
     {
-        if (playerNumber == 1 && !playerEnemys.empty())
+        if (playerNumber == 1 && !playerEnemies.empty())
         {
-            m_gameObject = playerEnemys[0];
+            m_gameObject = playerEnemies[0];
         }
         else if (playerNumber < static_cast<int>(players.size()))
         {
             m_gameObject = players[playerNumber];
+        }
+    }
+
+    // Ensure only one direction is prioritized
+    if (std::abs(m_deltaX) > 0 && std::abs(m_deltaY) > 0)
+    {
+        // Example: Prioritize horizontal movement
+        if (std::abs(m_deltaX) >= std::abs(m_deltaY))
+        {
+            m_deltaY = 0;
+        }
+        else
+        {
+            m_deltaX = 0;
         }
     }
 }
@@ -31,7 +45,7 @@ void MoveCommand::Execute()
 {
     if (m_gameObject)
     {
-	    if (const auto playerComponent = m_gameObject->GetComponent<game::Player>())
+        if (const auto playerComponent = m_gameObject->GetComponent<game::Player>())
         {
             playerComponent->Move(m_deltaX, m_deltaY);
         }
@@ -45,7 +59,6 @@ void MoveCommand::Execute()
         std::cerr << "Cannot execute MoveCommand: GameObject is null.\n";
     }
 }
-
 
 
 DamageCommand::DamageCommand(int playerNumber)

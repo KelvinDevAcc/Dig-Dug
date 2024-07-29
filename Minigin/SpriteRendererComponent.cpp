@@ -7,13 +7,13 @@
 using namespace dae;
 
 SpriteRendererComponent::SpriteRendererComponent(GameObject* gameObject, const Sprite* sprite)
-    : m_gameObject(gameObject), m_spritePtr(sprite), m_texturePtr(nullptr), m_drawCell(0, 0), m_width(0.0f), m_height(0.0f), m_flipX(false), m_flipY(false), m_rotation(0.0f)
+    : m_gameObject(gameObject), m_spritePtr(sprite), m_texturePtr(nullptr), m_drawCell(0, 0), m_width(0.0f), m_height(0.0f), m_flipX(false), m_flipY(false), m_rotation(0.0f), m_renderOrder(0), m_lastRenderOrder(0)
 {
     SetSprite(sprite);
 }
 
 SpriteRendererComponent::SpriteRendererComponent(GameObject* gameObject, const Texture2D* texture)
-    : m_gameObject(gameObject), m_spritePtr(nullptr), m_texturePtr(texture), m_drawCell(0, 0), m_width(0.0f), m_height(0.0f), m_flipX(false), m_flipY(false), m_rotation(0.0f)
+    : m_gameObject(gameObject), m_spritePtr(nullptr), m_texturePtr(texture), m_drawCell(0, 0), m_width(0.0f), m_height(0.0f), m_flipX(false), m_flipY(false), m_rotation(0.0f), m_renderOrder(0), m_lastRenderOrder(0)
 {
     SetTexture(texture);
 }

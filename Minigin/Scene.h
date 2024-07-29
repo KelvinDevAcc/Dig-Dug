@@ -12,9 +12,9 @@ namespace dae
     public:
         using ActivateCallback = std::function<void()>;
 
-        void Add(std::unique_ptr<GameObject> object);
-        void Remove(GameObject* object);
-        void RemoveAll();
+        void Add(std::unique_ptr<GameObject> object) const;
+        void Remove(GameObject* object) const;
+        void RemoveAll() const;
 
         void Update() const;
         void Render() const;
@@ -52,9 +52,15 @@ namespace dae
     private:
 
         std::string m_name;
-        std::vector<std::unique_ptr<GameObject>> m_objects{};
+        mutable std::vector<std::unique_ptr<GameObject>> m_objects{};
         sound_id m_backgroundMusicID{ 0 };
 
         ActivateCallback m_onActivateCallback;
+
+
+        mutable bool m_needsSorting = true; // Flag to track sorting status
+        mutable std::vector<GameObject*> m_sortedObjects;
+
+        void SortObjects() const;
     };
 }

@@ -96,7 +96,7 @@ namespace dae {
         return x >= minX && x < maxX && y >= minY && y < maxY;
     }
 
-    bool SceneData::CanEntityMove(float moveX, float moveY, GameObject& entity) const {
+    bool SceneData::CanEntityMove(float moveX, float moveY, const GameObject& entity) const {
         const glm::vec3 currentPosition = entity.GetWorldPosition();
         const glm::vec3 newPosition = currentPosition + glm::vec3(moveX, moveY, 0.0f);
 

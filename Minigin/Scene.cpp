@@ -3,17 +3,18 @@
 #include <string>
 #include "HitBox.h"
 #include "servicelocator.h"
+#include "SpriteRendererComponent.h"
 
 namespace dae
 {
     Scene::Scene(std::string name) : m_name(std::move(name)) {}
 
-    void Scene::Add(std::unique_ptr<GameObject> object)
+    void Scene::Add(std::unique_ptr<GameObject> object) const
     {
         m_objects.push_back(std::move(object));
     }
 
-    void Scene::Remove(GameObject* object)
+    void Scene::Remove(GameObject* object) const
     {
         m_objects.erase(std::ranges::remove_if(m_objects,
                                                [object](const std::unique_ptr<GameObject>& ptr)
@@ -27,7 +28,7 @@ namespace dae
                                                }).begin(), m_objects.end());
     }
 
-    void Scene::RemoveAll()
+    void Scene::RemoveAll() const
     {
         for (const auto& object : m_objects)
         {
@@ -49,11 +50,22 @@ namespace dae
                 std::cerr << "Null object found in Scene::Update\n";
             }
         }
+
+        if (m_sortedObjects.size() < m_objects.size() )
+        {
+            m_needsSorting = true;
+        }
     }
 
     void Scene::Render() const
     {
-        for (const auto& object : m_objects)
+        if (m_needsSorting)
+        {
+            SortObjects();
+            m_needsSorting = false;
+        }
+
+        for (const auto& object : m_sortedObjects)
         {
             object->Render();
         }
@@ -92,5 +104,22 @@ namespace dae
             //soundSystem.StopPlaying(m_backgroundMusicID);
             //m_backgroundMusicID = 0; // Clear the stored background music ID
         }
+    }
+
+    void Scene::SortObjects() const
+    {
+        // Extract raw pointers from unique_ptrs
+        m_sortedObjects.clear();
+        m_sortedObjects.reserve(m_objects.size());
+        for (const auto& obj : m_objects)
+        {
+            m_sortedObjects.push_back(obj.get());
+        }
+
+        // Sort raw pointers by their zIndex (z-coordinate in this case)
+        std::ranges::sort(m_sortedObjects,
+            [](const GameObject* a, const GameObject* b) {
+                return a->GetWorldPosition().z < b->GetWorldPosition().z;
+            });
     }
 }

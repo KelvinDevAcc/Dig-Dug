@@ -10,11 +10,11 @@
 #include "Texture2D.h"
 
 dae::TextComponent::TextComponent(std::string text, dae::Font* font, const SDL_Color& color, dae::GameObject& gameObject)
-    : m_NeedsUpdate(true)
-    , m_TextColor(color)
-    , m_Text(std::move(text))
-    , m_Font(font)
-    , m_GameObject(gameObject)
+	: m_NeedsUpdate(true)
+	  , m_TextColor(color)
+	  , m_Text(std::move(text))
+	  , m_Font(font)
+	  , m_GameObject(gameObject), m_RenderOrder(0)
 {
 }
 

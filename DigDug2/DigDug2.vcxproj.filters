@@ -30,6 +30,12 @@
     <ClCompile Include="EnemyComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Pooka.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PookaState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Player.h">
@@ -42,6 +48,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="EnemyComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Pooka.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PookaState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

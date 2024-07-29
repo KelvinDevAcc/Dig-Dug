@@ -37,6 +37,10 @@ void SceneHelpers::CreateWalkThough(dae::Scene* scene, float x, float y, glm::ve
     CreateGameObject(scene, textureName, x, y, scale, dae::GameObjectType::WalkThrough);
 }
 
+void SceneHelpers::CreateEmpty(dae::Scene* scene, float x, float y, glm::vec2 scale, const std::string& textureName) {
+    CreateGameObject(scene, textureName, x, y, scale, dae::GameObjectType::Empty);
+}
+
 
 
 
@@ -48,13 +52,32 @@ void SceneHelpers::LoadMapIntoScene(const LoadMap& loadMap, dae::Scene* scene, c
     s_MaxCoordinates = { startPos.x, startPos.y };
     s_CellSize = scale;
 
-    const std::unordered_map<char, std::string> tileToFloorType = {
-        {'v', "sky"}, {'#', "skyFloor"}, {'^', "floorblock01"}, {'|', "floorblock02"}, {'a', "floorblock021"},
-        {'s', "floorblock022"}, {'d', "floorblock023"}, {'f', "floorblock024"}, {'g', "floorblock025"},
-        {'h', "floorblock026"}, {'1', "floorblock031"}, {'2', "floorblock032"}, {'3', "floorblock033"},
-        {'4', "floorblock034"}, {'5', "floorblock035"}, {'6', "floorblock036"}, {'_', "floorblock03"},
-        {'7', "floorblock041"}, {'8', "floorblock042"}, {'9', "floorblock043"}, {'0', "floorblock044"},
-        {'-', "floorblock045"}, {'=', "floorblock046"}, {'u', "floorblock04"}
+    // Map tile characters to their corresponding texture names
+    const std::unordered_map<char, std::string> tileToTextureName = {
+        {'v', "sky"},      // Treat 'sky' tile as Empty
+        {'#', "skyFloor"},
+        {'^', "floorblock01"},
+        {'|', "floorblock02"},
+        {'a', "floorblock021"},
+        {'s', "floorblock022"},
+        {'d', "floorblock023"},
+        {'f', "floorblock024"},
+        {'g', "floorblock025"},
+        {'h', "floorblock026"},
+        {'1', "floorblock031"},
+        {'2', "floorblock032"},
+        {'3', "floorblock033"},
+        {'4', "floorblock034"},
+        {'5', "floorblock035"},
+        {'6', "floorblock036"},
+        {'_', "floorblock03"},
+        {'7', "floorblock041"},
+        {'8', "floorblock042"},
+        {'9', "floorblock043"},
+        {'0', "floorblock044"},
+        {'-', "floorblock045"},
+        {'=', "floorblock046"},
+        {'u', "floorblock04"}
     };
 
     const float startX = startPos.x;
@@ -73,13 +96,29 @@ void SceneHelpers::LoadMapIntoScene(const LoadMap& loadMap, dae::Scene* scene, c
             if (posY > s_MaxCoordinates.y)
                 s_MaxCoordinates.y = posY;
 
-            auto it = tileToFloorType.find(tile);
-            if (it != tileToFloorType.end()) {
-                CreateFloor(scene, posX, posY, scale, it->second);
+            auto it = tileToTextureName.find(tile);
+            if (it != tileToTextureName.end()) {
+                const std::string& textureName = it->second;
+
+                // Handle the tile type based on the texture name
+                if (textureName =="sky") {
+                    // Skip creating an object for Empty tiles (sky)
+                    CreateEmpty(scene, posX, posY, scale, textureName);
+                    continue;
+                }
+
+                // Create a floor or walkthrough object based on the tile texture
+                if (textureName == "skyFloor") {
+                    CreateFloor(scene, posX, posY, scale, textureName);
+                }
+                else {
+                    CreateFloor(scene, posX, posY, scale, textureName);  // Adjust if needed
+                }
             }
         }
     }
 }
+
 
 void SceneHelpers::LoadTunnelMapIntoScene(const LoadMap& loadMap, dae::Scene* scene, const glm::vec3& startPos, glm::vec2 scale) {
     const auto& map = loadMap.getIngMap();
@@ -160,6 +199,16 @@ TunnelType SceneHelpers::GetTileTypeAtPosition(const glm::vec3& position) {
         return TunnelType::walkTroughLeft;
     case '_':
         return TunnelType::Empty;
+    case 's':
+        return  TunnelType::sky;
+    case 'Y':
+        return TunnelType::UpRight;
+    case 'P':
+        return TunnelType::UpLeft;
+    case 'R':
+        return TunnelType::BottemRight;
+    case  'L':
+        return TunnelType::Bottomleft;
     default:
         return TunnelType::Empty;
     }
@@ -204,6 +253,24 @@ void SceneHelpers::SetTileTypeAtPosition(const glm::vec3& position, TunnelType n
     case TunnelType::rightEnd:
         s_tunnelMap[gridY][gridX] = '>';
         CreateWalkThough(m_scene, 300 + gridX * GetCellSize().x, 20 + gridY * GetCellSize().y, glm::vec2(GetCellSize().x, GetCellSize().y), "rightEnd");
+        break;
+    case TunnelType::sky:
+        break;
+    case TunnelType::UpRight:
+        s_tunnelMap[gridY][gridX] = 'Y';
+        CreateWalkThough(m_scene, 300 + gridX * GetCellSize().x, 20 + gridY * GetCellSize().y, glm::vec2(GetCellSize().x, GetCellSize().y), "UpRight");
+        break;
+    case TunnelType::UpLeft:
+        s_tunnelMap[gridY][gridX] = 'P';
+        CreateWalkThough(m_scene, 300 + gridX * GetCellSize().x, 20 + gridY * GetCellSize().y, glm::vec2(GetCellSize().x, GetCellSize().y), "UpLeft");
+        break;
+    case TunnelType::BottemRight:
+        s_tunnelMap[gridY][gridX] = 'R';
+        CreateWalkThough(m_scene, 300 + gridX * GetCellSize().x, 20 + gridY * GetCellSize().y, glm::vec2(GetCellSize().x, GetCellSize().y), "BottemRight");
+        break;
+    case TunnelType::Bottomleft:
+        s_tunnelMap[gridY][gridX] = 'L';
+        CreateWalkThough(m_scene, 300 + gridX * GetCellSize().x, 20 + gridY * GetCellSize().y, glm::vec2(GetCellSize().x, GetCellSize().y), "BottomLeft");
         break;
     default:
         break;

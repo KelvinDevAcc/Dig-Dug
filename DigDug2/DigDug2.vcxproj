@@ -181,6 +181,8 @@ xcopy "$(SolutionDir)3rdParty\SDL2_mixer\lib\$(PlatformTarget)\*.dll" "$(OutputP
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Pooka.cpp" />
+    <ClCompile Include="PookaState.cpp" />
     <ClCompile Include="Pump.cpp" />
     <ClCompile Include="DigDug2.cpp" />
     <ClCompile Include="EnemyComponent.cpp" />
@@ -188,6 +190,8 @@ xcopy "$(SolutionDir)3rdParty\SDL2_mixer\lib\$(PlatformTarget)\*.dll" "$(OutputP
     <ClCompile Include="PlayerState.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Pooka.h" />
+    <ClInclude Include="PookaState.h" />
     <ClInclude Include="Pump.h" />
     <ClInclude Include="EnemyComponent.h" />
     <ClInclude Include="Player.h" />

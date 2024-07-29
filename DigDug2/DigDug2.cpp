@@ -76,6 +76,11 @@ void loadResources()
     dae::ResourceManager::LoadTexture("rightEnd", "spritesheetDigging.png", SDL_Rect(48, 0, 16, 16));
     dae::ResourceManager::LoadTexture("walkTroughUp", "spritesheetDigging.png", SDL_Rect(64, 0, 16, 16));
     dae::ResourceManager::LoadTexture("walkTroughLeft", "spritesheetDigging.png", SDL_Rect(80, 0, 16, 16));
+    dae::ResourceManager::LoadTexture("UpRight", "spritesheetDigging.png", SDL_Rect(96, 0, 16, 16));
+    dae::ResourceManager::LoadTexture("UpLeft", "spritesheetDigging.png", SDL_Rect(112, 0, 16, 16));
+    dae::ResourceManager::LoadTexture("BottemRight", "spritesheetDigging.png", SDL_Rect(128, 0, 16, 16));
+    dae::ResourceManager::LoadTexture("BottomLeft", "spritesheetDigging.png", SDL_Rect(144, 0, 16, 16));
+
 
     dae::ResourceManager::LoadTexture("PumpLine", "SpriteSheetFinal.png", SDL_Rect(384, 144, 32, 16));
     dae::ResourceManager::LoadTexture("PumpEnd", "SpriteSheetFinal.png", SDL_Rect(352, 144, 32, 16));
@@ -94,7 +99,7 @@ void loadResources()
             { "Dying", { { { 0, 7 }, { 1, 7 }, { 2, 7 }, { 3, 7 } }, 2 } },
             { "Attacking", { { { 1, 1 } }, 1 } },
             { "Victory", { { { 3, 1 }, { 1, 0 }}, 3 } },
-            { "digging", { { { 0, 1 }, { 1, 1 }}, 3 } }
+            { "Digging", { { { 0, 1 }, { 1, 1 }}, 3 } }
 
         });
 
@@ -700,11 +705,12 @@ void GameScene(dae::Scene* scene)
 
     auto spriteRenderComponent = std::make_unique<dae::SpriteRendererComponent>(PlayerObject.get(), dae::ResourceManager::GetSprite("Player"));
     spriteRenderComponent->SetDimensions(40, 40);
+    spriteRenderComponent->SetRenderOrder(1);
     PlayerObject->AddComponent(std::move(spriteRenderComponent));
 
     auto animationComponent = std::make_unique<dae::AnimationComponent>(PlayerObject.get(), PlayerObject->GetComponent<dae::SpriteRendererComponent>(), "Idle");
     PlayerObject->AddComponent(std::move(animationComponent));
-    PlayerObject->SetLocalPosition(glm::vec3(320, 70, 1.0f));
+    PlayerObject->SetLocalPosition(glm::vec3(580, 380, 1.0f));
 
     auto hitBox = std::make_unique<HitBox>(glm::vec2(40, 40));
     hitBox->SetGameObject(PlayerObject.get());
@@ -719,27 +725,27 @@ void GameScene(dae::Scene* scene)
     scene->Add(std::move(PlayerObject));
 
    
-  /*  auto SaugeObject = std::make_unique<dae::GameObject>();
+    auto PookaObject = std::make_unique<dae::GameObject>();
 
-    auto spriterenderComponent2 = std::make_unique<dae::SpriteRendererComponent>(SaugeObject.get(), dae::ResourceManager::GetSprite("enemy"));
+    auto spriterenderComponent2 = std::make_unique<dae::SpriteRendererComponent>(PookaObject.get(), dae::ResourceManager::GetSprite("enemy"));
     spriterenderComponent2->SetDimensions(40, 40);
-    SaugeObject->AddComponent(std::move(spriterenderComponent2));
+    PookaObject->AddComponent(std::move(spriterenderComponent2));
 
-    auto animationComponent2 = std::make_unique<dae::AnimationComponent>(SaugeObject.get(), SaugeObject->GetComponent<dae::SpriteRendererComponent>(), "Idle");
-    animationComponent2->Play("Hovering", true);
-    SaugeObject->AddComponent(std::move(animationComponent2));
-    SaugeObject->SetLocalPosition(glm::vec3(600, 300, 0.0f));
+    auto animationComponent2 = std::make_unique<dae::AnimationComponent>(PookaObject.get(), PookaObject->GetComponent<dae::SpriteRendererComponent>(), "Idle");
+    //animationComponent2->Play("Walk_Right", true);
+    PookaObject->AddComponent(std::move(animationComponent2));
+    PookaObject->SetLocalPosition(glm::vec3(380, 260, 0.0f));
 
     auto hitBox2 = std::make_unique<HitBox>(glm::vec2(40, 40));
-    hitBox2->SetGameObject(SaugeObject.get());
-    SaugeObject->AddComponent(std::move(hitBox2));
+    hitBox2->SetGameObject(PookaObject.get());
+    PookaObject->AddComponent(std::move(hitBox2));
 
-    auto enemyComponent = std::make_unique<game::EnemyComponent>(SaugeObject.get(), scene);
-    SaugeObject->AddComponent(std::move(enemyComponent));
+    auto enemyComponent = std::make_unique<game::EnemyComponent>(PookaObject.get(), scene);
+    PookaObject->AddComponent(std::move(enemyComponent));
 
-    dae::SceneData::GetInstance().AddGameObject(SaugeObject.get(), dae::GameObjectType::enemy);
+    dae::SceneData::GetInstance().AddGameObject(PookaObject.get(), dae::GameObjectType::enemy);
 
-    scene->Add(std::move(SaugeObject));
+    scene->Add(std::move(PookaObject));
 
 
 
@@ -750,9 +756,9 @@ void GameScene(dae::Scene* scene)
     SaugeObject2->AddComponent(std::move(spriterenderComponent3));
 
     auto animationComponent3 = std::make_unique<dae::AnimationComponent>(SaugeObject2.get(), SaugeObject2->GetComponent<dae::SpriteRendererComponent>(), "Idle");
-    animationComponent3->Play("Hovering", true);
+    animationComponent3->Play("Walk_Right", true);
     SaugeObject2->AddComponent(std::move(animationComponent3));
-    SaugeObject2->SetLocalPosition(glm::vec3(800, 300, 0.0f));
+    SaugeObject2->SetLocalPosition(glm::vec3(820, 180, 0.0f));
 
     auto hitBox3 = std::make_unique<HitBox>(glm::vec2(40, 40));
     hitBox3->SetGameObject(SaugeObject2.get());
@@ -763,7 +769,7 @@ void GameScene(dae::Scene* scene)
 
     dae::SceneData::GetInstance().AddGameObject(SaugeObject2.get(), dae::GameObjectType::enemy);
 
-    scene->Add(std::move(SaugeObject2));*/
+    scene->Add(std::move(SaugeObject2));
 
     HandlePlayerInput(inputManager, 0);
     LoadUi(scene);

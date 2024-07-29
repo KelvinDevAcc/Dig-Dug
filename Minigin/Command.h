@@ -2,7 +2,6 @@
 #include "GameObject.h"
 #include "HealthComponent.h"
 #include "MenuComponent.h"
-#include "SceneManager.h"
 #include "SelectNameComponent.h"
 #include "sound_system.h"
 

@@ -25,6 +25,12 @@ namespace dae
 
         void SetFlip(bool flipX, bool flipY);
 
+        void SetRenderOrder(int renderOrder) { m_renderOrder = renderOrder; }
+        int GetRenderOrder() const { return m_renderOrder; }
+
+        int GetLastRenderOrder() const { return m_lastRenderOrder; }
+        void UpdateLastRenderOrder(int newOrder) { m_lastRenderOrder = newOrder; }
+
         void Update() override;
         void Render() const override;
 
@@ -40,5 +46,7 @@ namespace dae
         bool m_flipX;
         bool m_flipY;
         float m_rotation;
+        int m_renderOrder;
+        int m_lastRenderOrder;
     };
 }
