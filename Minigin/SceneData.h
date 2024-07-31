@@ -34,10 +34,12 @@ namespace dae {
         std::vector<GameObject*> GetPlayers() const {return m_players;}
         std::vector<GameObject*> GetEnemies() const {return m_enemys;}
         std::vector<GameObject*> GetenemyPlayers() const {return m_enemyPlayers;}
+        const std::vector<GameObject*>& GetWalkThrough() const {return m_WalkThrough;}
         GameObject* GetFloorAt(const glm::vec3& position) const;
 
-        bool IsOnFloor(GameObject& player) const;
-        bool isOnEnemy(GameObject& burgerPart) const;
+        bool IsOnFloor(GameObject& gameObject) const;
+        bool isOnEnemy(GameObject& gameObject) const;
+        bool IsOnwalkthrough(GameObject& gameObject) const;
 
         bool CanEntityMove(float moveX, float moveY, const GameObject& entity) const;
 

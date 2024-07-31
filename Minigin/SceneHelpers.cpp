@@ -233,7 +233,7 @@ void SceneHelpers::SetTileTypeAtPosition(const glm::vec3& position, TunnelType n
     case TunnelType::bottomEnd:
         s_tunnelMap[gridY][gridX] = 'v';
         CreateWalkThough(m_scene, 300 + gridX * GetCellSize().x, 20 + gridY * GetCellSize().y, glm::vec2(GetCellSize().x, GetCellSize().y), "bottomEnd");
-        break;
+    	break;
     case TunnelType::topEnd:
         s_tunnelMap[gridY][gridX] = '^';
         CreateWalkThough(m_scene, 300 + gridX * GetCellSize().x, 20 + gridY * GetCellSize().y, glm::vec2(GetCellSize().x, GetCellSize().y), "topEnd");

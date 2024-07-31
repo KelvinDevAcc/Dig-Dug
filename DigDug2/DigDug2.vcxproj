@@ -181,21 +181,23 @@ xcopy "$(SolutionDir)3rdParty\SDL2_mixer\lib\$(PlatformTarget)\*.dll" "$(OutputP
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Pooka.cpp" />
+    <ClCompile Include="PookaComponent.cpp" />
     <ClCompile Include="PookaState.cpp" />
     <ClCompile Include="Pump.cpp" />
     <ClCompile Include="DigDug2.cpp" />
     <ClCompile Include="EnemyComponent.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="PlayerState.cpp" />
+    <ClCompile Include="Rock.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Pooka.h" />
+    <ClInclude Include="PookaComponent.h" />
     <ClInclude Include="PookaState.h" />
     <ClInclude Include="Pump.h" />
     <ClInclude Include="EnemyComponent.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="PlayerState.h" />
+    <ClInclude Include="Rock.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

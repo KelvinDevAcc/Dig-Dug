@@ -68,6 +68,8 @@ namespace game
         void AddPumpPart();
         void UpdatePumpTextures() const;
         std::unique_ptr<Pump> GetInactivePump();
+        void UpdateTunnelType(const glm::vec3& position, bool isHorizontal);
+        void CheckAndSetCornerTypes(const glm::vec3& position, bool isHorizontal);
 
         float m_timeSinceLastPumpPart{ 0.0f };
         float m_pumpPartInterval{ 0.1f };

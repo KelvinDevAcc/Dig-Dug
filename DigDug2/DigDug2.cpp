@@ -22,7 +22,9 @@
 #include "Player.h"
 #include "PointComponent.h"
 #include "PointsDisplayComponent.h"
+#include "PookaComponent.h"
 #include "ResourceManager.h"
+#include "Rock.h"
 #include "SceneData.h"
 #include "SceneHelpers.h"
 #include "SceneManager.h"
@@ -92,14 +94,27 @@ void loadResources()
         16,  // colCount
         {
             { "Idle", { { { 1, 0 }}, 1 } },
-            { "Walk_Right", { {  { 4, 0 }, { 5, 0 } }, 4 } },
+            { "Walk_Right", { {  { 0, 0 }, { 1, 0 } }, 4 } },
             { "Walk_Left", { { { 4, 0 }, { 5, 0 } }, 4 } },
             { "Walk_Up", { { { 2, 0 }, { 3, 0 } }, 4 } },
             { "Walk_Down", { { { 6, 0 }, { 7,0 } }, 4 } },
             { "Dying", { { { 0, 7 }, { 1, 7 }, { 2, 7 }, { 3, 7 } }, 2 } },
             { "Attacking", { { { 1, 1 } }, 1 } },
+            { "AttackingUp", { { { 2, 1 } }, 1 } },
             { "Victory", { { { 3, 1 }, { 1, 0 }}, 3 } },
             { "Digging", { { { 0, 1 }, { 1, 1 }}, 3 } }
+
+        });
+
+    dae::ResourceManager::LoadSprite("Rock",
+        "Extra.png",
+        3,  // rowCount
+        16,  // colCount
+        {
+            { "Idle", { { { 0, 1 }}, 1 } },
+            { "Falling", { { { 0, 1 },{ 1, 1 } }, 2 } },
+            { "Dying", { {  { 0, 1 } ,{ 1, 1 }, { 2, 1 }, { 3,1}}, 1 } },
+            { "Digging", { { { 0, 1 }, { 1, 1 }}, 4 } }
 
         });
 
@@ -108,14 +123,17 @@ void loadResources()
         7,  // rowCount
         14,   // colCount
         {
-            { "Idle", { { { 1, 0 }}, 1 } },
+            { "Normal", { { { 0, 5 }}, 1 } },
             { "Walk_Right", { {  { 0, 5 }, { 1, 5 } }, 1 } },
             { "Walk_Left", { {  { 0, 5 }, { 1, 5 } }, 1 } },
             { "Walk_Up", { { { 0, 5 }, { 1, 5 } }, 1 } },
             { "Walk_Down", { { { 0, 5 }, { 1, 5 } }, 1 } },
             { "Dying", { { { 4, 6 }, { 5, 6 }, { 6, 6 }, { 7, 6 } }, 4 } },
-            { "Hovering", { { { 2, 6 }, { 3, 6 }}, 1 } }
+            { "Ghost", { { { 2, 6 }, { 3, 6 }}, 1 } }
         });
+
+
+
 }
 
 void UnBindMenuCommands(dae::InputManager& inputManager)
@@ -731,8 +749,8 @@ void GameScene(dae::Scene* scene)
     spriterenderComponent2->SetDimensions(40, 40);
     PookaObject->AddComponent(std::move(spriterenderComponent2));
 
-    auto animationComponent2 = std::make_unique<dae::AnimationComponent>(PookaObject.get(), PookaObject->GetComponent<dae::SpriteRendererComponent>(), "Idle");
-    //animationComponent2->Play("Walk_Right", true);
+    auto animationComponent2 = std::make_unique<dae::AnimationComponent>(PookaObject.get(), PookaObject->GetComponent<dae::SpriteRendererComponent>(), "Normal");
+    animationComponent2->Play("Walk_Down", true);
     PookaObject->AddComponent(std::move(animationComponent2));
     PookaObject->SetLocalPosition(glm::vec3(380, 260, 0.0f));
 
@@ -742,6 +760,9 @@ void GameScene(dae::Scene* scene)
 
     auto enemyComponent = std::make_unique<game::EnemyComponent>(PookaObject.get(), scene);
     PookaObject->AddComponent(std::move(enemyComponent));
+
+    //auto pookaComponent = std::make_unique<PookaComponent>(PookaObject.get(),loadMap.getIngMap());
+    //PookaObject->AddComponent(std::move(pookaComponent));
 
     dae::SceneData::GetInstance().AddGameObject(PookaObject.get(), dae::GameObjectType::enemy);
 
@@ -755,7 +776,7 @@ void GameScene(dae::Scene* scene)
     spriterenderComponent3->SetDimensions(40, 40);
     SaugeObject2->AddComponent(std::move(spriterenderComponent3));
 
-    auto animationComponent3 = std::make_unique<dae::AnimationComponent>(SaugeObject2.get(), SaugeObject2->GetComponent<dae::SpriteRendererComponent>(), "Idle");
+    auto animationComponent3 = std::make_unique<dae::AnimationComponent>(SaugeObject2.get(), SaugeObject2->GetComponent<dae::SpriteRendererComponent>(), "Normal");
     animationComponent3->Play("Walk_Right", true);
     SaugeObject2->AddComponent(std::move(animationComponent3));
     SaugeObject2->SetLocalPosition(glm::vec3(820, 180, 0.0f));
@@ -770,6 +791,29 @@ void GameScene(dae::Scene* scene)
     dae::SceneData::GetInstance().AddGameObject(SaugeObject2.get(), dae::GameObjectType::enemy);
 
     scene->Add(std::move(SaugeObject2));
+
+
+    auto RockObject = std::make_unique<dae::GameObject>();
+
+    auto spriterenderComponent4 = std::make_unique<dae::SpriteRendererComponent>(RockObject.get(), dae::ResourceManager::GetSprite("Rock"));
+    spriterenderComponent4->SetDimensions(40, 40);
+    spriterenderComponent4->SetRenderOrder(2);
+    RockObject->AddComponent(std::move(spriterenderComponent4));
+
+    auto RockObjectanimationComponent = std::make_unique<dae::AnimationComponent>(RockObject.get(), RockObject->GetComponent<dae::SpriteRendererComponent>(), "Digging");
+	RockObjectanimationComponent->Play("Idle", true);
+    RockObject->AddComponent(std::move(RockObjectanimationComponent));
+    RockObject->SetLocalPosition(glm::vec3(660, 420, 0.0f));
+
+    auto RockObjecthitBox = std::make_unique<HitBox>(glm::vec2(40, 40));
+    RockObjecthitBox->SetGameObject(RockObject.get());
+    RockObject->AddComponent(std::move(RockObjecthitBox));
+
+    auto RockComponnet = std::make_unique<Rock>(RockObject.get());
+    RockObject->AddComponent(std::move(RockComponnet));
+    dae::SceneData::GetInstance().AddGameObject(RockObject.get(), dae::GameObjectType::enemy);
+
+    scene->Add(std::move(RockObject));
 
     HandlePlayerInput(inputManager, 0);
     LoadUi(scene);
@@ -832,7 +876,7 @@ void GameScene2(dae::Scene* scene)
     spriteRenderComponent->SetDimensions(40, 40);
     PlayerObject->AddComponent(std::move(spriteRenderComponent));
 
-    auto animationComponent = std::make_unique<dae::AnimationComponent>(PlayerObject.get(), PlayerObject->GetComponent<dae::SpriteRendererComponent>(), "Idle");
+    auto animationComponent = std::make_unique<dae::AnimationComponent>(PlayerObject.get(), PlayerObject->GetComponent<dae::SpriteRendererComponent>(), "Normal");
     animationComponent->Play("Walk_Right", true);
     PlayerObject->AddComponent(std::move(animationComponent));
     PlayerObject->SetLocalPosition(glm::vec3(100, 100, 0.0f));
@@ -874,7 +918,7 @@ void GameScene2(dae::Scene* scene)
     spriteRenderComponent2->SetDimensions(40, 40);
     PlayerObject2->AddComponent(std::move(spriteRenderComponent2));
 
-    auto animationComponent2 = std::make_unique<dae::AnimationComponent>(PlayerObject2.get(), PlayerObject2->GetComponent<dae::SpriteRendererComponent>(), "Idle");
+    auto animationComponent2 = std::make_unique<dae::AnimationComponent>(PlayerObject2.get(), PlayerObject2->GetComponent<dae::SpriteRendererComponent>(), "Normal");
     animationComponent2->Play("Walk_Right", true);
     PlayerObject2->AddComponent(std::move(animationComponent2));
     PlayerObject2->SetLocalPosition(glm::vec3(100, 300, 0.0f));

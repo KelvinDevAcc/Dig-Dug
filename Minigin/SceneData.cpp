@@ -151,6 +151,10 @@ namespace dae {
         return IsOnSpecificObjectType(player, m_floors);
     }
 
+    bool SceneData::IsOnwalkthrough(GameObject& player) const {
+        return IsOnSpecificObjectType(player, m_WalkThrough);
+    }
+
     bool SceneData::isOnEnemy(GameObject& object) const
     {
         return IsOnSpecificObjectType(object, m_enemys);

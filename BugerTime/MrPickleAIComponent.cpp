@@ -52,10 +52,16 @@ MrPickleAIComponent::MrPickleAIComponent(dae::GameObject* owner, std::vector<std
 std::vector<SDL_Rect*> MrPickleAIComponent::CalculatePathToPeter(const glm::vec3& position)
 {
     m_path.clear();
+    std::vector<SDL_Rect*> path;
     const int startX = static_cast<int>((position.x - m_minCoords.x) / m_cellSize.x);
     const int startY = static_cast<int>((position.y - m_minCoords.y) / m_cellSize.y);
 
     const auto players = dae::SceneData::GetInstance().GetPlayers();
+
+    if (players.empty())
+    {
+        return path;
+    }
     glm::vec3 closestPlayerPosition = glm::vec3(0, 0, 0);
     float closestDistance = std::numeric_limits<float>::infinity();
 
@@ -73,7 +79,6 @@ std::vector<SDL_Rect*> MrPickleAIComponent::CalculatePathToPeter(const glm::vec3
     const int goalX = static_cast<int>((closestPlayerPosition.x - m_minCoords.x) / m_cellSize.x);
     const int goalY = static_cast<int>((closestPlayerPosition.y - m_minCoords.y) / m_cellSize.y);
 
-    std::vector<SDL_Rect*> path;
     std::unordered_set<std::pair<int, int>, PairHash> openSet;
     std::unordered_set<std::pair<int, int>, PairHash> closedSet;
     std::unordered_map<std::pair<int, int>, std::pair<int, int>, PairHash> cameFrom;
@@ -230,17 +235,17 @@ std::vector<SDL_Rect*> MrPickleAIComponent::ReconstructPath(const std::unordered
 }
 
 
-float MrPickleAIComponent::GetCost(const std::pair<int, int>& next) const {
-	const int x = next.first;
-    const int y = next.second;
+float MrPickleAIComponent::GetCost(const std::pair<int, int>& /*next*/) const {
+	//const int x = next.first;
+ //   const int y = next.second;
 
-    const char tile = m_map[y][x];
+ //   const char tile = m_map[y][x];
 
     // Assign costs based on tile type
     float baseCost = 1.0f; 
-    if (tile == 'v' || tile == '^' || tile == '|') {
+    /*if (tile == 'v' || tile == '^' || tile == '|') {
         baseCost = 0.5f; 
-    }
+    }*/
 
     return baseCost;
 }

@@ -56,7 +56,7 @@ namespace game {
         }
         else {
             // If not moving, play idle animation
-            m_animationComponent->Play("Idle", true);
+            m_animationComponent->Play("Normal", true);
         }
     }
 
@@ -67,7 +67,7 @@ void EnemyComponent::Die()
 
         
     // Set a delay before removing the enemy
-    const float totalTime = 2.f;
+    constexpr float totalTime = 2.f;
 
     m_deathTimer = totalTime;
 }

@@ -50,9 +50,9 @@ namespace game
             const auto playerSize = dae::SceneData::GetInstance().GetPlayers().size();
             if (playerSize == 1)
             {
-                GameData::GetInstance().FindAndStorePlayerData();
-                dae::SceneData::GetInstance().RemoveGameObject(GetParentObject(), dae::GameObjectType::Player);
-                dae::SceneManager::GetInstance().GetActiveScene()->Remove(GetParentObject());
+	            GameData::GetInstance().FindAndStorePlayerData();
+	            dae::SceneData::GetInstance().RemoveGameObject(GetParentObject(), dae::GameObjectType::Player);
+	            dae::SceneManager::GetInstance().GetActiveScene()->Remove(GetParentObject());
             }
             else if (playerSize > 1)
             {
@@ -62,24 +62,22 @@ namespace game
             }
         }
 
-        //std::cout << "Pump Direction: " << pumpDirection.x << ":" << pumpDirection.y << ":" << pumpDirection.z << std::endl;
+        std::cout << "Pump Direction: " << pumpDirection.x << ":" << pumpDirection.y << ":" << pumpDirection.z << std::endl;
     }
 
    
 
     void Player::Die()
     {
-        if (!m_healthComponent) {
-            return;
-        }
+        if (!m_healthComponent) return;
+
         SetAnimationState(AnimationState::Dying);
         dae::Message message;
         message.type = dae::PlaySoundMessageType::Sound;
         message.arguments.emplace_back(static_cast<sound_id>(2));
         dae::EventQueue::Broadcast(message);
 
-        const int newHealth = m_healthComponent->GetHealth() - 100;
-        m_healthComponent->SetHealth(newHealth);
+        m_healthComponent->SetHealth(m_healthComponent->GetHealth() - 100);
     }
 
     void Player::Render() const
@@ -110,6 +108,7 @@ namespace game
         SetAnimationState(AnimationState::Attacking);
     }
 
+
     void Player::UpdatePumpTimer(float deltaTime)
     {
         if (m_pumps.empty() || m_pumpPartCount > 5)
@@ -130,8 +129,7 @@ namespace game
         glm::vec3 offsetPosition(0.0f);
         if (!m_pumps.empty())
         {
-            const auto& prevPump = m_pumps.back();
-            if (prevPump)
+	        if (m_pumps.back())
             {
                 constexpr auto textureSize = glm::vec2(36, 16); // Assuming you have a method to get texture size
                 offsetPosition += pumpDirection * glm::vec3(textureSize.x, textureSize.y * 2, 0) * static_cast<float>(m_pumpPartCount);
@@ -184,26 +182,16 @@ namespace game
         const float scaledDeltaX = deltaX * 50 * dae::GameTime::GetDeltaTime();
         const float scaledDeltaY = deltaY * 50 * dae::GameTime::GetDeltaTime();
 
-        glm::vec3 currentPosition = m_GameObject->GetWorldPosition();
-
-        // Check for collisions before moving
-        if (scaledDeltaX != 0)
+        if (scaledDeltaX != 0 && dae::SceneData::GetInstance().CanEntityMove(scaledDeltaX, 0.0f, *m_GameObject))
         {
-            glm::vec3 newPosition = currentPosition + glm::vec3(scaledDeltaX, 0.0f, 0.0f);
-            if (dae::SceneData::GetInstance().CanEntityMove(scaledDeltaX, 0.0f, *m_GameObject))
-            {
-                MoveHorizontally(scaledDeltaX);
-            }
+            MoveHorizontally(scaledDeltaX);
         }
-        else if (scaledDeltaY != 0)
+        else if (scaledDeltaY != 0 && dae::SceneData::GetInstance().CanEntityMove(0.0f, scaledDeltaY, *m_GameObject))
         {
-            glm::vec3 newPosition = currentPosition + glm::vec3(0.0f, scaledDeltaY, 0.0f);
-            if (dae::SceneData::GetInstance().CanEntityMove(0.0f, scaledDeltaY, *m_GameObject))
-            {
-                MoveVertically(scaledDeltaY);
-            }
+            MoveVertically(scaledDeltaY);
         }
     }
+
 
 
     void Player::MoveHorizontally(float deltaX)
@@ -212,60 +200,8 @@ namespace game
         currentPosition.x += deltaX;
         m_GameObject->SetLocalPosition(currentPosition);
 
-        const TunnelType currentTile = SceneHelpers::GetTileTypeAtPosition(currentPosition);
-
-        if (deltaX > 0) {
-            m_animationComponent->Play("Walk_Right", true, 0);
-            m_animationComponent->FlipSprite(true, false);
-            pumpDirection = glm::vec3(1, 0, 0);
-            SetAnimationState(AnimationState::Digging);
-
-            if (currentTile == TunnelType::Empty) {
-                SceneHelpers::SetTileTypeAtPosition(currentPosition, TunnelType::rightEnd);
-            }
-            else if (currentTile == TunnelType::rightEnd) {
-                const glm::vec3 previousPosition = currentPosition - glm::vec3(SceneHelpers::GetCellSize().x, 0, 0);
-                SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::walkTroughLeft);
-                SceneHelpers::SetTileTypeAtPosition(currentPosition, TunnelType::rightEnd);
-
-                // Check for corners
-                glm::vec3 above = currentPosition + glm::vec3(0, SceneHelpers::GetCellSize().y, 0);
-                glm::vec3 below = currentPosition - glm::vec3(0, SceneHelpers::GetCellSize().y, 0);
-
-                if (SceneHelpers::GetTileTypeAtPosition(above) == TunnelType::topEnd) {
-                    SceneHelpers::SetTileTypeAtPosition(currentPosition, TunnelType::UpRight);
-                }
-                else if (SceneHelpers::GetTileTypeAtPosition(below) == TunnelType::bottomEnd) {
-                    SceneHelpers::SetTileTypeAtPosition(currentPosition, TunnelType::BottemRight);
-                }
-            }
-        }
-        else if (deltaX < 0) {
-            m_animationComponent->Play("Walk_Left", true, 0);
-            m_animationComponent->FlipSprite(false, false);
-            pumpDirection = glm::vec3(-1, 0, 0);
-            SetAnimationState(AnimationState::Digging);
-
-            if (currentTile == TunnelType::Empty) {
-                SceneHelpers::SetTileTypeAtPosition(currentPosition, TunnelType::leftEnd);
-            }
-            else if (currentTile == TunnelType::leftEnd) {
-                const glm::vec3 previousPosition = currentPosition + glm::vec3(SceneHelpers::GetCellSize().x, 0, 0);
-                SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::walkTroughLeft);
-                SceneHelpers::SetTileTypeAtPosition(currentPosition, TunnelType::leftEnd);
-
-                // Check for corners
-                glm::vec3 above = currentPosition + glm::vec3(0, SceneHelpers::GetCellSize().y, 0);
-                glm::vec3 below = currentPosition - glm::vec3(0, SceneHelpers::GetCellSize().y, 0);
-
-                if (SceneHelpers::GetTileTypeAtPosition(above) == TunnelType::topEnd) {
-                    SceneHelpers::SetTileTypeAtPosition(currentPosition, TunnelType::UpLeft);
-                }
-                else if (SceneHelpers::GetTileTypeAtPosition(below) == TunnelType::bottomEnd) {
-                    SceneHelpers::SetTileTypeAtPosition(currentPosition, TunnelType::Bottomleft);
-                }
-            }
-        }
+        SetAnimationState(deltaX > 0 ? AnimationState::Walk_Right : AnimationState::Walk_Left);
+        UpdateTunnelType(currentPosition, deltaX > 0);
     }
 
 
@@ -275,51 +211,52 @@ namespace game
         currentPosition.y += deltaY;
         m_GameObject->SetLocalPosition(currentPosition);
 
-        const TunnelType currentTile = SceneHelpers::GetTileTypeAtPosition(currentPosition);
+        SetAnimationState(deltaY > 0 ? AnimationState::Walk_Down : AnimationState::Walk_Up);
+        UpdateTunnelType(currentPosition, false);
+    }
 
-        if (deltaY > 0) {
-            if (currentTile == TunnelType::Empty) {
-                SetAnimationState(AnimationState::Digging);
-                SceneHelpers::SetTileTypeAtPosition(currentPosition, TunnelType::bottomEnd);
+    void Player::UpdateTunnelType(const glm::vec3& position, bool isHorizontal)
+    {
+        const TunnelType currentTile = SceneHelpers::GetTileTypeAtPosition(position);
+
+        if (currentTile == TunnelType::Empty)
+        {
+            SceneHelpers::SetTileTypeAtPosition(position, isHorizontal ? TunnelType::rightEnd : TunnelType::bottomEnd);
+        }
+        else if ((isHorizontal && currentTile == TunnelType::rightEnd) || (!isHorizontal && currentTile == TunnelType::bottomEnd))
+        {
+            const glm::vec3 previousPosition = position - (isHorizontal ? glm::vec3(SceneHelpers::GetCellSize().x, 0, 0) : glm::vec3(0, SceneHelpers::GetCellSize().y, 0));
+            SceneHelpers::SetTileTypeAtPosition(previousPosition, isHorizontal ? TunnelType::walkTroughLeft : TunnelType::walkTroughUp);
+            SceneHelpers::SetTileTypeAtPosition(position, isHorizontal ? TunnelType::rightEnd : TunnelType::bottomEnd);
+
+            CheckAndSetCornerTypes(position, isHorizontal);
+        }
+    }
+
+    void Player::CheckAndSetCornerTypes(const glm::vec3& position, bool isHorizontal)
+    {
+        if (isHorizontal)
+        {
+	        const glm::vec3 above = position + glm::vec3(0, SceneHelpers::GetCellSize().y, 0);
+            const glm::vec3 below = position - glm::vec3(0, SceneHelpers::GetCellSize().y, 0);
+
+            if (SceneHelpers::GetTileTypeAtPosition(above) == TunnelType::topEnd) {
+                SceneHelpers::SetTileTypeAtPosition(position, TunnelType::UpRight);
             }
-            else if (currentTile == TunnelType::bottomEnd) {
-                const glm::vec3 previousPosition = currentPosition - glm::vec3(0, SceneHelpers::GetCellSize().y, 0);
-                SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::walkTroughUp);
-                SceneHelpers::SetTileTypeAtPosition(currentPosition, TunnelType::bottomEnd);
-
-                // Check for corners
-                glm::vec3 left = currentPosition - glm::vec3(SceneHelpers::GetCellSize().x, 0, 0);
-                glm::vec3 right = currentPosition + glm::vec3(SceneHelpers::GetCellSize().x, 0, 0);
-
-                if (SceneHelpers::GetTileTypeAtPosition(left) == TunnelType::leftEnd) {
-                    SceneHelpers::SetTileTypeAtPosition(currentPosition, TunnelType::Bottomleft);
-                }
-                else if (SceneHelpers::GetTileTypeAtPosition(right) == TunnelType::rightEnd) {
-                    SceneHelpers::SetTileTypeAtPosition(currentPosition, TunnelType::BottemRight);
-                }
+            else if (SceneHelpers::GetTileTypeAtPosition(below) == TunnelType::bottomEnd) {
+                SceneHelpers::SetTileTypeAtPosition(position, TunnelType::BottemRight);
             }
         }
-        else if (deltaY < 0) {
-            const glm::vec3 nextPosition = currentPosition + glm::vec3(0, SceneHelpers::GetCellSize().y, 0);
-            if (SceneHelpers::GetTileTypeAtPosition(nextPosition) == TunnelType::Empty) {
-                SetAnimationState(AnimationState::Digging);
-                SceneHelpers::SetTileTypeAtPosition(currentPosition, TunnelType::topEnd);
+        else
+        {
+	        const glm::vec3 left = position - glm::vec3(SceneHelpers::GetCellSize().x, 0, 0);
+            const glm::vec3 right = position + glm::vec3(SceneHelpers::GetCellSize().x, 0, 0);
+
+            if (SceneHelpers::GetTileTypeAtPosition(left) == TunnelType::leftEnd) {
+                SceneHelpers::SetTileTypeAtPosition(position, TunnelType::Bottomleft);
             }
-            else if (currentTile == TunnelType::topEnd) {
-                const glm::vec3 previousPosition = currentPosition + glm::vec3(0, SceneHelpers::GetCellSize().y, 0);
-                SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::walkTroughUp);
-                SceneHelpers::SetTileTypeAtPosition(currentPosition, TunnelType::topEnd);
-
-                // Check for corners
-                glm::vec3 left = currentPosition - glm::vec3(SceneHelpers::GetCellSize().x, 0, 0);
-                glm::vec3 right = currentPosition + glm::vec3(SceneHelpers::GetCellSize().x, 0, 0);
-
-                if (SceneHelpers::GetTileTypeAtPosition(left) == TunnelType::leftEnd) {
-                    SceneHelpers::SetTileTypeAtPosition(currentPosition, TunnelType::UpLeft);
-                }
-                else if (SceneHelpers::GetTileTypeAtPosition(right) == TunnelType::rightEnd) {
-                    SceneHelpers::SetTileTypeAtPosition(currentPosition, TunnelType::UpRight);
-                }
+            else if (SceneHelpers::GetTileTypeAtPosition(right) == TunnelType::rightEnd) {
+                SceneHelpers::SetTileTypeAtPosition(position, TunnelType::BottemRight);
             }
         }
     }
@@ -334,16 +271,19 @@ namespace game
         switch (state)
         {
         case AnimationState::Idle:
-            if (m_animationComponent)
+            if (m_animationComponent) 
+            {
                 m_animationComponent->Play("Idle", true);
+                m_animationComponent->FlipSprite(false, false);
+            }
             break;
         case AnimationState::Walk_Up:
-            if (m_animationComponent)
+            if (m_animationComponent) 
                 m_animationComponent->Play("Walk_Up", true);
             pumpDirection = glm::vec3(0, -1, 0);
             break;
         case AnimationState::Walk_Right:
-            if (m_animationComponent)
+            if (m_animationComponent) 
                 m_animationComponent->Play("Walk_Right", true);
             pumpDirection = glm::vec3(1, 0, 0);
             break;
@@ -359,8 +299,28 @@ namespace game
             break;
         case AnimationState::Attacking:
             if (m_animationComponent)
-                m_animationComponent->Play("Attacking");
-            m_animationComponent->FlipSprite(true, false);
+            {
+                if (pumpDirection.x > 0)
+                {
+                    m_animationComponent->Play("Attacking");
+                    m_animationComponent->FlipSprite(false, false); // Facing right
+                }
+                else if (pumpDirection.x < 0)
+                {
+                    m_animationComponent->Play("Attacking");
+                    m_animationComponent->FlipSprite(true, false); // Facing left
+                }
+                else if (pumpDirection.y < 0)
+                {
+                    m_animationComponent->Play("AttackingUp");
+                    m_animationComponent->FlipSprite(false, false); // Facing up
+                }
+                else if (pumpDirection.y > 0)
+                {
+                    m_animationComponent->Play("AttackingUp");
+                    m_animationComponent->FlipSprite(false, true); // Facing down
+                }
+            }
             break;
         case AnimationState::Dying:
             if (m_animationComponent)
