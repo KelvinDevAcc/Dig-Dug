@@ -149,6 +149,9 @@ void SceneHelpers::LoadTunnelMapIntoScene(const LoadMap& loadMap, dae::Scene* sc
             case '=':
                 CreateWalkThough(scene, posX, posY, glm::vec2(scale.x, scale.y), "walkTroughLeft");
                 break;
+            case 'M':
+                CreateWalkThough(scene, posX, posY, glm::vec2(scale.x, scale.y), "MiddleBlock");
+                break;
             default:
                 break;
             }
@@ -177,112 +180,72 @@ glm::vec2 SceneHelpers::GetGridSize() {
 }
 
 
-TunnelType SceneHelpers::GetTileTypeAtPosition(const glm::vec3& position) {
-    // Calculate the grid coordinates based on the position
-    const int gridX = static_cast<int>((position.x - 300) / GetCellSize().x);
-    const int gridY = static_cast<int>((position.y - 20) / GetCellSize().y);
+TunnelType SceneHelpers::GetTileTypeAtPosition(const glm::vec3& position)
+{
+    static const float mapOffsetX = GetMinCoordinates().x;
+    static const float mapOffsetY = GetMinCoordinates().y;
+    static const glm::vec2 cellSize = GetCellSize();
 
-    // Check if the coordinates are within the bounds of the map
-    if (gridY < 0 || gridY >= static_cast<int>(s_tunnelMap.size()) || gridX < 0 || gridX >= static_cast<int>(s_tunnelMap[gridY].size())) {
+    const int gridX = static_cast<int>((position.x - mapOffsetX) / cellSize.x);
+    const int gridY = static_cast<int>((position.y - mapOffsetY) / cellSize.y);
+
+    if (gridY < 0 || gridY >= static_cast<int>(s_tunnelMap.size()) || gridX < 0 || gridX >= static_cast<int>(s_tunnelMap[gridY].size()))
+    {
         return TunnelType::Empty;
     }
 
-    // Determine the tile type based on the character at the grid position
-    switch (s_tunnelMap[gridY][gridX]) {
-    case 'v':
-        return TunnelType::bottomEnd;
-    case '^':
-        return TunnelType::topEnd;
-    case ':':
-        return TunnelType::walkTroughUp;
-    case '=':
-        return TunnelType::walkTroughLeft;
-    case '_':
-        return TunnelType::Empty;
-    case 's':
-        return  TunnelType::sky;
-    case 'Y':
-        return TunnelType::UpRight;
-    case 'P':
-        return TunnelType::UpLeft;
-    case 'R':
-        return TunnelType::BottemRight;
-    case  'L':
-        return TunnelType::Bottomleft;
-    default:
-        return TunnelType::Empty;
-    }
+    static const std::unordered_map<char, TunnelType> charToTunnelType = {
+        {'v', TunnelType::bottomEnd}, {'^', TunnelType::topEnd}, {'<', TunnelType::leftEnd}, {'>', TunnelType::rightEnd},
+        {':', TunnelType::walkThroughUp}, {'=', TunnelType::walkThroughLeft}, {'_', TunnelType::Empty}, {'s', TunnelType::sky},
+        {'Y', TunnelType::UpRight}, {'P', TunnelType::UpLeft}, {'R', TunnelType::BottomRight}, {'L', TunnelType::BottomLeft},
+        {'M', TunnelType::MiddleBlock}
+    };
+
+    const char tileChar = s_tunnelMap[gridY][gridX];
+    const auto it = charToTunnelType.find(tileChar);
+    return it != charToTunnelType.end() ? it->second : TunnelType::Empty;
 }
 
 void SceneHelpers::SetTileTypeAtPosition(const glm::vec3& position, TunnelType newType) {
-    const int gridX = static_cast<int>((position.x - 300) / GetCellSize().x);
-    const int gridY = static_cast<int>((position.y - 20) / GetCellSize().y);
+    const int gridX = static_cast<int>((position.x - GetMinCoordinates().x) / GetCellSize().x);
+    const int gridY = static_cast<int>((position.y - GetMinCoordinates().y) / GetCellSize().y);
 
     if (gridY < 0 || gridY >= static_cast<int>(s_tunnelMap.size()) || gridX < 0 || gridX >= static_cast<int>(s_tunnelMap[gridY].size())) {
         return;
     }
 
-    if (!m_scene)
+    if (!m_scene) {
         return;
-
-    // Update the tunnel map and create the corresponding GameObject in the scene
-    switch (newType) {
-    case TunnelType::Empty:
-        s_tunnelMap[gridY][gridX] = '_';
-        break;
-    case TunnelType::bottomEnd:
-        s_tunnelMap[gridY][gridX] = 'v';
-        CreateWalkThough(m_scene, 300 + gridX * GetCellSize().x, 20 + gridY * GetCellSize().y, glm::vec2(GetCellSize().x, GetCellSize().y), "bottomEnd");
-    	break;
-    case TunnelType::topEnd:
-        s_tunnelMap[gridY][gridX] = '^';
-        CreateWalkThough(m_scene, 300 + gridX * GetCellSize().x, 20 + gridY * GetCellSize().y, glm::vec2(GetCellSize().x, GetCellSize().y), "topEnd");
-        break;
-    case TunnelType::walkTroughUp:
-        s_tunnelMap[gridY][gridX] = ':';
-        CreateWalkThough(m_scene, 300 + gridX * GetCellSize().x, 20 + gridY * GetCellSize().y, glm::vec2(GetCellSize().x, GetCellSize().y), "walkTroughUp");
-        break;
-    case TunnelType::walkTroughLeft:
-        s_tunnelMap[gridY][gridX] = '=';
-        CreateWalkThough(m_scene, 300 + gridX * GetCellSize().x, 20 + gridY * GetCellSize().y, glm::vec2(GetCellSize().x, GetCellSize().y), "walkTroughLeft");
-        break;
-    case TunnelType::leftEnd:
-        s_tunnelMap[gridY][gridX] = '<';
-        CreateWalkThough(m_scene, 300 + gridX * GetCellSize().x, 20 + gridY * GetCellSize().y, glm::vec2(GetCellSize().x, GetCellSize().y), "leftEnd");
-        break;
-    case TunnelType::rightEnd:
-        s_tunnelMap[gridY][gridX] = '>';
-        CreateWalkThough(m_scene, 300 + gridX * GetCellSize().x, 20 + gridY * GetCellSize().y, glm::vec2(GetCellSize().x, GetCellSize().y), "rightEnd");
-        break;
-    case TunnelType::sky:
-        break;
-    case TunnelType::UpRight:
-        s_tunnelMap[gridY][gridX] = 'Y';
-        CreateWalkThough(m_scene, 300 + gridX * GetCellSize().x, 20 + gridY * GetCellSize().y, glm::vec2(GetCellSize().x, GetCellSize().y), "UpRight");
-        break;
-    case TunnelType::UpLeft:
-        s_tunnelMap[gridY][gridX] = 'P';
-        CreateWalkThough(m_scene, 300 + gridX * GetCellSize().x, 20 + gridY * GetCellSize().y, glm::vec2(GetCellSize().x, GetCellSize().y), "UpLeft");
-        break;
-    case TunnelType::BottemRight:
-        s_tunnelMap[gridY][gridX] = 'R';
-        CreateWalkThough(m_scene, 300 + gridX * GetCellSize().x, 20 + gridY * GetCellSize().y, glm::vec2(GetCellSize().x, GetCellSize().y), "BottemRight");
-        break;
-    case TunnelType::Bottomleft:
-        s_tunnelMap[gridY][gridX] = 'L';
-        CreateWalkThough(m_scene, 300 + gridX * GetCellSize().x, 20 + gridY * GetCellSize().y, glm::vec2(GetCellSize().x, GetCellSize().y), "BottomLeft");
-        break;
-    default:
-        break;
     }
 
-    // Print the tunnel map to the console for debugging
-    for (const auto& row : s_tunnelMap) {
-        for (const char tile : row) {
-            std::cout << tile;
+    // Remove any existing tile at the given position
+    s_tunnelMap[gridY][gridX] = '_';
+    dae::SceneData::GetInstance().RemoveGameObjectAtPosition(glm::vec3(300 + gridX * GetCellSize().x, 20 + gridY * GetCellSize().y, 0.0f));
+
+    // Map TunnelType to corresponding character and texture name
+    const std::unordered_map<TunnelType, std::pair<char, std::string>> tunnelTypeToTile = {
+        { TunnelType::Empty, {'_', ""} },
+        { TunnelType::bottomEnd, {'v', "bottomEnd"} },
+        { TunnelType::topEnd, {'^', "topEnd"} },
+        { TunnelType::walkThroughUp, {':', "walkTroughUp"} },
+        { TunnelType::walkThroughLeft, {'=', "walkTroughLeft"} },
+        { TunnelType::leftEnd, {'<', "leftEnd"} },
+        { TunnelType::rightEnd, {'>', "rightEnd"} },
+        { TunnelType::UpRight, {'Y', "UpRight"} },
+        { TunnelType::UpLeft, {'P', "UpLeft"} },
+        { TunnelType::BottomRight, {'R', "BottomRight"} },
+        { TunnelType::BottomLeft, {'L', "BottomLeft"} },
+        { TunnelType::MiddleBlock, {'M', "MiddleBlock"} }
+    };
+
+    const auto it = tunnelTypeToTile.find(newType);
+    if (it != tunnelTypeToTile.end()) {
+        s_tunnelMap[gridY][gridX] = it->second.first;
+        if (!it->second.second.empty()) {
+            CreateWalkThough(m_scene, 300 + gridX * GetCellSize().x, 20 + gridY * GetCellSize().y, glm::vec2(GetCellSize().x, GetCellSize().y), it->second.second);
         }
-        std::cout << std::endl;
     }
 }
+
 
 

@@ -25,8 +25,6 @@ namespace dae
 
         void SetFlip(bool flipX, bool flipY);
 
-        void SetRenderOrder(int renderOrder) { m_renderOrder = renderOrder; }
-        int GetRenderOrder() const { return m_renderOrder; }
 
         int GetLastRenderOrder() const { return m_lastRenderOrder; }
         void UpdateLastRenderOrder(int newOrder) { m_lastRenderOrder = newOrder; }

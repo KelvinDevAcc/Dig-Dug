@@ -8,7 +8,7 @@
 class HitBox final : public dae::Component {
 public:
     HitBox(const glm::vec2& size)
-        : m_position(0, 0), m_size(size)
+        : m_position(0, 0), m_size(size), m_enabled(true) 
     {
     }
 
@@ -31,6 +31,8 @@ public:
     }
 
     bool IsColliding(const HitBox& other) const {
+        if (!m_enabled || !other.m_enabled) return false; 
+
         const SDL_Rect rectA = GetRect();
         const SDL_Rect rectB = other.GetRect();
         return SDL_HasIntersection(&rectA, &rectB);
@@ -55,12 +57,26 @@ public:
     }
 
     void Render() const override {
-        const SDL_Rect rect = GetRect();
-        constexpr SDL_Color color = { 255, 0, 0, 255 }; // Red color for the hitbox
-        dae::Renderer::GetInstance().RenderRect(rect, color, false);
+        if (!m_enabled) return;
+
+      /*  const SDL_Rect rect = GetRect();
+        constexpr SDL_Color color = { 255, 0, 0, 255 }; 
+        dae::Renderer::GetInstance().RenderRect(rect, color, false);*/
+    }
+    bool GetEnable() const
+    {
+        return m_enabled;
+    }
+    void Enable() {
+        m_enabled = true;
+    }
+
+    void Disable() {
+        m_enabled = false;
     }
 
 private:
     glm::vec2 m_position;
     glm::vec2 m_size;
+    bool m_enabled; // Track whether the hitbox is enabled or disabled
 };

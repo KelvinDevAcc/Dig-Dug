@@ -16,6 +16,8 @@ namespace dae {
         case GameObjectType::enemy: m_enemys.push_back(gameObject); break;
         case GameObjectType::enemyPlayers: m_enemyPlayers.push_back(gameObject); break;
         case GameObjectType::WalkThrough: m_WalkThrough.push_back(gameObject); break;
+        case GameObjectType::Rock: m_rocks.push_back(gameObject); break;
+        case GameObjectType::Empty: m_empty.push_back(gameObject); break;
         default:;
         }
     }
@@ -48,8 +50,31 @@ namespace dae {
         case GameObjectType::WalkThrough:
             RemoveGameObjectFromList(gameObject, m_WalkThrough);
             break;
+        case GameObjectType::Rock:
+            RemoveGameObjectFromList(gameObject, m_rocks);
+            break;
+        case GameObjectType::Empty:
+            RemoveGameObjectFromList(gameObject, m_empty);
+            break;
         }
     }
+
+    void SceneData::RemoveGameObjectAtPosition(const glm::vec3& position)
+    {
+        auto& gameObjects = m_WalkThrough; // Ensure this is a vector of dae::GameObject*
+
+        // Use remove_if to find and move the objects to be removed to the end of the vector
+        const auto it = std::ranges::remove_if(gameObjects,
+                                               [&position](const GameObject* gameObject) {
+	                                               const glm::vec3& objPos = gameObject->GetWorldPosition();
+	                                               return std::abs(objPos.x - position.x) < 0.1f && std::abs(objPos.y - position.y) < 0.1f;
+                                               }).begin();
+
+        // Erase the removed objects from the vector
+        gameObjects.erase(it, gameObjects.end());
+    }
+
+
 
     template<typename T>
     void SceneData::RemoveGameObjectFromList(GameObject* gameObject, std::vector<T>& list)
@@ -67,6 +92,10 @@ namespace dae {
             if (player && isOnEnemy(*player)) {
                 player->GetComponent<game::Player>()->Die();
             }
+           /* else if (player && IsOnRock(*player))
+            {
+                player->GetComponent<game::Player>()->Die();
+            }*/
         }
     }
 
@@ -86,7 +115,20 @@ namespace dae {
         return false;
     }
 
-    bool SceneData::IsWithinBounds(float x, float y)
+    bool dae::SceneData::CanEntityMove(float moveX, float moveY, dae::GameObject& entity) const
+    {
+        const glm::vec3 currentPosition = entity.GetWorldPosition();
+        const glm::vec3 newPosition = currentPosition + glm::vec3(moveX, moveY, 0.0f);
+
+        if (!IsWithinBounds(newPosition.x, newPosition.y))
+        {
+            return false;
+        }
+
+        return !IsNextObject(newPosition,entity);
+    }
+
+    bool dae::SceneData::IsWithinBounds(float x, float y) const
     {
         const float minX = SceneHelpers::GetMinCoordinates().x;
         const float minY = SceneHelpers::GetMinCoordinates().y;
@@ -96,7 +138,41 @@ namespace dae {
         return x >= minX && x < maxX && y >= minY && y < maxY;
     }
 
-    bool SceneData::CanEntityMove(float moveX, float moveY, const GameObject& entity) const {
+    bool dae::SceneData::IsNextObject(const glm::vec3& newPosition,GameObject& entity) const
+    {
+        auto checkCollisionsWithObjects = [&](const std::vector<GameObject*>& objects) {
+            for (const auto gameObject : objects) {
+                if (const auto hitBox = gameObject->GetComponent<HitBox>()) {
+                    const SDL_Rect rect = hitBox->GetRect();
+
+                    // Calculate the bounds based on the center position
+                    int left = rect.x;
+                    int right = rect.x + rect.w;
+                    int top = rect.y;
+                    int bottom = rect.y + rect.h;
+
+                    // Player's bounding box
+                    const auto playerHitBox = entity.GetComponent<HitBox>()->GetRect();
+
+                    // Check if the new position will intersect the obstacle
+                    if (newPosition.x + playerHitBox.w / 2 > left && newPosition.x - playerHitBox.w / 2 < right &&
+                        newPosition.y + playerHitBox.h / 2 > top && newPosition.y - playerHitBox.h / 2 < bottom) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+            };
+
+        if (checkCollisionsWithObjects(m_rocks))
+            return true;
+        if (checkCollisionsWithObjects(m_empty))
+            return true;
+
+        return false;
+    }
+
+    bool SceneData::CanEnemyMove(float moveX, float moveY, const GameObject& entity) const {
         const glm::vec3 currentPosition = entity.GetWorldPosition();
         const glm::vec3 newPosition = currentPosition + glm::vec3(moveX, moveY, 0.0f);
 
@@ -105,7 +181,7 @@ namespace dae {
             return false;
         }
 
-        return IsNextObject(newPosition.x, newPosition.y);
+        return IsNextwalkthrough(newPosition.x, newPosition.y);
     }
 
     GameObject* SceneData::GetFloorAt(const glm::vec3& position) const
@@ -122,7 +198,9 @@ namespace dae {
         return nullptr;
     }
 
-    bool SceneData::IsNextObject(float x, float y) const {
+    
+
+    bool SceneData::IsNextwalkthrough(float x, float y) const {
         auto checkCollisionsWithObjects = [&](const std::vector<GameObject*>& objects) {
             for (const auto gameObject : objects) {
                 if (const auto hitBox = gameObject->GetComponent<HitBox>()) {
@@ -136,10 +214,9 @@ namespace dae {
             return false;
             };
 
-        if (checkCollisionsWithObjects(m_floors)) 
+        if (checkCollisionsWithObjects(m_WalkThrough))
             return true;
-        if (checkCollisionsWithObjects(m_WalkThrough)) 
-            return true;
+
         return false;
     }
 
@@ -158,5 +235,10 @@ namespace dae {
     bool SceneData::isOnEnemy(GameObject& object) const
     {
         return IsOnSpecificObjectType(object, m_enemys);
+    }
+
+    bool SceneData::IsOnRock(GameObject& object) const
+    {
+        return IsOnSpecificObjectType(object, m_rocks);
     }
 }

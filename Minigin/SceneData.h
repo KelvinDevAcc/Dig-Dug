@@ -27,6 +27,7 @@ namespace dae {
         void RemoveAllGameObjects();
 
         void RemoveGameObject(GameObject* gameObject, GameObjectType type);
+        void RemoveGameObjectAtPosition(const glm::vec3& position);
 
         void Update() const;
 
@@ -40,12 +41,15 @@ namespace dae {
         bool IsOnFloor(GameObject& gameObject) const;
         bool isOnEnemy(GameObject& gameObject) const;
         bool IsOnwalkthrough(GameObject& gameObject) const;
+        bool IsOnRock(GameObject& gameObject) const;
 
-        bool CanEntityMove(float moveX, float moveY, const GameObject& entity) const;
+        bool CanEntityMove(float moveX, float moveY, GameObject& entity) const;
+        bool CanEnemyMove(float moveX, float moveY, const GameObject& entity) const;
 
-        static bool IsWithinBounds(float x, float y);
+        bool IsWithinBounds(float x, float y)const;
 
-        bool IsNextObject(float x, float y) const;
+        bool IsNextObject(const glm::vec3& newPosition, GameObject& entity) const;
+        bool IsNextwalkthrough(float x, float y) const;
 
         static bool IsOnSpecificObjectType(GameObject& object, const std::vector<GameObject*>& objects);
 
@@ -60,6 +64,8 @@ namespace dae {
         std::vector<GameObject*> m_players;
         std::vector<GameObject*> m_enemyPlayers;
         std::vector<GameObject*> m_enemys;
+        std::vector<GameObject*> m_rocks;
+        std::vector<GameObject*> m_empty;
 
     };
 }

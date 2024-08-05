@@ -1,5 +1,4 @@
 #pragma once
-#include "PookaComponent.h"
 
 class PookaComponent;
 
@@ -43,3 +42,9 @@ public:
     void Exit(PookaComponent* pooka) override;
 };
 
+class PookaChaseState final : public PookaState {
+public:
+    void Enter(PookaComponent* pooka) override;
+    void Update(PookaComponent* pooka) override;
+    void Exit(PookaComponent* pooka) override;
+};

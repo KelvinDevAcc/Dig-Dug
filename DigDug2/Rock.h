@@ -23,7 +23,7 @@ public:
 
 private:
     bool ShouldStartFalling();
-    bool CheckCollisionWithGround();
+    bool CheckCollisionWithWalkThrough();
     bool CheckCollisionWithObjects();
     bool NoplayerUntherneath();
 
@@ -36,5 +36,6 @@ private:
     bool m_PlayerMovedAway;
     bool m_IsAnimating;
     float m_animationTimer;
+    bool m_dieing;
 };
 

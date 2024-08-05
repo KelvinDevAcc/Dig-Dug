@@ -20,7 +20,7 @@ namespace game {
             return;
         }
 
-        //UpdateAnimation();
+        UpdateAnimation();
 
         if (m_deathTimer > 0.0f) {
             m_deathTimer -= dae::GameTime::GetDeltaTime();

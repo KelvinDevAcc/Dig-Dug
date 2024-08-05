@@ -1,6 +1,7 @@
 #include "Player.h"
 #include "EnemyComponent.h"
 #include <iostream>
+
 #include "GameData.h"
 #include "GameTime.h"
 #include "ResourceManager.h"
@@ -12,7 +13,7 @@ namespace game
 {
     Player::Player(dae::GameObject* gameObject)
         : m_GameObject(gameObject),
-        m_timeSinceLastAction(0.0f), m_inactivityThreshold(4.0f),
+        m_timeSinceLastAction(0.0f), m_inactivityThreshold(6.0f),
         m_CurrentAnimationState(AnimationState::Idle),
         pumpDirection(glm::vec3(1, 0, 0))
     {
@@ -22,6 +23,7 @@ namespace game
         m_startPosition = m_GameObject->GetWorldPosition();
 
         SetAnimationState(AnimationState::Idle);
+        //SnapToTileCenter(m_GameObject->GetWorldPosition());
     }
 
     void Player::Update()
@@ -50,9 +52,15 @@ namespace game
             const auto playerSize = dae::SceneData::GetInstance().GetPlayers().size();
             if (playerSize == 1)
             {
-	            GameData::GetInstance().FindAndStorePlayerData();
-	            dae::SceneData::GetInstance().RemoveGameObject(GetParentObject(), dae::GameObjectType::Player);
-	            dae::SceneManager::GetInstance().GetActiveScene()->Remove(GetParentObject());
+                SetAnimationState(AnimationState::Dying);
+                dae::Message message;
+                message.type = dae::PlaySoundMessageType::Sound;
+                message.arguments.emplace_back(static_cast<sound_id>(2));
+                dae::EventQueue::Broadcast(message);
+
+                GameData::GetInstance().FindAndStorePlayerData();
+                dae::SceneData::GetInstance().RemoveGameObject(GetParentObject(), dae::GameObjectType::Player);
+                dae::SceneManager::GetInstance().GetActiveScene()->Remove(GetParentObject());
             }
             else if (playerSize > 1)
             {
@@ -61,11 +69,7 @@ namespace game
                 dae::SceneManager::GetInstance().GetActiveScene()->Remove(GetParentObject());
             }
         }
-
-        std::cout << "Pump Direction: " << pumpDirection.x << ":" << pumpDirection.y << ":" << pumpDirection.z << std::endl;
     }
-
-   
 
     void Player::Die()
     {
@@ -78,6 +82,7 @@ namespace game
         dae::EventQueue::Broadcast(message);
 
         m_healthComponent->SetHealth(m_healthComponent->GetHealth() - 100);
+        ReSpawn();
     }
 
     void Player::Render() const
@@ -93,6 +98,11 @@ namespace game
 
     void Player::ShootPump()
     {
+        if (m_CurrentAnimationState == AnimationState::Dying)
+        {
+            return;
+        }
+
         m_pumps.clear();
         m_pumpPartCount = 0;
         if (!m_pumps.empty() && m_pumps.back()->IsActive())
@@ -108,7 +118,6 @@ namespace game
         SetAnimationState(AnimationState::Attacking);
     }
 
-
     void Player::UpdatePumpTimer(float deltaTime)
     {
         if (m_pumps.empty() || m_pumpPartCount > 5)
@@ -123,13 +132,12 @@ namespace game
         }
     }
 
-
     void Player::AddPumpPart()
     {
         glm::vec3 offsetPosition(0.0f);
         if (!m_pumps.empty())
         {
-	        if (m_pumps.back())
+            if (m_pumps.back())
             {
                 constexpr auto textureSize = glm::vec2(36, 16); // Assuming you have a method to get texture size
                 offsetPosition += pumpDirection * glm::vec3(textureSize.x, textureSize.y * 2, 0) * static_cast<float>(m_pumpPartCount);
@@ -179,87 +187,228 @@ namespace game
 
     void Player::Move(float deltaX, float deltaY)
     {
-        const float scaledDeltaX = deltaX * 50 * dae::GameTime::GetDeltaTime();
-        const float scaledDeltaY = deltaY * 50 * dae::GameTime::GetDeltaTime();
+        // Check if the direction changed
+        Direction newDirection = Direction::None;
+        if (deltaX > 0)
+            newDirection = Direction::Right;
+        else if (deltaX < 0)
+            newDirection = Direction::Left;
+        else if (deltaY > 0)
+            newDirection = Direction::Down;
+        else if (deltaY < 0)
+            newDirection = Direction::Up;
 
-        if (scaledDeltaX != 0 && dae::SceneData::GetInstance().CanEntityMove(scaledDeltaX, 0.0f, *m_GameObject))
+        if (newDirection != m_CurrentDirection)
         {
-            MoveHorizontally(scaledDeltaX);
+            SnapToGrid();
+            m_CurrentDirection = newDirection;
         }
-        else if (scaledDeltaY != 0 && dae::SceneData::GetInstance().CanEntityMove(0.0f, scaledDeltaY, *m_GameObject))
+
+        if (deltaX != 0.f && dae::SceneData::GetInstance().CanEntityMove(deltaX,deltaY,*m_GameObject))
         {
-            MoveVertically(scaledDeltaY);
+            MoveHorizontally(deltaX);
+        }
+        if (deltaY != 0.f && dae::SceneData::GetInstance().CanEntityMove(deltaX, deltaY, *m_GameObject))
+        {
+            MoveVertically(deltaY);
         }
     }
 
+    void Player::SnapToGrid() const
+    {
+        glm::vec3 position = m_GameObject->GetWorldPosition();
+        position.x = SnapToGridLineX(position.x);
+        position.y = SnapToGridLineY(position.y);
+        m_GameObject->SetLocalPosition(position);
+    }
+
+    glm::ivec2 Player::PositionToGrid(const glm::vec3& position)
+    {
+        float gridStartX = SceneHelpers::GetMinCoordinates().x;
+        float gridStartY = SceneHelpers::GetMinCoordinates().y;
+        float cellSizeX = SceneHelpers::GetCellSize().x;
+        float cellSizeY = SceneHelpers::GetCellSize().y;
+
+        return {
+            static_cast<int>(std::floor((position.x - gridStartX) / cellSizeX)),
+            static_cast<int>(std::floor((position.y - gridStartY) / cellSizeY))
+        };
+    }
+
+    glm::vec3 Player::GridToPosition(const glm::ivec2& gridCoords)
+    {
+        float gridStartX = SceneHelpers::GetMinCoordinates().x;
+        float gridStartY = SceneHelpers::GetMinCoordinates().y;
+        float cellSizeX = SceneHelpers::GetCellSize().x;
+        float cellSizeY = SceneHelpers::GetCellSize().y;
+
+        return {
+            (cellSizeX * gridCoords.x) + gridStartX,
+            (cellSizeY * gridCoords.y) + gridStartY,
+            0.0f
+        };
+    }
+
+
+    float Player::SnapToGridLineX(float xPosition)
+    {
+        float gridStartX = SceneHelpers::GetMinCoordinates().x;
+        float cellSizeX = SceneHelpers::GetCellSize().x;
+
+        float relativeX = xPosition - gridStartX;
+        float snappedX = std::round(relativeX / cellSizeX) * cellSizeX;
+        return snappedX + gridStartX;
+    }
+
+    float Player::SnapToGridLineY(float yPosition)
+    {
+        float gridStartY = SceneHelpers::GetMinCoordinates().y;
+        float cellSizeY = SceneHelpers::GetCellSize().y;
+
+        float relativeY = yPosition - gridStartY;
+        float snappedY = std::round(relativeY / cellSizeY) * cellSizeY;
+        return snappedY + gridStartY;
+    }
+
+
+   /*  const float setdeltax = deltaX * 50.f * dae::GameTime::GetDeltaTime();
+        const float setdeltay = deltaY * 50.f * dae::GameTime::GetDeltaTime();
+
+        if (setdeltax != 0.f)
+        {
+            MoveHorizontally(setdeltax);
+        }
+        if (setdeltay != 0.f)
+        {
+            MoveVertically(setdeltay);
+        }*/
 
 
     void Player::MoveHorizontally(float deltaX)
     {
-        glm::vec3 currentPosition = m_GameObject->GetWorldPosition();
-        currentPosition.x += deltaX;
-        m_GameObject->SetLocalPosition(currentPosition);
+        if (deltaX == 0.0f) return;
 
+        glm::vec3 position = m_GameObject->GetWorldPosition();
+        float newPosX = position.x + deltaX * dae::GameTime::GetDeltaTime() * m_Speed;
+       // newPosX = SnapToGridLineX(newPosX);
         SetAnimationState(deltaX > 0 ? AnimationState::Walk_Right : AnimationState::Walk_Left);
-        UpdateTunnelType(currentPosition, deltaX > 0);
+        UpdateTunnelType(position, true, deltaX > 0);
+        m_GameObject->SetLocalPosition(glm::vec3(newPosX, position.y, position.z));
     }
-
 
     void Player::MoveVertically(float deltaY)
     {
-        glm::vec3 currentPosition = m_GameObject->GetWorldPosition();
-        currentPosition.y += deltaY;
-        m_GameObject->SetLocalPosition(currentPosition);
+        if (deltaY == 0.0f) return;
 
+        glm::vec3 position = m_GameObject->GetWorldPosition();
+        float newPosY = position.y + deltaY * dae::GameTime::GetDeltaTime() * m_Speed;
+        //newPosY = SnapToGridLineY(newPosY);
         SetAnimationState(deltaY > 0 ? AnimationState::Walk_Down : AnimationState::Walk_Up);
-        UpdateTunnelType(currentPosition, false);
+        UpdateTunnelType(position, false, deltaY > 0);
+        m_GameObject->SetLocalPosition(glm::vec3(position.x, newPosY, position.z));
     }
 
-    void Player::UpdateTunnelType(const glm::vec3& position, bool isHorizontal)
+    void Player::UpdateTunnelType(const glm::vec3& position, bool isHorizontal, bool isPositiveDirection)
     {
         const TunnelType currentTile = SceneHelpers::GetTileTypeAtPosition(position);
 
         if (currentTile == TunnelType::Empty)
         {
-            SceneHelpers::SetTileTypeAtPosition(position, isHorizontal ? TunnelType::rightEnd : TunnelType::bottomEnd);
+            // Set the new type based on direction
+            SceneHelpers::SetTileTypeAtPosition(position, isHorizontal ? (isPositiveDirection ? TunnelType::rightEnd : TunnelType::leftEnd)
+                : (isPositiveDirection ? TunnelType::bottomEnd : TunnelType::topEnd));
         }
-        else if ((isHorizontal && currentTile == TunnelType::rightEnd) || (!isHorizontal && currentTile == TunnelType::bottomEnd))
+        else if (isHorizontal)
         {
-            const glm::vec3 previousPosition = position - (isHorizontal ? glm::vec3(SceneHelpers::GetCellSize().x, 0, 0) : glm::vec3(0, SceneHelpers::GetCellSize().y, 0));
-            SceneHelpers::SetTileTypeAtPosition(previousPosition, isHorizontal ? TunnelType::walkTroughLeft : TunnelType::walkTroughUp);
-            SceneHelpers::SetTileTypeAtPosition(position, isHorizontal ? TunnelType::rightEnd : TunnelType::bottomEnd);
-
-            CheckAndSetCornerTypes(position, isHorizontal);
-        }
-    }
-
-    void Player::CheckAndSetCornerTypes(const glm::vec3& position, bool isHorizontal)
-    {
-        if (isHorizontal)
-        {
-	        const glm::vec3 above = position + glm::vec3(0, SceneHelpers::GetCellSize().y, 0);
-            const glm::vec3 below = position - glm::vec3(0, SceneHelpers::GetCellSize().y, 0);
-
-            if (SceneHelpers::GetTileTypeAtPosition(above) == TunnelType::topEnd) {
-                SceneHelpers::SetTileTypeAtPosition(position, TunnelType::UpRight);
+            glm::vec3 previousPosition;
+            TunnelType previousTile;
+            if (currentTile == TunnelType::rightEnd)
+            {
+                previousPosition = position + glm::vec3(-SceneHelpers::GetCellSize().x, 0, 0);
+                previousTile = SceneHelpers::GetTileTypeAtPosition(previousPosition);
+                if (previousTile == TunnelType::walkThroughUp)
+                {
+                    SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::MiddleBlock);
+                }
+                if (previousTile == TunnelType::rightEnd)
+                {
+                    SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::walkThroughLeft);
+                }
+                SceneHelpers::SetTileTypeAtPosition(position, TunnelType::rightEnd);
             }
-            else if (SceneHelpers::GetTileTypeAtPosition(below) == TunnelType::bottomEnd) {
-                SceneHelpers::SetTileTypeAtPosition(position, TunnelType::BottemRight);
+            else if (currentTile == TunnelType::leftEnd)
+            {
+                previousPosition = position + glm::vec3(SceneHelpers::GetCellSize().x, 0, 0);
+                previousTile = SceneHelpers::GetTileTypeAtPosition(previousPosition);
+                if (previousTile == TunnelType::walkThroughUp)
+                {
+                    SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::MiddleBlock);
+                }
+                if (previousTile == TunnelType::leftEnd)
+                {
+                    SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::walkThroughLeft);
+                }
+                SceneHelpers::SetTileTypeAtPosition(position, TunnelType::leftEnd);
             }
         }
         else
         {
-	        const glm::vec3 left = position - glm::vec3(SceneHelpers::GetCellSize().x, 0, 0);
-            const glm::vec3 right = position + glm::vec3(SceneHelpers::GetCellSize().x, 0, 0);
-
-            if (SceneHelpers::GetTileTypeAtPosition(left) == TunnelType::leftEnd) {
-                SceneHelpers::SetTileTypeAtPosition(position, TunnelType::Bottomleft);
+            glm::vec3 previousPosition;
+            TunnelType previousTile;
+            if (currentTile == TunnelType::topEnd)
+            {
+                previousPosition = position + glm::vec3(0, SceneHelpers::GetCellSize().y, 0);
+                previousTile = SceneHelpers::GetTileTypeAtPosition(previousPosition);
+                if (previousTile == TunnelType::walkThroughLeft)
+                {
+                    SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::MiddleBlock);
+                }
+                if (previousTile == TunnelType::topEnd)
+                {
+                    SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::walkThroughUp);
+                }
+                SceneHelpers::SetTileTypeAtPosition(position, TunnelType::topEnd);
             }
-            else if (SceneHelpers::GetTileTypeAtPosition(right) == TunnelType::rightEnd) {
-                SceneHelpers::SetTileTypeAtPosition(position, TunnelType::BottemRight);
+            else if (currentTile == TunnelType::bottomEnd)
+            {
+                previousPosition = position + glm::vec3(0, -SceneHelpers::GetCellSize().y, 0);
+                previousTile = SceneHelpers::GetTileTypeAtPosition(previousPosition);
+                if (previousTile == TunnelType::walkThroughLeft)
+                {
+                    SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::MiddleBlock);
+                }
+                if (previousTile == TunnelType::bottomEnd)
+                {
+                    SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::walkThroughUp);
+                }
+                SceneHelpers::SetTileTypeAtPosition(position, TunnelType::bottomEnd);
             }
         }
     }
+
+    void Player::CheckAndSetCornerTypes(const glm::vec3& position, bool isHorizontal, bool isPositiveDirection)
+    {
+    	const glm::vec3 above = position + glm::vec3(0, -SceneHelpers::GetCellSize().y, 0);
+        glm::vec3 below = position + glm::vec3(0, SceneHelpers::GetCellSize().y, 0);
+        const glm::vec3 left = position + glm::vec3(-SceneHelpers::GetCellSize().x, 0, 0);
+        const glm::vec3 right = position + glm::vec3(SceneHelpers::GetCellSize().x, 0, 0);
+
+
+        // Check for corner types
+        if (isHorizontal && SceneHelpers::GetTileTypeAtPosition(below) == TunnelType::topEnd)
+        {
+            const glm::vec3 previousPosition = position + glm::vec3(0, -SceneHelpers::GetCellSize().y, 0);
+            SceneHelpers::SetTileTypeAtPosition(previousPosition, isPositiveDirection ? TunnelType::UpRight : TunnelType::UpLeft);
+            SceneHelpers::SetTileTypeAtPosition(position, TunnelType::rightEnd);
+        }
+        if (isHorizontal && SceneHelpers::GetTileTypeAtPosition(right) == TunnelType::bottomEnd)
+        {
+            const glm::vec3 previousPosition = position + glm::vec3(0, -SceneHelpers::GetCellSize().y, 0);
+            SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::UpRight);
+            SceneHelpers::SetTileTypeAtPosition(position, TunnelType::leftEnd);
+        }
+    }
+
 
     void Player::SetAnimationState(AnimationState state)
     {
@@ -271,30 +420,61 @@ namespace game
         switch (state)
         {
         case AnimationState::Idle:
-            if (m_animationComponent) 
+            if (m_animationComponent)
             {
-                m_animationComponent->Play("Idle", true);
-                m_animationComponent->FlipSprite(false, false);
+                if (pumpDirection.x > 0)
+                {
+                    m_animationComponent->Play("Idle");
+                    m_animationComponent->FlipSprite(false, false); // Facing right
+                }
+                else if (pumpDirection.x < 0)
+                {
+                    m_animationComponent->Play("Idle");
+                    m_animationComponent->FlipSprite(true, false); // Facing left
+                }
+                else if (pumpDirection.y < 0)
+                {
+                    m_animationComponent->Play("IdleUp");
+                    m_animationComponent->FlipSprite(false, false); // Facing up
+                }
+                else if (pumpDirection.y > 0)
+                {
+                    m_animationComponent->Play("IdleUp");
+                    m_animationComponent->FlipSprite(false, true); // Facing down
+                }
             }
             break;
         case AnimationState::Walk_Up:
-            if (m_animationComponent) 
+            if (m_animationComponent)
+            {
+                m_animationComponent->FlipSprite(false, false);
                 m_animationComponent->Play("Walk_Up", true);
+            }
             pumpDirection = glm::vec3(0, -1, 0);
             break;
         case AnimationState::Walk_Right:
-            if (m_animationComponent) 
+            if (m_animationComponent)
+            {
+                m_animationComponent->FlipSprite(false, false);
                 m_animationComponent->Play("Walk_Right", true);
+            }
+
             pumpDirection = glm::vec3(1, 0, 0);
             break;
         case AnimationState::Walk_Left:
             if (m_animationComponent)
+            {
+                m_animationComponent->FlipSprite(false, false);
                 m_animationComponent->Play("Walk_Left", true);
+            }
             pumpDirection = glm::vec3(-1, 0, 0);
             break;
         case AnimationState::Walk_Down:
             if (m_animationComponent)
+            {
+                m_animationComponent->FlipSprite(false, false);
                 m_animationComponent->Play("Walk_Down", true);
+            }
             pumpDirection = glm::vec3(0, 1, 0);
             break;
         case AnimationState::Attacking:
@@ -332,4 +512,5 @@ namespace game
             break;
         }
     }
+
 }

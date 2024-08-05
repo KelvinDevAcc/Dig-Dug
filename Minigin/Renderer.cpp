@@ -28,7 +28,7 @@ void dae::Renderer::Init(SDL_Window* window)
 	m_window = window;
 
 	// Create OpenGL context
-	SDL_GLContext glContext = SDL_GL_CreateContext(window);
+	const SDL_GLContext glContext = SDL_GL_CreateContext(window);
 	if (!glContext)
 	{
 		throw std::runtime_error(std::string("SDL_GL_CreateContext Error: ") + SDL_GetError());

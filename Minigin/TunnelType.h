@@ -6,10 +6,11 @@ enum class TunnelType {
     bottomEnd,
     leftEnd,
     rightEnd,
-    walkTroughUp,
-    walkTroughLeft,
+    walkThroughUp,
+    walkThroughLeft,
     UpRight,
     UpLeft,
-    BottemRight,
-    Bottomleft
+    BottomRight,
+    BottomLeft,
+    MiddleBlock
 };

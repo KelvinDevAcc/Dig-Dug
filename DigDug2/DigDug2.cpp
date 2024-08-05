@@ -82,6 +82,7 @@ void loadResources()
     dae::ResourceManager::LoadTexture("UpLeft", "spritesheetDigging.png", SDL_Rect(112, 0, 16, 16));
     dae::ResourceManager::LoadTexture("BottemRight", "spritesheetDigging.png", SDL_Rect(128, 0, 16, 16));
     dae::ResourceManager::LoadTexture("BottomLeft", "spritesheetDigging.png", SDL_Rect(144, 0, 16, 16));
+    dae::ResourceManager::LoadTexture("MiddleBlock", "spritesheetDigging.png", SDL_Rect(160, 0, 16, 16));
 
 
     dae::ResourceManager::LoadTexture("PumpLine", "SpriteSheetFinal.png", SDL_Rect(384, 144, 32, 16));
@@ -94,6 +95,7 @@ void loadResources()
         16,  // colCount
         {
             { "Idle", { { { 1, 0 }}, 1 } },
+            { "IdleUp", { { { 3, 0 }}, 1 } },
             { "Walk_Right", { {  { 0, 0 }, { 1, 0 } }, 4 } },
             { "Walk_Left", { { { 4, 0 }, { 5, 0 } }, 4 } },
             { "Walk_Up", { { { 2, 0 }, { 3, 0 } }, 4 } },
@@ -207,8 +209,7 @@ void BindKeyboardCommands(dae::InputManager& inputManager, int playerId) {
     inputManager.BindCommand(SDL_SCANCODE_W, KeyState::Pressed, std::make_unique<MoveCommand>(playerId, 0.0f, -1.5f), InputType::Keyboard);
     inputManager.BindCommand(SDL_SCANCODE_S, KeyState::Pressed, std::make_unique<MoveCommand>(playerId, 0.0f, 1.5f), InputType::Keyboard);
     inputManager.BindCommand(SDL_SCANCODE_A, KeyState::Pressed, std::make_unique<MoveCommand>(playerId, -1.5f, 0.0f), InputType::Keyboard);
-    inputManager.BindCommand(SDL_SCANCODE_D, KeyState::Pressed, std::make_unique<MoveCommand>(playerId, 1.5f, 0.0f), InputType::Keyboard);
-    inputManager.BindCommand(SDL_SCANCODE_X, KeyState::Up, std::make_unique<ScorePointCommand>(playerId), InputType::Keyboard);
+    inputManager.BindCommand(SDL_SCANCODE_D, KeyState::Pressed, std::make_unique<MoveCommand>(playerId, 1.5f, 0.0f), InputType::Keyboard); inputManager.BindCommand(SDL_SCANCODE_X, KeyState::Up, std::make_unique<ScorePointCommand>(playerId), InputType::Keyboard);
     inputManager.BindCommand(SDL_SCANCODE_Z, KeyState::Up, std::make_unique<ScorePointCommand>(playerId), InputType::Keyboard);
     inputManager.BindCommand(SDL_SCANCODE_C, KeyState::Up, std::make_unique<DamageCommand>(playerId), InputType::Keyboard);
 }
@@ -723,7 +724,6 @@ void GameScene(dae::Scene* scene)
 
     auto spriteRenderComponent = std::make_unique<dae::SpriteRendererComponent>(PlayerObject.get(), dae::ResourceManager::GetSprite("Player"));
     spriteRenderComponent->SetDimensions(40, 40);
-    spriteRenderComponent->SetRenderOrder(1);
     PlayerObject->AddComponent(std::move(spriteRenderComponent));
 
     auto animationComponent = std::make_unique<dae::AnimationComponent>(PlayerObject.get(), PlayerObject->GetComponent<dae::SpriteRendererComponent>(), "Idle");
@@ -743,7 +743,8 @@ void GameScene(dae::Scene* scene)
     scene->Add(std::move(PlayerObject));
 
    
-    auto PookaObject = std::make_unique<dae::GameObject>();
+    /*auto PookaObject = std::make_unique<dae::GameObject>();
+    std::cout << "Creating PookaObject" << std::endl;
 
     auto spriterenderComponent2 = std::make_unique<dae::SpriteRendererComponent>(PookaObject.get(), dae::ResourceManager::GetSprite("enemy"));
     spriterenderComponent2->SetDimensions(40, 40);
@@ -752,58 +753,53 @@ void GameScene(dae::Scene* scene)
     auto animationComponent2 = std::make_unique<dae::AnimationComponent>(PookaObject.get(), PookaObject->GetComponent<dae::SpriteRendererComponent>(), "Normal");
     animationComponent2->Play("Walk_Down", true);
     PookaObject->AddComponent(std::move(animationComponent2));
-    PookaObject->SetLocalPosition(glm::vec3(380, 260, 0.0f));
+
+    PookaObject->SetLocalPosition(glm::vec3(380, 260, 1.0f));
 
     auto hitBox2 = std::make_unique<HitBox>(glm::vec2(40, 40));
     hitBox2->SetGameObject(PookaObject.get());
     PookaObject->AddComponent(std::move(hitBox2));
 
-    auto enemyComponent = std::make_unique<game::EnemyComponent>(PookaObject.get(), scene);
-    PookaObject->AddComponent(std::move(enemyComponent));
-
-    //auto pookaComponent = std::make_unique<PookaComponent>(PookaObject.get(),loadMap.getIngMap());
-    //PookaObject->AddComponent(std::move(pookaComponent));
+    auto pookaComponent = std::make_unique<PookaComponent>(PookaObject.get());
+    PookaObject->AddComponent(std::move(pookaComponent));
 
     dae::SceneData::GetInstance().AddGameObject(PookaObject.get(), dae::GameObjectType::enemy);
-
     scene->Add(std::move(PookaObject));
 
-
-
     auto SaugeObject2 = std::make_unique<dae::GameObject>();
-
     auto spriterenderComponent3 = std::make_unique<dae::SpriteRendererComponent>(SaugeObject2.get(), dae::ResourceManager::GetSprite("enemy"));
     spriterenderComponent3->SetDimensions(40, 40);
     SaugeObject2->AddComponent(std::move(spriterenderComponent3));
 
     auto animationComponent3 = std::make_unique<dae::AnimationComponent>(SaugeObject2.get(), SaugeObject2->GetComponent<dae::SpriteRendererComponent>(), "Normal");
-    animationComponent3->Play("Walk_Right", true);
+    animationComponent3->Play("Walk_Down", true);
     SaugeObject2->AddComponent(std::move(animationComponent3));
-    SaugeObject2->SetLocalPosition(glm::vec3(820, 180, 0.0f));
+
+    SaugeObject2->SetLocalPosition(glm::vec3(820, 180, 1.0f));
 
     auto hitBox3 = std::make_unique<HitBox>(glm::vec2(40, 40));
     hitBox3->SetGameObject(SaugeObject2.get());
     SaugeObject2->AddComponent(std::move(hitBox3));
 
-    auto enemyComponent2 = std::make_unique<game::EnemyComponent>(SaugeObject2.get(), scene);
-    SaugeObject2->AddComponent(std::move(enemyComponent2));
+    auto pookaComponent2 = std::make_unique<PookaComponent>(SaugeObject2.get());
+    SaugeObject2->AddComponent(std::move(pookaComponent2));
+    std::cout << "SaugeObject2: PookaComponent added" << std::endl;
 
     dae::SceneData::GetInstance().AddGameObject(SaugeObject2.get(), dae::GameObjectType::enemy);
+    scene->Add(std::move(SaugeObject2));*/
 
-    scene->Add(std::move(SaugeObject2));
 
 
     auto RockObject = std::make_unique<dae::GameObject>();
 
     auto spriterenderComponent4 = std::make_unique<dae::SpriteRendererComponent>(RockObject.get(), dae::ResourceManager::GetSprite("Rock"));
     spriterenderComponent4->SetDimensions(40, 40);
-    spriterenderComponent4->SetRenderOrder(2);
     RockObject->AddComponent(std::move(spriterenderComponent4));
 
     auto RockObjectanimationComponent = std::make_unique<dae::AnimationComponent>(RockObject.get(), RockObject->GetComponent<dae::SpriteRendererComponent>(), "Digging");
 	RockObjectanimationComponent->Play("Idle", true);
     RockObject->AddComponent(std::move(RockObjectanimationComponent));
-    RockObject->SetLocalPosition(glm::vec3(660, 420, 0.0f));
+    RockObject->SetLocalPosition(glm::vec3(660, 420, 1.0f));
 
     auto RockObjecthitBox = std::make_unique<HitBox>(glm::vec2(40, 40));
     RockObjecthitBox->SetGameObject(RockObject.get());
@@ -811,7 +807,7 @@ void GameScene(dae::Scene* scene)
 
     auto RockComponnet = std::make_unique<Rock>(RockObject.get());
     RockObject->AddComponent(std::move(RockComponnet));
-    dae::SceneData::GetInstance().AddGameObject(RockObject.get(), dae::GameObjectType::enemy);
+    dae::SceneData::GetInstance().AddGameObject(RockObject.get(), dae::GameObjectType::Rock);
 
     scene->Add(std::move(RockObject));
 
@@ -844,12 +840,12 @@ void GameScene2(dae::Scene* scene)
 
     SceneHelpers::LoadTunnelMapIntoScene(loadMap, scene, startPos, mapScale);
 
-    auto lifeSprite = std::make_unique<dae::GameObject>();
-    auto spriteComponent = std::make_unique<dae::SpriteRendererComponent>(lifeSprite.get(), dae::ResourceManager::GetInstance().GetTexture("ArrowLine"));
-    spriteComponent->SetDimensions(SceneHelpers::GetGridSize().x, SceneHelpers::GetGridSize().y);
-    lifeSprite->AddComponent(std::move(spriteComponent));
-    lifeSprite->SetLocalPosition(glm::vec3((SceneHelpers::GetMinCoordinates().x + SceneHelpers::GetMaxCoordinates().x) / 2, (SceneHelpers::GetMinCoordinates().y + SceneHelpers::GetMaxCoordinates().y) / 2, -1.0f)); // Adjust position for each sprite
-    scene->Add(std::move(lifeSprite));
+    //auto lifeSprite = std::make_unique<dae::GameObject>();
+    //auto spriteComponent = std::make_unique<dae::SpriteRendererComponent>(lifeSprite.get(), dae::ResourceManager::GetInstance().GetTexture("ArrowLine"));
+    //spriteComponent->SetDimensions(SceneHelpers::GetGridSize().x, SceneHelpers::GetGridSize().y);
+    //lifeSprite->AddComponent(std::move(spriteComponent));
+    //lifeSprite->SetLocalPosition(glm::vec3((SceneHelpers::GetMinCoordinates().x + SceneHelpers::GetMaxCoordinates().x) / 2, (SceneHelpers::GetMinCoordinates().y + SceneHelpers::GetMaxCoordinates().y) / 2, -1.0f)); // Adjust position for each sprite
+    //scene->Add(std::move(lifeSprite));
 
     //SceneHelpers::LoadMapIntoScene(loadMap, scene, startPos, mapScale);
 
@@ -876,7 +872,7 @@ void GameScene2(dae::Scene* scene)
     spriteRenderComponent->SetDimensions(40, 40);
     PlayerObject->AddComponent(std::move(spriteRenderComponent));
 
-    auto animationComponent = std::make_unique<dae::AnimationComponent>(PlayerObject.get(), PlayerObject->GetComponent<dae::SpriteRendererComponent>(), "Normal");
+    auto animationComponent = std::make_unique<dae::AnimationComponent>(PlayerObject.get(), PlayerObject->GetComponent<dae::SpriteRendererComponent>(), "Idle");
     animationComponent->Play("Walk_Right", true);
     PlayerObject->AddComponent(std::move(animationComponent));
     PlayerObject->SetLocalPosition(glm::vec3(100, 100, 0.0f));
@@ -918,7 +914,7 @@ void GameScene2(dae::Scene* scene)
     spriteRenderComponent2->SetDimensions(40, 40);
     PlayerObject2->AddComponent(std::move(spriteRenderComponent2));
 
-    auto animationComponent2 = std::make_unique<dae::AnimationComponent>(PlayerObject2.get(), PlayerObject2->GetComponent<dae::SpriteRendererComponent>(), "Normal");
+    auto animationComponent2 = std::make_unique<dae::AnimationComponent>(PlayerObject2.get(), PlayerObject2->GetComponent<dae::SpriteRendererComponent>(), "Idle");
     animationComponent2->Play("Walk_Right", true);
     PlayerObject2->AddComponent(std::move(animationComponent2));
     PlayerObject2->SetLocalPosition(glm::vec3(100, 300, 0.0f));

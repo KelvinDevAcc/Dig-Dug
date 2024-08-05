@@ -2,8 +2,6 @@
 #include <iostream>
 #include <fstream>
 #include "SceneHelpers.h"
-#include "TunnelType.h"
-
 LoadMap::LoadMap(const std::string& mapFilePath, const std::string& ingFilePath) {
     loadFromFile(mapFilePath, ingFilePath);
 }

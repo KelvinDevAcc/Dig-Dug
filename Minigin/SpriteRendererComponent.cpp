@@ -98,7 +98,7 @@ void SpriteRendererComponent::Render() const
     if (texture) {
         const glm::vec2& pos = m_gameObject->GetWorldPosition();
         const glm::vec2 middlePoint = pos - glm::vec2(m_width / 2.0f, m_height / 2.0f);
-        float rotation = m_gameObject->GetRotation();
+        const float rotation = m_gameObject->GetRotation();
 
         Renderer::GetInstance().RenderTexture(*texture,
             middlePoint,

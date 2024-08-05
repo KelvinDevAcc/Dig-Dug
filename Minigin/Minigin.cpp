@@ -109,9 +109,9 @@ void dae::minigin::Run(const std::function<void()>& load)
 
         TweenManager::GetInstance().Update();
 
-        SceneData::GetInstance().Update();
-
         sceneManager.Update();
+
+        SceneData::GetInstance().Update();
 
         renderer.Render();
 

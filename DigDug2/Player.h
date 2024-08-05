@@ -1,5 +1,6 @@
 #pragma once
 #include "AnimationComponent.h"
+#include "Command.h"
 #include "GameObject.h"
 #include "HealthComponent.h"
 #include "LoadMap.h"
@@ -19,6 +20,9 @@ namespace game
         Dying,
         Digging
     };
+    
+    
+    enum class Direction { None, Up, Down, Left, Right };
 
     class Player : public dae::Component
     {
@@ -68,8 +72,14 @@ namespace game
         void AddPumpPart();
         void UpdatePumpTextures() const;
         std::unique_ptr<Pump> GetInactivePump();
-        void UpdateTunnelType(const glm::vec3& position, bool isHorizontal);
-        void CheckAndSetCornerTypes(const glm::vec3& position, bool isHorizontal);
+        void UpdateTunnelType(const glm::vec3& position, bool isHorizontal, bool isPositiveDirection);
+        void CheckAndSetCornerTypes(const glm::vec3& position, bool isHorizontal, bool isPositiveDirection);
+        void SnapToGrid() const;
+        static glm::ivec2 PositionToGrid(const glm::vec3& position);
+        static glm::vec3 GridToPosition(const glm::ivec2& gridCoords);
+        static float SnapToGridLineY(float yPosition);
+        static float SnapToGridLineX(float xPosition);
+
 
         float m_timeSinceLastPumpPart{ 0.0f };
         float m_pumpPartInterval{ 0.1f };
@@ -80,5 +90,14 @@ namespace game
         std::vector<std::unique_ptr<Pump>> m_pumpPool;
         glm::vec3 pumpDirection{ 1, 0, 0 };
         size_t m_maxPumps;
+
+        glm::vec3 m_TargetPosition;
+        bool m_IsMoving = false;
+        glm::vec2 m_GridSize;
+        float m_Speed = 50.0f; // Adjust as necessary
+
+
+        Direction m_CurrentDirection = Direction::None;
+
     };
 }
