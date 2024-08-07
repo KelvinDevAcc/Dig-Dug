@@ -114,19 +114,39 @@ void PookaComponent::MoveToNextWaypointTowards(const glm::vec3& targetPosition) 
     }
 }
 
+glm::ivec2 PositionToGrid(const glm::vec3& position)
+{
+    float gridStartX = SceneHelpers::GetMinCoordinates().x;
+    float gridStartY = SceneHelpers::GetMinCoordinates().y;
+    float cellSizeX = SceneHelpers::GetCellSize().x;
+    float cellSizeY = SceneHelpers::GetCellSize().y;
+
+    return {
+        static_cast<int>(std::floor((position.x - gridStartX) / cellSizeX)),
+        static_cast<int>(std::floor((position.y - gridStartY) / cellSizeY))
+    };
+}
+
+glm::vec3 GridToPosition(const glm::ivec2& gridCoords)
+{
+    float gridStartX = SceneHelpers::GetMinCoordinates().x;
+    float gridStartY = SceneHelpers::GetMinCoordinates().y;
+    float cellSizeX = SceneHelpers::GetCellSize().x;
+    float cellSizeY = SceneHelpers::GetCellSize().y;
+
+    return {
+        (cellSizeX * gridCoords.x) + gridStartX,
+        (cellSizeY * gridCoords.y) + gridStartY,
+        0.0f
+    };
+}
+
 glm::vec3 PookaComponent::FindNearestValidSpot() {
-    const float maxSearchDistance = 1000.0f; // Maximum distance to search
+    const float maxSearchDistance = 100.0f; // Maximum distance to search
     const float stepSize = SceneHelpers::GetCellSize().x; // Step size in grid (assumes square cells)
 
-    // Get the starting position of the grid
-    glm::vec2 gridStart = SceneHelpers::GetMinCoordinates();
-    glm::vec2 currentPosition2D = glm::vec2(m_CurrentPosition.x, m_CurrentPosition.y);
-
     // Calculate the grid origin in 2D space
-    glm::vec2 gridOrigin = gridStart + glm::vec2(
-        std::fmod(currentPosition2D.x - gridStart.x, stepSize),
-        std::fmod(currentPosition2D.y - gridStart.y, stepSize)
-    );
+    glm::ivec2 currentGridPos = PositionToGrid(m_Owner->GetWorldPosition());
 
     float searchRange = stepSize;
 
@@ -134,16 +154,12 @@ glm::vec3 PookaComponent::FindNearestValidSpot() {
         // Search in a grid pattern around the grid origin
         for (float x = -searchRange; x <= searchRange; x += stepSize) {
             for (float y = -searchRange; y <= searchRange; y += stepSize) {
-                glm::vec2 potentialSpot2D = gridOrigin + glm::vec2(x, y);
-
-                // Convert to 3D for compatibility with existing methods
-                glm::vec3 potentialSpot(potentialSpot2D.x, potentialSpot2D.y, m_CurrentPosition.z);
+                glm::ivec2 potentialGridPos = currentGridPos + glm::ivec2(x / stepSize, y / stepSize);
+                glm::vec3 potentialSpot = GridToPosition(potentialGridPos);
 
                 // Check if the center of the tile is walkable
                 if (dae::SceneData::GetInstance().CanEnemyMove(potentialSpot.x, potentialSpot.y, *m_Owner)) {
-                    // Return the center of the valid tile
-                    glm::vec3 tileCenter = potentialSpot + glm::vec3(stepSize / 2.0f, stepSize / 2.0f, 0.0f);
-                    return tileCenter;
+                    return potentialSpot;
                 }
             }
         }
@@ -156,6 +172,7 @@ glm::vec3 PookaComponent::FindNearestValidSpot() {
     std::cout << "No valid spot found within the search range." << std::endl;
     return m_CurrentPosition; // Return the current position if no valid spot is found
 }
+
 
 bool PookaComponent::DetectsPlayer() {
     const auto& sceneData = dae::SceneData::GetInstance();
@@ -183,13 +200,11 @@ bool PookaComponent::DetectsPlayer() {
 void PookaComponent::EnableGhostMode() {
     std::cout << "Pooka ghost mode enabled." << std::endl;
     m_GhostModeEnabled = true;
-    // Additional logic to disable collisions, change appearance, etc.
 }
 
 void PookaComponent::DisableGhostMode() {
     std::cout << "Pooka ghost mode disabled." << std::endl;
     m_GhostModeEnabled = false;
-    // Additional logic to re-enable collisions, reset appearance, etc.
 }
 
 bool PookaComponent::ReachedDestination() {
@@ -330,4 +345,20 @@ void PookaComponent::UpdateTimer() {
 
 bool PookaComponent::ShouldEnterGhostMode() {
     return m_GhostModeEnabled;
+}
+
+void PookaComponent::HitByPump() {
+    ++m_PumpHits;
+    if (m_PumpHits <= 4)
+    {
+        SetState(std::make_unique<PookaPumpedState>());
+    }
+}
+
+void PookaComponent::StartDeflationTimer() {
+    m_DeflationTimeLimit = 5.0f; // Set the deflation time limit (e.g., 5 seconds)
+}
+
+void PookaComponent::OnCrushed() {
+        SetState(std::make_unique<PookaCrushedState>());
 }

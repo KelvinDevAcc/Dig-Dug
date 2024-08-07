@@ -4,6 +4,7 @@
 
 #include "EnemyComponent.h"
 #include "GameTime.h"
+#include "PookaComponent.h"
 #include "ResourceManager.h"
 #include "SceneData.h"
 
@@ -106,7 +107,7 @@ void Pump::PumpEnemy()
     // Pump logic
     //if (/* Logic to check if enemy should explode */)
     //{
-       //m_connectedEnemy->GetComponent<game::EnemyComponent>()->Die();
+    m_connectedEnemy->GetComponent<PookaComponent>()->HitByPump();
         Deactivate();
         m_connectedEnemy = nullptr;
    /* }*/

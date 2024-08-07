@@ -3,8 +3,6 @@
 #include <memory>
 #include <vector>
 #include <glm/vec3.hpp>
-#include <typeinfo> // for typeid
-
 #include "Component.h"
 
 enum class Direction { Up, Down, Left, Right };
@@ -15,6 +13,9 @@ class PookaComponent : public dae::Component {
     friend class  PookaNormalState;
     friend class  PookaGhostState;
     friend class  PookaWandering;
+    friend class  PookaPumpedState;
+    friend class  PookaDeadState;
+    friend class  PookaCrushedState;
 
 public:
     PookaComponent(dae::GameObject* owner);
@@ -36,6 +37,10 @@ public:
     bool TryMove(glm::vec3 direction);
     void MoveToNextWaypointTowards(const glm::vec3& targetPosition);
     glm::vec3 FindNearestValidSpot();
+    void OnCrushed();
+
+    void HitByPump();
+    int GetPumpHits() const { return m_PumpHits; }
 
     bool ShouldEnterGhostMode();
     void UpdateTimer(); // Method to update the timer
@@ -57,5 +62,8 @@ private:
     glm::vec3 m_TargetPlayerPosition; // Target position to move to when in ghost mode
     float m_GhostModePursuitTimer = 0.0f; // Timer for pursuit duration
     float m_GhostModePursuitDuration = 5.0f; // Duration to try and reach the player (in seconds)
+    int m_PumpHits = 0;
 
+    float m_DeflationTimeLimit; // Time limit for deflation
+    void StartDeflationTimer();
 };

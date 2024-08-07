@@ -5,6 +5,8 @@
 #include "AnimationComponent.h"
 #include "GameObject.h"
 #include "GameTime.h"
+#include "SceneData.h"
+#include "SceneManager.h"
 
 void PookaNormalState::Enter(PookaComponent* /*pooka*/) {
     std::cout << "Pooka entered Normal State" << std::endl;
@@ -13,10 +15,6 @@ void PookaNormalState::Enter(PookaComponent* /*pooka*/) {
 void PookaNormalState::Update(PookaComponent* pooka) {
     pooka->MoveToNextWaypoint();
     std::cout << "Pooka is patrolling" << std::endl;
-
-    if (pooka->DetectsPlayer()) {
-        pooka->SetState(std::make_unique<PookaChaseState>());
-    }
 
     if (pooka->ShouldEnterGhostMode()) {
         pooka->SetState(std::make_unique<PookaGhostState>());
@@ -116,20 +114,113 @@ void PookaWandering::Update(PookaComponent* pooka) {
 void PookaWandering::Exit(PookaComponent* /*pooka*/) {
 }
 
-void PookaChaseState::Enter(PookaComponent* /*pooka*/) {
-    std::cout << "Pooka entered Chase State" << std::endl;
-    
+void PookaPumpedState::Enter(PookaComponent* pooka) {
+    std::cout << "Pooka hit by pump. Pump hits: " << pooka->m_PumpHits << std::endl;
+
+    m_ElapsedTime = 0.0f;
+
+    // Play the corresponding animation based on the number of hits
+    switch (pooka->m_PumpHits) {
+    case 1:
+        pooka->m_Owner->GetComponent<dae::AnimationComponent>()->Play("Pumped1", true);
+        break;
+    case 2:
+        pooka->m_Owner->GetComponent<dae::AnimationComponent>()->Play("Pumped2", true);
+        break;
+    case 3:
+        pooka->m_Owner->GetComponent<dae::AnimationComponent>()->Play("Pumped3", true);
+        break;
+    case 4:
+        pooka->m_Owner->GetComponent<dae::AnimationComponent>()->Play("Pumped4", true);
+        m_Pumped4Duration = pooka->m_Owner->GetComponent<dae::AnimationComponent>()->GetAnimationDuration();
+        break;
+    }
+    pooka->StartDeflationTimer();
+
+    // Initialize the deflation timer
+    m_DeflationTimer = pooka->m_DeflationTimeLimit;
 }
 
-void PookaChaseState::Update(PookaComponent* pooka) {
-    std::cout << "Pooka is chasing the player" << std::endl;
-    pooka->ChasePlayer();
 
-    if (!pooka->DetectsPlayer()) {
-        pooka->SetState(std::make_unique<PookaWandering>());
+void PookaPumpedState::Update(PookaComponent* pooka) {
+    std::cout << "Pooka is being pumped" << std::endl;
+
+    // If Pump hits is 4, track the elapsed time to switch to dead state
+    if (pooka->m_PumpHits == 4) {
+        m_ElapsedTime += dae::GameTime::GetDeltaTime();
+        if (m_ElapsedTime >= static_cast<float>(m_Pumped4Duration)) {
+            pooka->SetState(std::make_unique<PookaDeadState>());
+            return;
+        }
+    }
+
+    // Decrease the deflation timer
+    m_DeflationTimer -= dae::GameTime::GetDeltaTime();
+
+    if (m_DeflationTimer <= 0.0f) {
+        // Deflation starts if the timer expires
+        pooka->m_PumpHits--;
+
+        if (pooka->m_PumpHits > 0) {
+            // Play the corresponding deflation animation
+            switch (pooka->m_PumpHits) {
+            case 1:
+                pooka->m_Owner->GetComponent<dae::AnimationComponent>()->Play("Pumped1", true);
+                break;
+            case 2:
+                pooka->m_Owner->GetComponent<dae::AnimationComponent>()->Play("Pumped2", true);
+                break;
+            case 3:
+                pooka->m_Owner->GetComponent<dae::AnimationComponent>()->Play("Pumped3", true);
+                break;
+            }
+
+            // Reset the deflation timer
+            m_DeflationTimer = pooka->m_DeflationTimeLimit;
+        }
+        else {
+            // If pump hits reach 0, transition back to wandering state
+            pooka->SetState(std::make_unique<PookaWandering>());
+        }
     }
 }
 
-void PookaChaseState::Exit(PookaComponent* /*pooka*/) {
-    std::cout << "Pooka exiting Chase State" << std::endl;
+
+void PookaPumpedState::Exit(PookaComponent* /*pooka*/) {
+    std::cout << "Pooka exiting Pumped State" << std::endl;
+}
+
+
+void PookaDeadState::Enter(PookaComponent* pooka) {
+    std::cout << "Pooka entered Dead State" << std::endl;
+
+    // Remove the Pooka object from the scene after the death animation plays
+    dae::SceneData::GetInstance().RemoveGameObject(pooka->m_Owner, dae::GameObjectType::enemy);
+    dae::SceneManager::GetInstance().GetActiveScene()->Remove(pooka->m_Owner);
+}
+
+void PookaDeadState::Update(PookaComponent* /*pooka*/) {
+    // No update logic needed for dead state
+}
+
+void PookaDeadState::Exit(PookaComponent* /*pooka*/) {
+    std::cout << "Pooka exiting Dead State" << std::endl;
+}
+
+void PookaCrushedState::Enter(PookaComponent* pooka) {
+    std::cout << "Enemy entered Crushed State" << std::endl;
+    // Play crushed animation
+    pooka->m_Owner->GetComponent<dae::AnimationComponent>()->Play("Crushed");
+    m_CrushedDuration = pooka->m_Owner->GetComponent<dae::AnimationComponent>()->GetAnimationDuration();
+}
+
+void PookaCrushedState::Update(PookaComponent* pooka) {
+    m_ElapsedTime += dae::GameTime::GetDeltaTime();
+    if (m_ElapsedTime >= static_cast<float>(m_CrushedDuration)) {
+        pooka->SetState(std::make_unique<PookaDeadState>());
+    }
+}
+
+void PookaCrushedState::Exit(PookaComponent* /*pooka*/) {
+    std::cout << "Enemy exiting Crushed State" << std::endl;
 }

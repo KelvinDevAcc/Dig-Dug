@@ -140,7 +140,7 @@ namespace game
             if (m_pumps.back())
             {
                 constexpr auto textureSize = glm::vec2(36, 16); // Assuming you have a method to get texture size
-                offsetPosition += pumpDirection * glm::vec3(textureSize.x, textureSize.y * 2, 0) * static_cast<float>(m_pumpPartCount);
+                offsetPosition += pumpDirection * glm::vec3(textureSize.x, textureSize.y, 0) * static_cast<float>(m_pumpPartCount);
             }
         }
 

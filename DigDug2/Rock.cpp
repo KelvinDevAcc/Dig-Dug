@@ -1,6 +1,7 @@
 #include "Rock.h"
 #include "GameTime.h"
 #include "Player.h"
+#include "PookaComponent.h"
 #include "SceneData.h"
 #include "SceneHelpers.h"
 #include "SceneManager.h"
@@ -207,6 +208,16 @@ bool Rock::CheckCollisionWithObjects()
 
 	if (sceneData.isOnEnemy(*m_Owner))
 	{
+        const auto& enemies = sceneData.GetEnemies();
+        for (const auto& enemy : enemies) {
+            const auto hitBox = m_Owner->GetComponent<HitBox>();
+            const auto enemyHitBox = enemy->GetComponent<HitBox>();
+            if (hitBox && enemyHitBox && hitBox->IsColliding(*enemyHitBox)) {
+                // Notify the enemy about being crushed
+                enemy->GetComponent<PookaComponent>()->OnCrushed(); // Add this method to the enemy class
+                return true;
+            }
+        }
         return true;
 	}
 
