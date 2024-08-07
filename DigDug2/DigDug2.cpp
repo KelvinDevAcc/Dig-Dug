@@ -743,7 +743,7 @@ void GameScene(dae::Scene* scene)
     scene->Add(std::move(PlayerObject));
 
    
-    /*auto PookaObject = std::make_unique<dae::GameObject>();
+    auto PookaObject = std::make_unique<dae::GameObject>();
     std::cout << "Creating PookaObject" << std::endl;
 
     auto spriterenderComponent2 = std::make_unique<dae::SpriteRendererComponent>(PookaObject.get(), dae::ResourceManager::GetSprite("enemy"));
@@ -766,27 +766,27 @@ void GameScene(dae::Scene* scene)
     dae::SceneData::GetInstance().AddGameObject(PookaObject.get(), dae::GameObjectType::enemy);
     scene->Add(std::move(PookaObject));
 
-    auto SaugeObject2 = std::make_unique<dae::GameObject>();
-    auto spriterenderComponent3 = std::make_unique<dae::SpriteRendererComponent>(SaugeObject2.get(), dae::ResourceManager::GetSprite("enemy"));
-    spriterenderComponent3->SetDimensions(40, 40);
-    SaugeObject2->AddComponent(std::move(spriterenderComponent3));
+    //auto SaugeObject2 = std::make_unique<dae::GameObject>();
+    //auto spriterenderComponent3 = std::make_unique<dae::SpriteRendererComponent>(SaugeObject2.get(), dae::ResourceManager::GetSprite("enemy"));
+    //spriterenderComponent3->SetDimensions(40, 40);
+    //SaugeObject2->AddComponent(std::move(spriterenderComponent3));
 
-    auto animationComponent3 = std::make_unique<dae::AnimationComponent>(SaugeObject2.get(), SaugeObject2->GetComponent<dae::SpriteRendererComponent>(), "Normal");
-    animationComponent3->Play("Walk_Down", true);
-    SaugeObject2->AddComponent(std::move(animationComponent3));
+    //auto animationComponent3 = std::make_unique<dae::AnimationComponent>(SaugeObject2.get(), SaugeObject2->GetComponent<dae::SpriteRendererComponent>(), "Normal");
+    //animationComponent3->Play("Walk_Down", true);
+    //SaugeObject2->AddComponent(std::move(animationComponent3));
 
-    SaugeObject2->SetLocalPosition(glm::vec3(820, 180, 1.0f));
+    //SaugeObject2->SetLocalPosition(glm::vec3(820, 180, 1.0f));
 
-    auto hitBox3 = std::make_unique<HitBox>(glm::vec2(40, 40));
-    hitBox3->SetGameObject(SaugeObject2.get());
-    SaugeObject2->AddComponent(std::move(hitBox3));
+    //auto hitBox3 = std::make_unique<HitBox>(glm::vec2(40, 40));
+    //hitBox3->SetGameObject(SaugeObject2.get());
+    //SaugeObject2->AddComponent(std::move(hitBox3));
 
-    auto pookaComponent2 = std::make_unique<PookaComponent>(SaugeObject2.get());
-    SaugeObject2->AddComponent(std::move(pookaComponent2));
-    std::cout << "SaugeObject2: PookaComponent added" << std::endl;
+    //auto pookaComponent2 = std::make_unique<PookaComponent>(SaugeObject2.get());
+    //SaugeObject2->AddComponent(std::move(pookaComponent2));
+    //std::cout << "SaugeObject2: PookaComponent added" << std::endl;
 
-    dae::SceneData::GetInstance().AddGameObject(SaugeObject2.get(), dae::GameObjectType::enemy);
-    scene->Add(std::move(SaugeObject2));*/
+    //dae::SceneData::GetInstance().AddGameObject(SaugeObject2.get(), dae::GameObjectType::enemy);
+    //scene->Add(std::move(SaugeObject2));
 
 
 

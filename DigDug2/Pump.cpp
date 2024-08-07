@@ -106,7 +106,7 @@ void Pump::PumpEnemy()
     // Pump logic
     //if (/* Logic to check if enemy should explode */)
     //{
-        m_connectedEnemy->GetComponent<game::EnemyComponent>()->Die();
+       //m_connectedEnemy->GetComponent<game::EnemyComponent>()->Die();
         Deactivate();
         m_connectedEnemy = nullptr;
    /* }*/

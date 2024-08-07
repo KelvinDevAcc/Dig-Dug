@@ -270,20 +270,6 @@ namespace game
         return snappedY + gridStartY;
     }
 
-
-   /*  const float setdeltax = deltaX * 50.f * dae::GameTime::GetDeltaTime();
-        const float setdeltay = deltaY * 50.f * dae::GameTime::GetDeltaTime();
-
-        if (setdeltax != 0.f)
-        {
-            MoveHorizontally(setdeltax);
-        }
-        if (setdeltay != 0.f)
-        {
-            MoveVertically(setdeltay);
-        }*/
-
-
     void Player::MoveHorizontally(float deltaX)
     {
         if (deltaX == 0.0f) return;
@@ -384,6 +370,7 @@ namespace game
                 SceneHelpers::SetTileTypeAtPosition(position, TunnelType::bottomEnd);
             }
         }
+        CheckAndSetCornerTypes(position, isHorizontal, isPositiveDirection);
     }
 
     void Player::CheckAndSetCornerTypes(const glm::vec3& position, bool isHorizontal, bool isPositiveDirection)
@@ -395,17 +382,87 @@ namespace game
 
 
         // Check for corner types
-        if (isHorizontal && SceneHelpers::GetTileTypeAtPosition(below) == TunnelType::topEnd)
+        if (isHorizontal && SceneHelpers::GetTileTypeAtPosition(left) == TunnelType::topEnd && isPositiveDirection)
         {
-            const glm::vec3 previousPosition = position + glm::vec3(0, -SceneHelpers::GetCellSize().y, 0);
-            SceneHelpers::SetTileTypeAtPosition(previousPosition, isPositiveDirection ? TunnelType::UpRight : TunnelType::UpLeft);
+            const glm::vec3 previousPosition = position + glm::vec3(-SceneHelpers::GetCellSize().x, 0, 0);
+            SceneHelpers::SetTileTypeAtPosition(previousPosition,  TunnelType::UpRight);
             SceneHelpers::SetTileTypeAtPosition(position, TunnelType::rightEnd);
         }
-        if (isHorizontal && SceneHelpers::GetTileTypeAtPosition(right) == TunnelType::bottomEnd)
+        if (isHorizontal && SceneHelpers::GetTileTypeAtPosition(right) == TunnelType::topEnd && !isPositiveDirection)
+        {
+            const glm::vec3 previousPosition = position + glm::vec3(SceneHelpers::GetCellSize().y, 0, 0);
+            SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::UpLeft);
+            SceneHelpers::SetTileTypeAtPosition(position, TunnelType::leftEnd);
+        }
+
+        // Check for corner types
+        if (isHorizontal && SceneHelpers::GetTileTypeAtPosition(left) == TunnelType::bottomEnd && isPositiveDirection)
+        {
+            const glm::vec3 previousPosition = position + glm::vec3(-SceneHelpers::GetCellSize().x, 0, 0);
+            SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::UpRight);
+            SceneHelpers::SetTileTypeAtPosition(position, TunnelType::rightEnd);
+        }
+        if (isHorizontal && SceneHelpers::GetTileTypeAtPosition(right) == TunnelType::bottomEnd && !isPositiveDirection)
+        {
+            const glm::vec3 previousPosition = position + glm::vec3(SceneHelpers::GetCellSize().y, 0, 0);
+            SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::UpLeft);
+            SceneHelpers::SetTileTypeAtPosition(position, TunnelType::leftEnd);
+        }
+
+        // Check for corner types
+        //if (!isHorizontal && SceneHelpers::GetTileTypeAtPosition(below) == TunnelType::leftEnd )
+        //{
+        //    const glm::vec3 previousPosition = position + glm::vec3(0, -SceneHelpers::GetCellSize().y, 0);
+        //    SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::UpRight);
+        //    SceneHelpers::SetTileTypeAtPosition(position, TunnelType::rightEnd);
+        //}
+        //if (!isHorizontal && SceneHelpers::GetTileTypeAtPosition(right) == TunnelType::leftEnd && !isPositiveDirection)
+        //{
+        //    const glm::vec3 previousPosition = position + glm::vec3(SceneHelpers::GetCellSize().y, 0, 0);
+        //    SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::UpLeft);
+        //    SceneHelpers::SetTileTypeAtPosition(position, TunnelType::leftEnd);
+        //}
+
+        //// Check for corner types
+        //if (!isHorizontal && SceneHelpers::GetTileTypeAtPosition(left) == TunnelType::rightEnd && isPositiveDirection)
+        //{
+        //    const glm::vec3 previousPosition = position + glm::vec3(-SceneHelpers::GetCellSize().x, 0, 0);
+        //    SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::UpRight);
+        //    SceneHelpers::SetTileTypeAtPosition(position, TunnelType::rightEnd);
+        //}
+        //if (!isHorizontal && SceneHelpers::GetTileTypeAtPosition(right) == TunnelType::rightEnd && !isPositiveDirection)
+        //{
+        //    const glm::vec3 previousPosition = position + glm::vec3(SceneHelpers::GetCellSize().y, 0, 0);
+        //    SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::UpLeft);
+        //    SceneHelpers::SetTileTypeAtPosition(position, TunnelType::leftEnd);
+        //}
+
+
+
+
+        if (isHorizontal && SceneHelpers::GetTileTypeAtPosition(right) == TunnelType::walkThroughUp)
+        {
+            const glm::vec3 previousPosition = position + glm::vec3(-SceneHelpers::GetCellSize().x,0, 0);
+            SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::walkThroughLeft);
+            SceneHelpers::SetTileTypeAtPosition(position, TunnelType::walkThroughLeft);
+        }
+        if (isHorizontal && SceneHelpers::GetTileTypeAtPosition(left) == TunnelType::walkThroughUp)
+        {
+            const glm::vec3 previousPosition = position + glm::vec3(SceneHelpers::GetCellSize().x, 0, 0);
+            SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::walkThroughLeft);
+            SceneHelpers::SetTileTypeAtPosition(position, TunnelType::walkThroughLeft);
+        }
+        if (!isHorizontal && SceneHelpers::GetTileTypeAtPosition(above) == TunnelType::walkThroughLeft)
         {
             const glm::vec3 previousPosition = position + glm::vec3(0, -SceneHelpers::GetCellSize().y, 0);
-            SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::UpRight);
-            SceneHelpers::SetTileTypeAtPosition(position, TunnelType::leftEnd);
+            SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::walkThroughUp);
+            SceneHelpers::SetTileTypeAtPosition(position, TunnelType::walkThroughUp);
+        }
+        if (!isHorizontal && SceneHelpers::GetTileTypeAtPosition(below) == TunnelType::walkThroughLeft)
+        {
+            const glm::vec3 previousPosition = position + glm::vec3(0, SceneHelpers::GetCellSize().y, 0);
+            SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::walkThroughUp);
+            SceneHelpers::SetTileTypeAtPosition(position, TunnelType::walkThroughUp);
         }
     }
 

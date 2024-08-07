@@ -20,6 +20,7 @@ namespace game {
             return;
         }
 
+        // Update the animation based on the new direction
         UpdateAnimation();
 
         if (m_deathTimer > 0.0f) {

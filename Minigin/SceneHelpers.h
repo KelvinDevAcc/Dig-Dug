@@ -24,7 +24,7 @@ public:
 
 private:
     static void CreateFloor(dae::Scene* scene, float x, float y, glm::vec2 scale, const std::string& textureName);
-    static void CreateWalkThough(dae::Scene* scene, float x, float y, glm::vec2 scale, const std::string& textureName);
+    static void CreateWalkThough(dae::Scene* scene, float x, float y, glm::vec2 scale, const std::string& textureName, char tileChar);
     static void CreateEmpty(dae::Scene* scene, float x, float y, glm::vec2 scale, const std::string& textureName);
 
     static LoadMap* s_loadMap;

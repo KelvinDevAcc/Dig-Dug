@@ -34,8 +34,9 @@ namespace dae
                 GameData::GetInstance().FindAndStorePlayerData();
                 m_activeSceneIterator = it;
 
-                (*m_activeSceneIterator)->RemoveAll();
                 SceneData::GetInstance().RemoveAllGameObjects();
+                (*m_activeSceneIterator)->RemoveAll();
+
                 (*m_activeSceneIterator)->Activate();
 
                 // Stop the background music of the previously active scene

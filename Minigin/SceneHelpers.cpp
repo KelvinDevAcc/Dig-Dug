@@ -1,10 +1,9 @@
 #include "SceneHelpers.h"
-
 #include <iostream>
-
 #include "ResourceManager.h"
 #include "SceneData.h"
 #include "SpriteRendererComponent.h"
+#include "TileComponent.h"
 
 LoadMap* SceneHelpers::s_loadMap = nullptr;
 std::vector<std::vector<char>> SceneHelpers::s_tunnelMap;
@@ -29,20 +28,53 @@ void CreateGameObject(dae::Scene* scene, const std::string& textureName, float x
     scene->Add(std::move(gameObject));
 }
 
+void CreateTile(dae::Scene* scene, const std::string& textureName, float x, float y, glm::vec2 scale, dae::GameObjectType type, TunnelType tunnelType) {
+    auto gameObject = std::make_unique<dae::GameObject>();
+
+    // Add sprite renderer component
+    auto spriteRenderer = std::make_unique<dae::SpriteRendererComponent>(gameObject.get(), dae::ResourceManager::GetTexture(textureName));
+    spriteRenderer->SetDimensions(scale.x, scale.y);
+    gameObject->AddComponent(std::move(spriteRenderer));
+    gameObject->SetLocalPosition(glm::vec3(x, y, 0.0f));
+
+    // Add hitbox component
+    auto hitBox = std::make_unique<HitBox>(scale);
+    hitBox->SetGameObject(gameObject.get());
+    gameObject->AddComponent(std::move(hitBox));
+
+    // Add tile component
+    auto tile = std::make_unique<TileComponent>(gameObject.get(), tunnelType);
+    gameObject->AddComponent(std::move(tile));
+
+    // Add game object to the scene
+    dae::SceneData::GetInstance().AddGameObject(gameObject.get(), type);
+    scene->Add(std::move(gameObject));
+}
+
 void SceneHelpers::CreateFloor(dae::Scene* scene, float x, float y, glm::vec2 scale, const std::string& textureName) {
     CreateGameObject(scene, textureName, x, y, scale, dae::GameObjectType::Floor);
 }
 
-void SceneHelpers::CreateWalkThough(dae::Scene* scene, float x, float y, glm::vec2 scale, const std::string& textureName) {
-    CreateGameObject(scene, textureName, x, y, scale, dae::GameObjectType::WalkThrough);
+void SceneHelpers::CreateWalkThough(dae::Scene* scene, float x, float y, glm::vec2 scale,
+	const std::string& textureName, char tileChar)
+{
+    TunnelType tunnelType;
+    switch (tileChar) {
+    case '^': tunnelType = TunnelType::topEnd; break;
+    case 'v': tunnelType = TunnelType::bottomEnd; break;
+    case '<': tunnelType = TunnelType::leftEnd; break;
+    case '>': tunnelType = TunnelType::rightEnd; break;
+    case ':': tunnelType = TunnelType::walkThroughUp; break;
+    case '=': tunnelType = TunnelType::walkThroughLeft; break;
+    case 'M': tunnelType = TunnelType::MiddleBlock; break;
+    default: tunnelType = TunnelType::Empty; break;
+    }
+    CreateTile(scene, textureName, x, y, scale, dae::GameObjectType::WalkThrough, tunnelType);
 }
 
 void SceneHelpers::CreateEmpty(dae::Scene* scene, float x, float y, glm::vec2 scale, const std::string& textureName) {
     CreateGameObject(scene, textureName, x, y, scale, dae::GameObjectType::Empty);
 }
-
-
-
 
 void SceneHelpers::LoadMapIntoScene(const LoadMap& loadMap, dae::Scene* scene, const glm::vec3& startPos, glm::vec2 scale) {
     const auto& map = loadMap.getMap();
@@ -52,32 +84,15 @@ void SceneHelpers::LoadMapIntoScene(const LoadMap& loadMap, dae::Scene* scene, c
     s_MaxCoordinates = { startPos.x, startPos.y };
     s_CellSize = scale;
 
-    // Map tile characters to their corresponding texture names
     const std::unordered_map<char, std::string> tileToTextureName = {
-        {'v', "sky"},      // Treat 'sky' tile as Empty
-        {'#', "skyFloor"},
-        {'^', "floorblock01"},
-        {'|', "floorblock02"},
-        {'a', "floorblock021"},
-        {'s', "floorblock022"},
-        {'d', "floorblock023"},
-        {'f', "floorblock024"},
-        {'g', "floorblock025"},
-        {'h', "floorblock026"},
-        {'1', "floorblock031"},
-        {'2', "floorblock032"},
-        {'3', "floorblock033"},
-        {'4', "floorblock034"},
-        {'5', "floorblock035"},
-        {'6', "floorblock036"},
-        {'_', "floorblock03"},
-        {'7', "floorblock041"},
-        {'8', "floorblock042"},
-        {'9', "floorblock043"},
-        {'0', "floorblock044"},
-        {'-', "floorblock045"},
-        {'=', "floorblock046"},
-        {'u', "floorblock04"}
+        {'v', "sky"}, {'#', "skyFloor"}, {'^', "floorblock01"}, {'|', "floorblock02"},
+        {'a', "floorblock021"}, {'s', "floorblock022"}, {'d', "floorblock023"},
+        {'f', "floorblock024"}, {'g', "floorblock025"}, {'h', "floorblock026"},
+        {'1', "floorblock031"}, {'2', "floorblock032"}, {'3', "floorblock033"},
+        {'4', "floorblock034"}, {'5', "floorblock035"}, {'6', "floorblock036"},
+        {'_', "floorblock03"}, {'7', "floorblock041"}, {'8', "floorblock042"},
+        {'9', "floorblock043"}, {'0', "floorblock044"}, {'-', "floorblock045"},
+        {'=', "floorblock046"}, {'u', "floorblock04"}
     };
 
     const float startX = startPos.x;
@@ -100,25 +115,16 @@ void SceneHelpers::LoadMapIntoScene(const LoadMap& loadMap, dae::Scene* scene, c
             if (it != tileToTextureName.end()) {
                 const std::string& textureName = it->second;
 
-                // Handle the tile type based on the texture name
-                if (textureName =="sky") {
-                    // Skip creating an object for Empty tiles (sky)
+                if (textureName == "sky") {
                     CreateEmpty(scene, posX, posY, scale, textureName);
                     continue;
                 }
 
-                // Create a floor or walkthrough object based on the tile texture
-                if (textureName == "skyFloor") {
-                    CreateFloor(scene, posX, posY, scale, textureName);
-                }
-                else {
-                    CreateFloor(scene, posX, posY, scale, textureName);  // Adjust if needed
-                }
+                CreateFloor(scene, posX, posY, scale, textureName);
             }
         }
     }
 }
-
 
 void SceneHelpers::LoadTunnelMapIntoScene(const LoadMap& loadMap, dae::Scene* scene, const glm::vec3& startPos, glm::vec2 scale) {
     const auto& map = loadMap.getIngMap();
@@ -132,25 +138,13 @@ void SceneHelpers::LoadTunnelMapIntoScene(const LoadMap& loadMap, dae::Scene* sc
 
             switch (tile) {
             case '^':
-                CreateWalkThough(scene, posX, posY, glm::vec2(scale.x, scale.y), "topEnd");
-                break;
             case 'v':
-                CreateWalkThough(scene, posX, posY, glm::vec2(scale.x, scale.y), "bottomEnd");
-                break;
             case '<':
-                CreateWalkThough(scene, posX, posY, glm::vec2(scale.x, scale.y), "leftEnd");
-                break;
             case '>':
-                CreateWalkThough(scene, posX, posY, glm::vec2(scale.x, scale.y), "rightEnd");
-                break;
             case ':':
-                CreateWalkThough(scene, posX, posY, glm::vec2(scale.x, scale.y), "walkTroughUp");
-                break;
             case '=':
-                CreateWalkThough(scene, posX, posY, glm::vec2(scale.x, scale.y), "walkTroughLeft");
-                break;
             case 'M':
-                CreateWalkThough(scene, posX, posY, glm::vec2(scale.x, scale.y), "MiddleBlock");
+                CreateWalkThough(scene, posX, posY, glm::vec2(scale.x, scale.y), "", tile);
                 break;
             default:
                 break;
@@ -179,9 +173,7 @@ glm::vec2 SceneHelpers::GetGridSize() {
     return { maxCoord.x - minCoord.x, maxCoord.y - minCoord.y };
 }
 
-
-TunnelType SceneHelpers::GetTileTypeAtPosition(const glm::vec3& position)
-{
+TunnelType SceneHelpers::GetTileTypeAtPosition(const glm::vec3& position) {
     static const float mapOffsetX = GetMinCoordinates().x;
     static const float mapOffsetY = GetMinCoordinates().y;
     static const glm::vec2 cellSize = GetCellSize();
@@ -189,8 +181,7 @@ TunnelType SceneHelpers::GetTileTypeAtPosition(const glm::vec3& position)
     const int gridX = static_cast<int>((position.x - mapOffsetX) / cellSize.x);
     const int gridY = static_cast<int>((position.y - mapOffsetY) / cellSize.y);
 
-    if (gridY < 0 || gridY >= static_cast<int>(s_tunnelMap.size()) || gridX < 0 || gridX >= static_cast<int>(s_tunnelMap[gridY].size()))
-    {
+    if (gridY < 0 || gridY >= static_cast<int>(s_tunnelMap.size()) || gridX < 0 || gridX >= static_cast<int>(s_tunnelMap[gridY].size())) {
         return TunnelType::Empty;
     }
 
@@ -218,11 +209,9 @@ void SceneHelpers::SetTileTypeAtPosition(const glm::vec3& position, TunnelType n
         return;
     }
 
-    // Remove any existing tile at the given position
     s_tunnelMap[gridY][gridX] = '_';
     dae::SceneData::GetInstance().RemoveGameObjectAtPosition(glm::vec3(300 + gridX * GetCellSize().x, 20 + gridY * GetCellSize().y, 0.0f));
 
-    // Map TunnelType to corresponding character and texture name
     const std::unordered_map<TunnelType, std::pair<char, std::string>> tunnelTypeToTile = {
         { TunnelType::Empty, {'_', ""} },
         { TunnelType::bottomEnd, {'v', "bottomEnd"} },
@@ -242,10 +231,7 @@ void SceneHelpers::SetTileTypeAtPosition(const glm::vec3& position, TunnelType n
     if (it != tunnelTypeToTile.end()) {
         s_tunnelMap[gridY][gridX] = it->second.first;
         if (!it->second.second.empty()) {
-            CreateWalkThough(m_scene, 300 + gridX * GetCellSize().x, 20 + gridY * GetCellSize().y, glm::vec2(GetCellSize().x, GetCellSize().y), it->second.second);
+            CreateWalkThough(m_scene, 300 + gridX * GetCellSize().x, 20 + gridY * GetCellSize().y, glm::vec2(GetCellSize().x, GetCellSize().y), it->second.second, it->second.first);
         }
     }
 }
-
-
-

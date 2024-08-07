@@ -94,7 +94,7 @@ namespace game
         glm::vec3 m_TargetPosition;
         bool m_IsMoving = false;
         glm::vec2 m_GridSize;
-        float m_Speed = 50.0f; // Adjust as necessary
+        float m_Speed = 50.0f; 
 
 
         Direction m_CurrentDirection = Direction::None;
