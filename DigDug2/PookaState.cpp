@@ -5,6 +5,7 @@
 #include "AnimationComponent.h"
 #include "GameObject.h"
 #include "GameTime.h"
+#include "PointComponent.h"
 #include "SceneData.h"
 #include "SceneManager.h"
 
@@ -132,6 +133,7 @@ void PookaPumpedState::Enter(PookaComponent* pooka) {
         break;
     case 4:
         pooka->m_Owner->GetComponent<dae::AnimationComponent>()->Play("Pumped4", true);
+        pooka->m_Owner->GetComponent<HitBox>()->Disable();
         m_Pumped4Duration = pooka->m_Owner->GetComponent<dae::AnimationComponent>()->GetAnimationDuration();
         break;
     }
@@ -186,13 +188,27 @@ void PookaPumpedState::Update(PookaComponent* pooka) {
 }
 
 
-void PookaPumpedState::Exit(PookaComponent* /*pooka*/) {
+void PookaPumpedState::Exit(PookaComponent* pooka) {
     std::cout << "Pooka exiting Pumped State" << std::endl;
+    pooka->DetectsPlayer();
 }
 
 
 void PookaDeadState::Enter(PookaComponent* pooka) {
     std::cout << "Pooka entered Dead State" << std::endl;
+
+    // Determine the layer based on the Y position
+    int layer = pooka->DetermineLayer(pooka->m_Owner->GetWorldPosition().y);
+
+    // Calculate the points based on the layer
+    int points = pooka->CalculatePoints(layer, "Pooka");
+
+    // Get the last attacker and award points
+    if (const auto lastAttacker = pooka->GetLastAttacker()) {
+	    if (const auto playerScoreComponent = lastAttacker->GetComponent<dae::PointComponent>()) {
+            playerScoreComponent->SetScore(playerScoreComponent->GetScore() + points); // Award points to the correct player
+        }
+    }
 
     // Remove the Pooka object from the scene after the death animation plays
     dae::SceneData::GetInstance().RemoveGameObject(pooka->m_Owner, dae::GameObjectType::enemy);
@@ -210,6 +226,7 @@ void PookaDeadState::Exit(PookaComponent* /*pooka*/) {
 void PookaCrushedState::Enter(PookaComponent* pooka) {
     std::cout << "Enemy entered Crushed State" << std::endl;
     // Play crushed animation
+    pooka->m_Owner->GetComponent<HitBox>()->Disable();
     pooka->m_Owner->GetComponent<dae::AnimationComponent>()->Play("Crushed");
     m_CrushedDuration = pooka->m_Owner->GetComponent<dae::AnimationComponent>()->GetAnimationDuration();
 }

@@ -37,5 +37,6 @@ private:
     bool m_IsAnimating;
     float m_animationTimer;
     bool m_dieing;
+    dae::GameObject* m_PlayerThatTriggeredFall = nullptr;
 };
 

@@ -14,7 +14,6 @@ Rock::Rock(dae::GameObject* owner):
 {
 	m_animationComponnent = m_Owner->GetComponent<dae::AnimationComponent>();
 	dae::SceneData::GetInstance().AddGameObject(m_Owner, dae::GameObjectType::Rock);
-    //m_Owner->GetComponent<HitBox>()->Disable();
 }
 
 void Rock::Update()
@@ -71,8 +70,8 @@ void Rock::Update()
         auto newPosition = m_Owner->GetWorldPosition();
         newPosition.y += m_FallSpeed * dae::GameTime::GetDeltaTime();
         m_Owner->SetLocalPosition(newPosition);
-
-        if (CheckCollisionWithObjects() || !CheckCollisionWithWalkThrough())
+        CheckCollisionWithObjects();
+        if (!CheckCollisionWithWalkThrough())
         {
             Die();
         }
@@ -151,11 +150,17 @@ bool Rock::NoplayerUntherneath()
             // Player is still underneath
             return false;
         }
+        else
+        {
+            // The player has moved away, mark them as the one who triggered the fall
+            m_PlayerThatTriggeredFall = player;
+        }
     }
 
     // No players underneath, the rock should start falling
     return true;
 }
+
 
 
 bool Rock::CheckCollisionWithWalkThrough()
@@ -193,33 +198,49 @@ bool Rock::CheckCollisionWithWalkThrough()
 
 bool Rock::CheckCollisionWithObjects()
 {
-	const auto& sceneData = dae::SceneData::GetInstance();
-    const auto& objectsToCheck = sceneData.GetPlayers(); 
+    const auto& sceneData = dae::SceneData::GetInstance();
+    const auto& enemies = sceneData.GetEnemies();
 
-    for (const auto& object : objectsToCheck)
+    int enemiesKilled = 0;  // Track the number of enemies killed
+
+    for (const auto& enemy : enemies)
     {
         const auto hitBox = m_Owner->GetComponent<HitBox>();
-        const auto objectHitBox = object->GetComponent<HitBox>();
-        if (hitBox && objectHitBox && hitBox->IsColliding(*objectHitBox))
+        const auto enemyHitBox = enemy->GetComponent<HitBox>();
+        if (hitBox && enemyHitBox && hitBox->IsColliding(*enemyHitBox))
         {
-            return true;
+            // Notify the enemy about being crushed
+            enemy->GetComponent<PookaComponent>()->OnCrushed();  // Call OnCrushed on the enemy
+            ++enemiesKilled;  // Increment the kill count
         }
     }
 
-	if (sceneData.isOnEnemy(*m_Owner))
-	{
-        const auto& enemies = sceneData.GetEnemies();
-        for (const auto& enemy : enemies) {
-            const auto hitBox = m_Owner->GetComponent<HitBox>();
-            const auto enemyHitBox = enemy->GetComponent<HitBox>();
-            if (hitBox && enemyHitBox && hitBox->IsColliding(*enemyHitBox)) {
-                // Notify the enemy about being crushed
-                enemy->GetComponent<PookaComponent>()->OnCrushed(); // Add this method to the enemy class
-                return true;
-            }
+    if (enemiesKilled > 0 && m_PlayerThatTriggeredFall)
+    {
+        // Calculate the score based on the number of enemies killed
+        int points = 0;
+        switch (enemiesKilled)
+        {
+        case 1: points = 1000; break;
+        case 2: points = 2500; break;
+        case 3: points = 4000; break;
+        case 4: points = 6000; break;
+        case 5: points = 8000; break;
+        case 6: points = 10000; break;
+        case 7: points = 12000; break;
+        case 8: points = 15000; break;
+        default: points = 15000; break;  // Cap at 15000 for more than 8 enemies
         }
-        return true;
-	}
 
-    return false;
+        // Award the points to the player who triggered the fall
+        auto playerScoreComponent = m_PlayerThatTriggeredFall->GetComponent<dae::PointComponent>();
+        if (playerScoreComponent)
+        {
+            playerScoreComponent->SetScore(playerScoreComponent->GetScore() + points);
+        }
+    }
+
+
+
+    return enemiesKilled > 0;  // Return true if any enemies were killed
 }

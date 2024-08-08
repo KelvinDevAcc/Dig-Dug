@@ -37,7 +37,7 @@ namespace game
         void Die();
         void Idle();
 
-        void Respawn();
+        void ReSpawn();
 
 
         dae::GameObject* GetParentObject() const { return m_GameObject; }

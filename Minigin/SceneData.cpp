@@ -29,6 +29,8 @@ namespace dae {
         m_players.clear();
         m_enemyPlayers.clear();
         m_enemys.clear();
+        m_empty.clear();
+        m_rocks.clear();
     }
 
     void SceneData::RemoveGameObject(GameObject* gameObject, GameObjectType type)
@@ -82,7 +84,7 @@ namespace dae {
         auto it = std::find(list.begin(), list.end(), gameObject);
         if (it != list.end())
         {
-            list.erase(it);
+            list.erase(it);  // Just remove the pointer, do not delete it
         }
     }
 
@@ -102,7 +104,7 @@ namespace dae {
     bool SceneData::IsOnSpecificObjectType(GameObject& object, const std::vector<GameObject*>& objects)
     {
         const auto hitBox = object.GetComponent<HitBox>();
-        if (!hitBox) return false;
+        if (!hitBox || !hitBox->GetEnable()) return false;
 
         for (const auto& gameObject : objects) {
             if (gameObject == &object) continue;
@@ -142,23 +144,27 @@ namespace dae {
     {
         auto checkCollisionsWithObjects = [&](const std::vector<GameObject*>& objects) {
             for (const auto gameObject : objects) {
-                if (const auto hitBox = gameObject->GetComponent<HitBox>()) {
-                    const SDL_Rect rect = hitBox->GetRect();
+                if (const auto hitBox = gameObject->GetComponent<HitBox>())
+                {
+	                if (hitBox->GetEnable())
+	                {
+                        const SDL_Rect rect = hitBox->GetRect();
 
-                    // Calculate the bounds based on the center position
-                    int left = rect.x;
-                    int right = rect.x + rect.w;
-                    int top = rect.y;
-                    int bottom = rect.y + rect.h;
+                        // Calculate the bounds based on the center position
+                        int left = rect.x;
+                        int right = rect.x + rect.w;
+                        int top = rect.y;
+                        int bottom = rect.y + rect.h;
 
-                    // Player's bounding box
-                    const auto playerHitBox = entity.GetComponent<HitBox>()->GetRect();
+                        // Player's bounding box
+                        const auto playerHitBox = entity.GetComponent<HitBox>()->GetRect();
 
-                    // Check if the new position will intersect the obstacle
-                    if (newPosition.x + playerHitBox.w / 2 > left && newPosition.x - playerHitBox.w / 2 < right &&
-                        newPosition.y + playerHitBox.h / 2 > top && newPosition.y - playerHitBox.h / 2 < bottom) {
-                        return true;
-                    }
+                        // Check if the new position will intersect the obstacle
+                        if (newPosition.x + playerHitBox.w / 2 > left && newPosition.x - playerHitBox.w / 2 < right &&
+                            newPosition.y + playerHitBox.h / 2 > top && newPosition.y - playerHitBox.h / 2 < bottom) {
+                            return true;
+                        }
+	                }
                 }
             }
             return false;
@@ -202,14 +208,18 @@ namespace dae {
 
     bool SceneData::IsNextwalkthrough(float x, float y) const {
         auto checkCollisionsWithObjects = [&](const std::vector<GameObject*>& objects) {
-            for (const auto gameObject : objects) {
-                if (const auto hitBox = gameObject->GetComponent<HitBox>()) {
-                    const SDL_Rect rect = hitBox->GetRect();
-                    if (x >= rect.x && x < rect.x + rect.w &&
-                        y >= rect.y && y < rect.y + rect.h) {
-                        return true;
+            for (const auto gameObject : objects) 
+            {
+	            if (gameObject)
+	            {
+                    if (const auto hitBox = gameObject->GetComponent<HitBox>()) {
+                        const SDL_Rect rect = hitBox->GetRect();
+                        if (x >= rect.x && x < rect.x + rect.w &&
+                            y >= rect.y && y < rect.y + rect.h) {
+                            return true;
+                        }
                     }
-                }
+	            }
             }
             return false;
             };

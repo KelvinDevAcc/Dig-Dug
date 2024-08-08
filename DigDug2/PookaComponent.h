@@ -1,6 +1,7 @@
 #pragma once
 #include "PookaState.h"
 #include <memory>
+#include <string>
 #include <vector>
 #include <glm/vec3.hpp>
 #include "Component.h"
@@ -38,13 +39,17 @@ public:
     void MoveToNextWaypointTowards(const glm::vec3& targetPosition);
     glm::vec3 FindNearestValidSpot();
     void OnCrushed();
+    static int CalculatePoints(int layer, std::string enemyType);
+    static int DetermineLayer(float yPosition);
 
-    void HitByPump();
+    dae::GameObject* GetLastAttacker() const { return m_LastAttacker; }
+    void HitByPump(dae::GameObject*  lastatacker);
     int GetPumpHits() const { return m_PumpHits; }
 
     bool ShouldEnterGhostMode();
     void UpdateTimer(); // Method to update the timer
 
+    void ReSpawn();
     std::type_info const& GetComponentType() const override { return typeid(PookaComponent); }
 
 private:
@@ -54,16 +59,19 @@ private:
     dae::GameObject* m_Owner;
     std::vector<dae::GameObject*> m_DetectedPlayers;
 
-    float m_GhostModeTimer = 0.0f; // Remaining time for the next ghost mode check
-    float m_GhostModeInterval = 10.0f; // Interval in seconds to decide on ghost mode (can be randomized)
-    float m_LastGhostModeChange = 0.0f; // Last time ghost mode check occurred
-    bool m_GhostModeEnabled = false; // To track if ghost mode is currently enabled
+    float m_GhostModeTimer; // Remaining time for the next ghost mode check
+    float m_GhostModeInterval; // Interval in seconds to decide on ghost mode (can be randomized)
+    float m_LastGhostModeChange; // Last time ghost mode check occurred
+    bool m_GhostModeEnabled; // To track if ghost mode is currently enabled
 
     glm::vec3 m_TargetPlayerPosition; // Target position to move to when in ghost mode
-    float m_GhostModePursuitTimer = 0.0f; // Timer for pursuit duration
-    float m_GhostModePursuitDuration = 5.0f; // Duration to try and reach the player (in seconds)
-    int m_PumpHits = 0;
+    float m_GhostModePursuitTimer; // Timer for pursuit duration
+    float m_GhostModePursuitDuration; // Duration to try and reach the player (in seconds)
+    int m_PumpHits;
 
     float m_DeflationTimeLimit; // Time limit for deflation
     void StartDeflationTimer();
+
+    glm::vec3 m_startPosition;
+    dae::GameObject* m_LastAttacker = nullptr;
 };

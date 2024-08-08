@@ -1,6 +1,7 @@
 #include "GameObject.h"
 
 #include <algorithm>
+#include <iostream>
 
 #include "ResourceManager.h"
 #include "Renderer.h"
@@ -17,7 +18,14 @@ namespace dae
     {
         for (auto& component : m_components)
         {
-            component->Update();
+            if (component)  // Null check
+            {
+                component->Update();
+            }
+            else
+            {
+                std::cerr << "Warning: Null component in GameObject::Render\n";
+            }
         }
     }
 
@@ -25,7 +33,14 @@ namespace dae
     {
         for (auto& component : m_components)
         {
-            component->Render();
+            if (component)  // Null check
+            {
+                component->Render();
+            }
+            else
+            {
+                std::cerr << "Warning: Null component in GameObject::Render\n";
+            }
         }
     }
 

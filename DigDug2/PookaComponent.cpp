@@ -12,12 +12,13 @@
 
 PookaComponent::PookaComponent(dae::GameObject* owner)
     : m_CurrentState(std::make_unique<PookaWandering>()), m_Destination(0, 0, 0), m_Owner(owner),
-    m_GhostModeTimer(0.0f), m_GhostModeInterval(0.0f), m_GhostModeEnabled(false), m_GhostModePursuitTimer(0.0f)
+    m_GhostModeTimer(0.0f), m_GhostModeInterval(10.0f), m_LastGhostModeChange(0), m_GhostModeEnabled(false),m_TargetPlayerPosition(0, 0, 0),m_GhostModePursuitTimer(0.0f)
+	,m_GhostModePursuitDuration(5.0f),m_PumpHits(0),m_DeflationTimeLimit(0)
 {
+    m_startPosition = m_Owner->GetWorldPosition();
     m_CurrentPosition = m_Owner->GetWorldPosition(); // Initialize the position
     m_CurrentState->Enter(this);
     SetGameObject(m_Owner);
-
     // Initialize the ghost mode timer with a random interval
     static std::random_device rd;
     static std::mt19937 gen(rd());
@@ -347,12 +348,13 @@ bool PookaComponent::ShouldEnterGhostMode() {
     return m_GhostModeEnabled;
 }
 
-void PookaComponent::HitByPump() {
+void PookaComponent::HitByPump(dae::GameObject* lastatacker) {
     ++m_PumpHits;
     if (m_PumpHits <= 4)
     {
         SetState(std::make_unique<PookaPumpedState>());
     }
+    m_LastAttacker = lastatacker;
 }
 
 void PookaComponent::StartDeflationTimer() {
@@ -361,4 +363,49 @@ void PookaComponent::StartDeflationTimer() {
 
 void PookaComponent::OnCrushed() {
         SetState(std::make_unique<PookaCrushedState>());
+}
+
+int PookaComponent::CalculatePoints(int layer, std::string enemyType) {
+    if (enemyType == "Pooka") {
+        switch (layer) {
+        case 1: return 200;
+        case 2: return 300;
+        case 3: return 400;
+        case 4: return 500;
+        }
+    }
+    else if (enemyType == "Fygar") {
+        switch (layer) {
+        case 1: return 400;
+        case 2: return 600;
+        case 3: return 800;
+        case 4: return 1000;
+        }
+    }
+    return 0;
+}
+
+int PookaComponent::DetermineLayer(float yPosition) {
+    if (yPosition >= 0 && yPosition < 240) {
+        return 1;
+    }
+    else if (yPosition >= 240 && yPosition < 400) {
+        return 2;
+    }
+    else if (yPosition >= 400 && yPosition < 560) {
+        return 3;
+    }
+    else if (yPosition >= 560) {
+        return 4;
+    }
+    return 0;
+}
+
+void PookaComponent::ReSpawn()
+{
+    m_Owner->SetLocalPosition(m_startPosition);
+    if (m_Owner->GetWorldPosition() == m_startPosition)
+    {
+        SetState(std::make_unique<PookaWandering>());
+    }
 }

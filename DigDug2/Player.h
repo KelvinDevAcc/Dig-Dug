@@ -71,6 +71,7 @@ namespace game
         void UpdatePumpTimer(float deltaTime);
         void AddPumpPart();
         void UpdatePumpTextures() const;
+        static bool IsCollidingWithSomething(const glm::vec3& position);
         std::unique_ptr<Pump> GetInactivePump();
         void UpdateTunnelType(const glm::vec3& position, bool isHorizontal, bool isPositiveDirection);
         void CheckAndSetCornerTypes(const glm::vec3& position, bool isHorizontal, bool isPositiveDirection);

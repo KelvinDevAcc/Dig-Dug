@@ -26,19 +26,20 @@ namespace dae
 	                                               }
 	                                               return false;
                                                }).begin(), m_objects.end());
+        SortObjects();
     }
 
     void Scene::RemoveAll() const
     {
-        for (const auto& object : m_objects)
-        {
-            object->RemoveAllComponents();
-        }
-        m_objects.clear();
+        m_objects.clear();  // Clears and deletes all objects
+        m_sortedObjects.clear();  // Also clear the sorted list if you are maintaining one
     }
 
     void Scene::Update() const
     {
+        if (m_objects.empty())
+            return;
+
         for (const auto& object : m_objects)
         {
             if (object)
@@ -59,6 +60,9 @@ namespace dae
 
     void Scene::Render() const
     {
+        if (m_objects.empty())
+            return;
+
         if (m_needsSorting)
         {
             SortObjects();
@@ -67,7 +71,10 @@ namespace dae
 
         for (const auto& object : m_sortedObjects)
         {
-            object->Render();
+	        if (object)
+	        {
+                object->Render();
+	        }
         }
     }
 

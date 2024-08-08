@@ -13,6 +13,12 @@ Pump::Pump(dae::GameObject* owner, const glm::vec3& localPosition, const glm::ve
     m_isActive(false), m_isPumping(false), m_connectedEnemy(nullptr), m_spriteRenderComponent(nullptr),
     m_hitBox(nullptr)
 {
+
+    float forwardOffset = 35.0f; // Adjust this value to set how far forward the pump should appear
+
+    // Apply the forward offset based on the direction
+    m_LocalPosition += forwardOffset * glm::normalize(direction);
+
     // Create the pump object
     auto PumpObject = std::make_unique<dae::GameObject>();
     PumpObject->SetParent(m_owner);
@@ -104,13 +110,8 @@ void Pump::PumpEnemy()
 {
     if (!m_connectedEnemy) return;
 
-    // Pump logic
-    //if (/* Logic to check if enemy should explode */)
-    //{
-    m_connectedEnemy->GetComponent<PookaComponent>()->HitByPump();
-        Deactivate();
-        m_connectedEnemy = nullptr;
-   /* }*/
+    m_connectedEnemy->GetComponent<PookaComponent>()->HitByPump(m_owner);
+	m_connectedEnemy = nullptr;
 }
 
 void Pump::SetTexture(const dae::Texture2D* texture) const

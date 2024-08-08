@@ -22,6 +22,7 @@ namespace dae
         Scene* GetActiveScene() const;
         void SetActiveScene(const std::string& name);
         void GoToNextScene();
+        void RestartCurrentSceneWithPersistentObjects();
 
         void Update() const;
         void Render() const;

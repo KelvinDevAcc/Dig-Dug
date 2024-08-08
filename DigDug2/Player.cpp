@@ -23,7 +23,6 @@ namespace game
         m_startPosition = m_GameObject->GetWorldPosition();
 
         SetAnimationState(AnimationState::Idle);
-        //SnapToTileCenter(m_GameObject->GetWorldPosition());
     }
 
     void Player::Update()
@@ -98,6 +97,10 @@ namespace game
 
     void Player::ShootPump()
     {
+        if (!m_pointComponent) {
+            return;
+        }
+
         if (m_CurrentAnimationState == AnimationState::Dying)
         {
             return;
@@ -112,9 +115,7 @@ namespace game
 
         m_timeSinceLastPumpPart = 0.0f; // Reset the timer for adding new pump parts
         AddPumpPart(); // Start by adding the first pump part immediately
-        if (!m_pointComponent) {
-            return;
-        }
+       
         SetAnimationState(AnimationState::Attacking);
     }
 
@@ -140,22 +141,51 @@ namespace game
             if (m_pumps.back())
             {
                 constexpr auto textureSize = glm::vec2(36, 16); // Assuming you have a method to get texture size
-                offsetPosition += pumpDirection * glm::vec3(textureSize.x, textureSize.y, 0) * static_cast<float>(m_pumpPartCount);
+                offsetPosition += pumpDirection * glm::vec3(textureSize.x, textureSize.y * 2, 0) * static_cast<float>(m_pumpPartCount);
             }
         }
 
         glm::vec3 pumpPosition = offsetPosition;
 
+        // Check for collisions before adding a new pump part
+        if (IsCollidingWithSomething(pumpPosition + m_GameObject->GetWorldPosition()))
+        {
+            std::cout << "Collision detected, stopping pump addition." << std::endl;
+            return; // Stop adding pump parts if there's a collision
+        }
+
         auto pump = std::make_unique<Pump>(m_GameObject, pumpPosition, pumpDirection, 4.0f); // Adjust speed and lifetime as needed
         pump->SetGameObject(m_GameObject);
         pump->Activate();
 
-        // Add the new arrow part to the list
+        // Add the new pump part to the list
         m_pumps.push_back(std::move(pump));
-        ++m_pumpPartCount; // Increment the arrow part count
+        ++m_pumpPartCount; // Increment the pump part count
 
-        // Update textures for the arrows to ensure the last one remains "ArrowEnd"
+        // Update textures for the pump to ensure the last one remains "PumpEnd"
         UpdatePumpTextures();
+    }
+
+    bool Player::IsCollidingWithSomething(const glm::vec3& position)
+    {
+	    const auto tempPumpObject = std::make_unique<dae::GameObject>();
+        tempPumpObject->SetLocalPosition(position);
+
+        auto hitbox = std::make_unique<HitBox>(glm::vec2(32,16));
+        hitbox->SetGameObject(tempPumpObject.get());
+        tempPumpObject->AddComponent(std::move(hitbox));
+
+        if (dae::SceneData::GetInstance().isOnEnemy(*tempPumpObject))
+        {
+          return true;  
+        }
+
+        if (!dae::SceneData::GetInstance().IsOnwalkthrough(*tempPumpObject))
+        {
+            return true;
+        }
+
+        return false;
     }
 
     void Player::UpdatePumpTextures() const

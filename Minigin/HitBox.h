@@ -59,7 +59,7 @@ public:
     void Render() const override {
         if (!m_enabled) return;
 
-      /*  const SDL_Rect rect = GetRect();
+     /*   const SDL_Rect rect = GetRect();
         constexpr SDL_Color color = { 255, 0, 0, 255 }; 
         dae::Renderer::GetInstance().RenderRect(rect, color, false);*/
     }

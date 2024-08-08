@@ -7,8 +7,11 @@
 #include "GameData.h"
 #include "SceneData.h"
 #include "servicelocator.h"
-//#include "../BugerTime/GameData.h"
+#include "../BugerTime/Player.h"
+#include "../DigDug2/PookaComponent.h"
 
+
+class PookaComponent;
 
 namespace dae
 {
@@ -90,6 +93,32 @@ namespace dae
         }
     }
 
+    void SceneManager::RestartCurrentSceneWithPersistentObjects()
+    {
+        // Store the current state of objects that should persist
+        std::vector<GameObject*> persistentObjects;
+        for (const auto& obj : (*m_activeSceneIterator)->GetObjects())
+        {
+            // Add logic here to determine if the object should persist
+            persistentObjects.push_back(obj.get());  // Store the raw pointer
+        }
+
+        // Re-add persistent objects
+        for (const auto& obj : persistentObjects)
+        {
+            if (const auto player = obj->GetComponent<game::Player>())
+            {
+                player->ReSpawn();
+            }
+            if (const auto pooka = obj->GetComponent<PookaComponent>())
+            {
+                pooka->ReSpawn();
+            }
+        }
+        // Reactivate the scene
+        //(*m_activeSceneIterator)->Activate();
+    }
+
     void SceneManager::Update() const
     {
 	    if (m_scenes.empty())
@@ -97,18 +126,26 @@ namespace dae
 
         if (m_activeSceneIterator != m_scenes.end())
         {
-            (*m_activeSceneIterator)->Update();
+            if (!(*m_activeSceneIterator)->GetObjects().empty())
+            {
+                (*m_activeSceneIterator)->Update();
+            }
+            
         }
     }
 
     void SceneManager::Render() const
     {
-        if (m_scenes.empty())
+        if (m_scenes.empty() || (*m_activeSceneIterator) == nullptr)
             return;
 
         if (m_activeSceneIterator != m_scenes.end())
         {
-            (*m_activeSceneIterator)->Render();
+            if (!(*m_activeSceneIterator)->GetObjects().empty())
+            {
+                (*m_activeSceneIterator)->Render();
+
+            }
         }
     }
 }

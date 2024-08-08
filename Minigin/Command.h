@@ -67,6 +67,13 @@ public:
     virtual void Execute() override;
 };
 
+class ReloadSceneCommand final : public Command {
+public:
+    ReloadSceneCommand();
+
+    virtual void Execute() override;
+};
+
 
 
 //sound Commands

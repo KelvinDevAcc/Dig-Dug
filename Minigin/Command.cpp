@@ -115,6 +115,16 @@ void GoToNextSceneCommand::Execute()
    
 }
 
+ReloadSceneCommand::ReloadSceneCommand() = default;
+
+void ReloadSceneCommand::Execute()
+{
+    auto& sceneManager = dae::SceneManager::GetInstance();
+    sceneManager.RestartCurrentSceneWithPersistentObjects();
+
+}
+
+
 PlaySoundCommand::PlaySoundCommand() = default;
 
 void PlaySoundCommand::Execute() {
