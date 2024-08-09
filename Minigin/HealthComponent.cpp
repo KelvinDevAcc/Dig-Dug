@@ -1,5 +1,6 @@
 #include "HealthComponent.h"
 #include "EnventQueue.h"
+#include "GameData.h"
 #include "sound_system.h"
 
 namespace dae
@@ -15,7 +16,7 @@ namespace dae
         {
             m_Lives--;
             m_Health = 100; 
-            if (m_Lives == 0)
+            if (m_Lives < 0)
             {
                 dae::Message message;
 
@@ -24,6 +25,8 @@ namespace dae
                 message.arguments.emplace_back(static_cast<sound_id>(1));
 
                 dae::EventQueue::Broadcast(message);
+                GameData::GetInstance().FindAndStorePlayerData();
+                GameData::GetInstance().CheckGameState();
             }
             Notify();
         }

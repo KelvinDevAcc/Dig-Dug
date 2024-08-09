@@ -134,9 +134,30 @@ void loadResources()
             { "Pumped2", { {{ 5, 6 } }, 1 } },
             { "Pumped3", { {{ 6, 6 } }, 1 } },
             { "Pumped4", { { { 7, 6 } }, 1 } },
-            { "Dying", { { { 4, 6 }, { 5, 6 }, { 6, 6 }, { 7, 6 } }, 4 } },
+            { "Dying", { { { 4, 6 }, { 5, 6 }, { 6, 6 }, { 7, 6 } }, 1 } },
             { "Ghost", { { { 2, 6 }, { 3, 6 }}, 1 } },
             { "Crushed", { { { 8, 6 }}, 1 } }
+        });
+
+    dae::ResourceManager::LoadSprite("Fygar",
+        "SpriteSheetFinal.png",
+        7,  // rowCount
+        14,   // colCount
+        {
+            { "Normal", { { { 0, 4 }}, 1 } },
+            { "Walk_Right", { {  { 0, 4 }, { 1, 4 } }, 1 } },
+            { "Walk_Left", { {  { 0, 4 }, { 1, 4 } }, 1 } },
+            { "Walk_Up", { { { 0, 4 }, { 1, 4 } }, 1 } },
+            { "Walk_Down", { { { 0, 4 }, { 1, 4 } }, 1 } },
+            { "Pumped1", { {{ 4, 5 } }, 1 } },
+            { "Pumped2", { {{ 5, 5 } }, 1 } },
+            { "Pumped3", { {{ 6, 5 } }, 1 } },
+            { "Pumped4", { { { 7, 5 } }, 1 } },
+            { "Dying", { { { 4, 6 }, { 5, 6 }, { 6, 6 }, { 7, 6 } }, 1 } },
+            { "Ghost", { { { 0, 6 }, { 1, 6 }}, 1 } },
+            { "Crushed", { { { 8, 5 }}, 1 } },
+            { "Atacking", { { { 8, 5 }}, 1 } }
+
         });
 
 
@@ -678,6 +699,8 @@ void GameScene(dae::Scene* scene)
     
     auto& inputManager = dae::InputManager::GetInstance();
     UnBindPlayerCommands(inputManager);
+    UnBindMenuCommands(inputManager);
+    UnBindNameCommands(inputManager);
 
     // Create GameObject for FPS counter
     auto fpsCounterObject = std::make_unique<dae::GameObject>();
@@ -695,21 +718,6 @@ void GameScene(dae::Scene* scene)
     SceneHelpers::LoadMapIntoScene(loadMap, scene, startPos, mapScale);
 
     SceneHelpers::LoadTunnelMapIntoScene(loadMap, scene, startPos, mapScale);
-   
-
-    //auto lifeSprite = std::make_unique<dae::GameObject>();
-    //auto spriteComponent = std::make_unique<dae::SpriteRendererComponent>(lifeSprite.get(), dae::ResourceManager::GetInstance().GetTexture("ArrowEnd"));
-    //spriteComponent->SetDimensions(SceneHelpers::GetGridSize().x, SceneHelpers::GetGridSize().y);
-    //lifeSprite->AddComponent(std::move(spriteComponent));
-    //lifeSprite->SetLocalPosition(glm::vec3((SceneHelpers::GetMinCoordinates().x + SceneHelpers::GetMaxCoordinates().x) / 2, (SceneHelpers::GetMinCoordinates().y + SceneHelpers::GetMaxCoordinates().y) / 2, -1.0f)); // Adjust position for each sprite
-    //scene->Add(std::move(lifeSprite));
-
-    //auto lifeSprite2 = std::make_unique<dae::GameObject>();
-    //auto spriteComponent2 = std::make_unique<dae::SpriteRendererComponent>(lifeSprite2.get(), dae::ResourceManager::GetInstance().GetTexture("ArrowEnd"));
-    //spriteComponent2->SetDimensions(SceneHelpers::GetGridSize().x, SceneHelpers::GetGridSize().y);
-    //lifeSprite2->AddComponent(std::move(spriteComponent2));
-    //lifeSprite2->SetLocalPosition(glm::vec3((SceneHelpers::GetMinCoordinates().x + SceneHelpers::GetMaxCoordinates().x) / 2, (SceneHelpers::GetMinCoordinates().y + SceneHelpers::GetMaxCoordinates().y) / 2 + 100, -1.0f)); // Adjust position for each sprite
-    //scene->Add(std::move(lifeSprite2));
 
     int score;
     int lives;
@@ -750,7 +758,7 @@ void GameScene(dae::Scene* scene)
 
     scene->Add(std::move(PlayerObject));
 
-   
+   //enemie 1 
     auto PookaObject = std::make_unique<dae::GameObject>();
     std::cout << "Creating PookaObject" << std::endl;
 
@@ -774,8 +782,9 @@ void GameScene(dae::Scene* scene)
     dae::SceneData::GetInstance().AddGameObject(PookaObject.get(), dae::GameObjectType::enemy);
     scene->Add(std::move(PookaObject));
 
+    //enemie 2
     auto SaugeObject2 = std::make_unique<dae::GameObject>();
-    auto spriterenderComponent3 = std::make_unique<dae::SpriteRendererComponent>(SaugeObject2.get(), dae::ResourceManager::GetSprite("enemy"));
+    auto spriterenderComponent3 = std::make_unique<dae::SpriteRendererComponent>(SaugeObject2.get(), dae::ResourceManager::GetSprite("Fygar"));
     spriterenderComponent3->SetDimensions(40, 40);
     SaugeObject2->AddComponent(std::move(spriterenderComponent3));
 
@@ -828,6 +837,9 @@ void GameScene(dae::Scene* scene)
 void GameScene2(dae::Scene* scene)
 {
     auto& inputManager = dae::InputManager::GetInstance();
+    UnBindPlayerCommands(inputManager);
+    UnBindMenuCommands(inputManager);
+    UnBindNameCommands(inputManager);
 
     // Create GameObject for FPS counter
     auto fpsCounterObject = std::make_unique<dae::GameObject>();
@@ -840,7 +852,7 @@ void GameScene2(dae::Scene* scene)
     scene->Add(std::move(fpsCounterObject));
 
 
-    constexpr glm::vec3 startPos(300, 50, 0.0f);
+    constexpr glm::vec3 startPos(300, 20, 0.0f);
     constexpr glm::vec2 mapScale(40, 40);
 
     const LoadMap loadMap("../Data/maps/map1.map", "../Data/maps/map1.ingmap");
@@ -883,7 +895,8 @@ void GameScene2(dae::Scene* scene)
     auto animationComponent = std::make_unique<dae::AnimationComponent>(PlayerObject.get(), PlayerObject->GetComponent<dae::SpriteRendererComponent>(), "Idle");
     animationComponent->Play("Walk_Right", true);
     PlayerObject->AddComponent(std::move(animationComponent));
-    PlayerObject->SetLocalPosition(glm::vec3(100, 100, 0.0f));
+    PlayerObject->SetLocalPosition(glm::vec3(580, 380, 1.0f));
+
 
     auto hitBox = std::make_unique<HitBox>(glm::vec2(40, 40));
     hitBox->SetGameObject(PlayerObject.get());
@@ -925,7 +938,8 @@ void GameScene2(dae::Scene* scene)
     auto animationComponent2 = std::make_unique<dae::AnimationComponent>(PlayerObject2.get(), PlayerObject2->GetComponent<dae::SpriteRendererComponent>(), "Idle");
     animationComponent2->Play("Walk_Right", true);
     PlayerObject2->AddComponent(std::move(animationComponent2));
-    PlayerObject2->SetLocalPosition(glm::vec3(100, 300, 0.0f));
+    PlayerObject2->SetLocalPosition(glm::vec3(620, 380, 1.0f));
+
 
     auto hitBox2 = std::make_unique<HitBox>(glm::vec2(40, 40));
     hitBox2->SetGameObject(PlayerObject2.get());
@@ -965,7 +979,7 @@ void load()
     SaveSoreScene->SetOnActivateCallback([SaveSoreScene]() { loadInputScore(SaveSoreScene); });
 
 
-    sceneManager.SetActiveScene("Game");
+    sceneManager.SetActiveScene("StartMenu");
 }
 
 int main(int, char* []) {

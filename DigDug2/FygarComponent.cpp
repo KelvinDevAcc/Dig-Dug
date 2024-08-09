@@ -1,95 +1,96 @@
-#include "PookaComponent.h"
+#include "FygarComponent.h"
+
 #include <iostream>
 #include <random>
 #include <limits>
 #include <algorithm>
 
-#include "EnemyComponent.h"
 #include "SceneData.h"
 #include "GameObject.h"
 #include "GameTime.h"
 #include "SceneHelpers.h"
+#include "PookaComponent.h"
 
-PookaComponent::PookaComponent(dae::GameObject* owner)
-    : m_CurrentState(std::make_unique<PookaWandering>()), m_Destination(0, 0, 0), m_Owner(owner),
-    m_GhostModeTimer(0.0f), m_GhostModeInterval(10.0f), m_LastGhostModeChange(0), m_GhostModeEnabled(false),m_TargetPlayerPosition(0, 0, 0),m_GhostModePursuitTimer(0.0f)
-	,m_GhostModePursuitDuration(5.0f),m_PumpHits(0),m_DeflationTimeLimit(0)
+FygarComponent::FygarComponent(dae::GameObject* owner)
+    : m_ActiveState(std::make_unique<FygarWandering>()), m_TargetLocation(0, 0, 0), m_EntityOwner(owner),
+    m_GhostModeTimer(0.0f), m_GhostModeInterval(10.0f), m_LastGhostModeCheck(0), m_IsGhostModeActive(false),
+    m_TargetPlayerLocation(0, 0, 0), m_GhostModePursuitTimer(0.0f), m_GhostModePursuitDuration(5.0f), m_PumpStrikes(0), m_DeflationTimeLimit(0)
 {
-    m_startPosition = m_Owner->GetWorldPosition();
-    m_CurrentPosition = m_Owner->GetWorldPosition(); // Initialize the position
-    m_CurrentState->Enter(this);
-    SetGameObject(m_Owner);
+    m_InitialPosition = m_EntityOwner->GetWorldPosition();
+    m_CurrentLocation = m_EntityOwner->GetWorldPosition(); // Initialize the position
+    m_ActiveState->Enter(this);
+    SetGameObject(m_EntityOwner);
     // Initialize the ghost mode timer with a random interval
     static std::random_device rd;
     static std::mt19937 gen(rd());
-    std::uniform_real_distribution<float> dis(5.0f, 15.0f); // Interval between 50 and 150 seconds
+    std::uniform_real_distribution<float> dis(5.0f, 15.0f); // Interval between 5 and 15 seconds
     m_GhostModeInterval = dis(gen);
     m_GhostModeTimer = m_GhostModeInterval;
 }
 
-PookaComponent::~PookaComponent() {
-    if (m_CurrentState) {
-        m_CurrentState->Exit(this);
+FygarComponent::~FygarComponent() {
+    if (m_ActiveState) {
+        m_ActiveState->Exit(this);
     }
 }
 
-void PookaComponent::SetState(std::unique_ptr<PookaState> newState) {
-    if (m_CurrentState) {
-        m_CurrentState->Exit(this);
+void FygarComponent::SetState(std::unique_ptr<FygarState> newState) {
+    if (m_ActiveState) {
+        m_ActiveState->Exit(this);
     }
-    m_CurrentState = std::move(newState);
-    m_CurrentState->Enter(this);
+    m_ActiveState = std::move(newState);
+    m_ActiveState->Enter(this);
 }
 
-void PookaComponent::Update() {
-    if (m_CurrentState) {
-        m_CurrentState->Update(this);
+void FygarComponent::Update() {
+    if (m_ActiveState) {
+        m_ActiveState->Update(this);
     }
 
-    UpdateTimer();
+    RefreshTimer();
 }
 
-void PookaComponent::MoveToNextWaypoint() {
+void FygarComponent::NavigateToNextWaypoint() {
     const float speed = 50.0f * dae::GameTime::GetDeltaTime(); // Adjust speed as needed
     constexpr float precision = 1.0f; // Precision threshold for reaching destination
 
-    glm::vec3 direction = m_Destination - m_CurrentPosition;
+    glm::vec3 direction = m_TargetLocation - m_CurrentLocation;
     const float distance = glm::length(direction);
 
     if (distance > precision) {
         direction = glm::normalize(direction);
-        if (!TryMove(direction * speed)) {
+        if (!AttemptMove(direction * speed)) {
             // If move fails, try smaller steps
             std::cout << "Failed to move directly, trying smaller steps." << std::endl;
             for (float step = speed / 2; step > 0.1f; step /= 2) {
-                if (TryMove(direction * step)) {
+                if (AttemptMove(direction * step)) {
                     break;
                 }
             }
         }
     }
     else {
-        m_CurrentPosition = m_Destination;
+        m_CurrentLocation = m_TargetLocation;
     }
-    m_Owner->SetLocalPosition(m_CurrentPosition); // Update owner's position
+    m_EntityOwner->SetLocalPosition(m_CurrentLocation); // Update owner's position
 }
 
-bool PookaComponent::TryMove(glm::vec3 direction) {
+bool FygarComponent::AttemptMove(glm::vec3 direction) {
     const auto& sceneData = dae::SceneData::GetInstance();
-    const glm::vec3 newPosition = m_CurrentPosition + direction;
+    const glm::vec3 newPosition = m_CurrentLocation + direction;
 
-    if (sceneData.CanEnemyMove(direction.x, direction.y, *m_Owner)) {
-        m_CurrentPosition = newPosition;
+    if (sceneData.CanEnemyMove(direction.x, direction.y, *m_EntityOwner)) {
+        m_CurrentLocation = newPosition;
         return true;
     }
     return false;
 }
 
-void PookaComponent::MoveToNextWaypointTowards(const glm::vec3& targetPosition) {
+void FygarComponent::NavigateToNextWaypointTowards(const glm::vec3& targetPosition) {
     const float deltaTime = dae::GameTime::GetDeltaTime();
     const float speed = 50.0f; // Adjust this speed value as needed
 
-    glm::vec3 direction = targetPosition - m_CurrentPosition;
+    glm::vec3 direction = targetPosition - m_CurrentLocation;
     const float distance = glm::length(direction);
 
     if (distance > 0.1f) { // Threshold to stop moving
@@ -97,25 +98,25 @@ void PookaComponent::MoveToNextWaypointTowards(const glm::vec3& targetPosition) 
         glm::vec3 movement = direction * speed * deltaTime;
 
         // Move `Pooka` towards the destination
-        if (glm::length(targetPosition - (m_CurrentPosition + movement)) < distance) {
-            m_CurrentPosition += movement;
+        if (glm::length(targetPosition - (m_CurrentLocation + movement)) < distance) {
+            m_CurrentLocation += movement;
         }
         else {
             // Move directly to the destination if the next step would overshoot
-            m_CurrentPosition = targetPosition;
+            m_CurrentLocation = targetPosition;
         }
 
         // Update position
-        m_Owner->SetLocalPosition(m_CurrentPosition);
+        m_EntityOwner->SetLocalPosition(m_CurrentLocation);
     }
     else {
         // Reached destination
-        m_CurrentPosition = targetPosition;
-        m_Owner->SetLocalPosition(m_CurrentPosition);
+        m_CurrentLocation = targetPosition;
+        m_EntityOwner->SetLocalPosition(m_CurrentLocation);
     }
 }
 
-glm::ivec2 PositionToGrid(const glm::vec3& position)
+glm::ivec2 FygarComponent::ConvertPositionToGrid(const glm::vec3& position)
 {
     float gridStartX = SceneHelpers::GetMinCoordinates().x;
     float gridStartY = SceneHelpers::GetMinCoordinates().y;
@@ -128,7 +129,7 @@ glm::ivec2 PositionToGrid(const glm::vec3& position)
     };
 }
 
-glm::vec3 GridToPosition(const glm::ivec2& gridCoords)
+glm::vec3 FygarComponent::ConvertGridToPosition(const glm::ivec2& gridCoords)
 {
     float gridStartX = SceneHelpers::GetMinCoordinates().x;
     float gridStartY = SceneHelpers::GetMinCoordinates().y;
@@ -142,12 +143,12 @@ glm::vec3 GridToPosition(const glm::ivec2& gridCoords)
     };
 }
 
-glm::vec3 PookaComponent::FindNearestValidSpot() {
+glm::vec3 FygarComponent::LocateNearestSafeSpot() {
     const float maxSearchDistance = 100.0f; // Maximum distance to search
     const float stepSize = SceneHelpers::GetCellSize().x; // Step size in grid (assumes square cells)
 
     // Calculate the grid origin in 2D space
-    glm::ivec2 currentGridPos = PositionToGrid(m_Owner->GetWorldPosition());
+    glm::ivec2 currentGridPos = ConvertPositionToGrid(m_EntityOwner->GetWorldPosition());
 
     float searchRange = stepSize;
 
@@ -156,10 +157,10 @@ glm::vec3 PookaComponent::FindNearestValidSpot() {
         for (float x = -searchRange; x <= searchRange; x += stepSize) {
             for (float y = -searchRange; y <= searchRange; y += stepSize) {
                 glm::ivec2 potentialGridPos = currentGridPos + glm::ivec2(x / stepSize, y / stepSize);
-                glm::vec3 potentialSpot = GridToPosition(potentialGridPos);
+                glm::vec3 potentialSpot = ConvertGridToPosition(potentialGridPos);
 
                 // Check if the center of the tile is walkable
-                if (dae::SceneData::GetInstance().CanEnemyMove(potentialSpot.x, potentialSpot.y, *m_Owner)) {
+                if (dae::SceneData::GetInstance().CanEnemyMove(potentialSpot.x, potentialSpot.y, *m_EntityOwner)) {
                     return potentialSpot;
                 }
             }
@@ -171,11 +172,11 @@ glm::vec3 PookaComponent::FindNearestValidSpot() {
 
     // If no valid spot was found within the search range
     std::cout << "No valid spot found within the search range." << std::endl;
-    return m_CurrentPosition; // Return the current position if no valid spot is found
+    return m_CurrentLocation; // Return the current position if no valid spot is found
 }
 
 
-bool PookaComponent::DetectsPlayer() {
+bool FygarComponent::DetectsPlayer() {
     const auto& sceneData = dae::SceneData::GetInstance();
     const auto& players = sceneData.GetPlayers();
 
@@ -198,17 +199,17 @@ bool PookaComponent::DetectsPlayer() {
     return !m_DetectedPlayers.empty();
 }
 
-void PookaComponent::EnableGhostMode() {
+void FygarComponent::EnableGhostMode() {
     std::cout << "Pooka ghost mode enabled." << std::endl;
     m_GhostModeEnabled = true;
 }
 
-void PookaComponent::DisableGhostMode() {
+void FygarComponent::DisableGhostMode() {
     std::cout << "Pooka ghost mode disabled." << std::endl;
     m_GhostModeEnabled = false;
 }
 
-bool PookaComponent::ReachedDestination() {
+bool FygarComponent::ReachedDestination() {
     constexpr float threshold = 1.0f; // Adjust threshold distance
     const glm::vec3 direction = m_Destination - m_CurrentPosition;
     const float distance = glm::length(direction);
@@ -216,11 +217,11 @@ bool PookaComponent::ReachedDestination() {
     return distance < threshold;
 }
 
-bool PookaComponent::CanRemainGhost() {
+bool FygarComponent::CanRemainGhost() {
     return m_GhostModeEnabled; // Simple example logic, could be expanded
 }
 
-void PookaComponent::ChooseRandomDirection() {
+void FygarComponent::ChooseRandomDirection() {
     std::cout << "Pooka choosing a random direction." << std::endl;
 
     const std::vector<Direction> directions = { Direction::Up, Direction::Down, Direction::Left, Direction::Right };
@@ -273,11 +274,11 @@ void PookaComponent::ChooseRandomDirection() {
 
 
 
-bool PookaComponent::SeesPlayer() {
+bool FygarComponent::SeesPlayer() {
     return DetectsPlayer(); // Placeholder for Line of Sight (LOS) checks
 }
 
-void PookaComponent::ChasePlayer() {
+void FygarComponent::ChasePlayer() {
     if (m_DetectedPlayers.empty()) return;
 
     std::cout << "Pooka is moving towards the nearest player." << std::endl;
@@ -315,7 +316,7 @@ void PookaComponent::ChasePlayer() {
     }
 }
 
-void PookaComponent::UpdateTimer() {
+void FygarComponent::UpdateTimer() {
     const float deltaTime = dae::GameTime::GetDeltaTime();
 
     // Decrement the timer if ghost mode is not enabled
@@ -344,28 +345,28 @@ void PookaComponent::UpdateTimer() {
     }
 }
 
-bool PookaComponent::ShouldEnterGhostMode() {
+bool FygarComponent::ShouldEnterGhostMode() {
     return m_GhostModeEnabled;
 }
 
-void PookaComponent::HitByPump(dae::GameObject* lastatacker) {
+void FygarComponent::HitByPump(dae::GameObject* lastatacker) {
     ++m_PumpHits;
     if (m_PumpHits <= 4)
     {
-        SetState(std::make_unique<PookaPumpedState>());
+        SetState(std::make_unique<FygarPumpedState>());
     }
     m_LastAttacker = lastatacker;
 }
 
-void PookaComponent::StartDeflationTimer() {
+void FygarComponent::StartDeflationTimer() {
     m_DeflationTimeLimit = 5.0f; // Set the deflation time limit (e.g., 5 seconds)
 }
 
-void PookaComponent::OnCrushed() {
-        SetState(std::make_unique<PookaCrushedState>());
+void FygarComponent::OnCrushed() {
+        SetState(std::make_unique<FygarCrushedState>());
 }
 
-int PookaComponent::CalculatePoints(int layer, std::string enemyType) {
+int FygarComponent::CalculatePoints(int layer, std::string enemyType) {
     if (enemyType == "Pooka") {
         switch (layer) {
         case 1: return 200;
@@ -385,7 +386,7 @@ int PookaComponent::CalculatePoints(int layer, std::string enemyType) {
     return 0;
 }
 
-int PookaComponent::DetermineLayer(float yPosition) {
+int FygarComponent::DetermineLayer(float yPosition) {
     if (yPosition >= 0 && yPosition < 240) {
         return 1;
     }
@@ -401,7 +402,7 @@ int PookaComponent::DetermineLayer(float yPosition) {
     return 0;
 }
 
-void PookaComponent::ReSpawn() {
+void FygarComponent::ReSpawn() {
     std::cout << "Pooka respawning at starting position." << std::endl;
 
     m_CurrentPosition = m_startPosition;
@@ -409,5 +410,5 @@ void PookaComponent::ReSpawn() {
     m_Destination = m_startPosition;
     m_PumpHits = 0;
     // Reset to Wandering state
-    SetState(std::make_unique<PookaWandering>());
+    SetState(std::make_unique<FygarWandering>());
 }

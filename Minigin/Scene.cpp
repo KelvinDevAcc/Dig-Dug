@@ -31,8 +31,8 @@ namespace dae
 
     void Scene::RemoveAll() const
     {
-        m_objects.clear();  // Clears and deletes all objects
-        m_sortedObjects.clear();  // Also clear the sorted list if you are maintaining one
+        m_objects.clear();
+        m_sortedObjects.clear();
     }
 
     void Scene::Update() const

@@ -90,15 +90,25 @@ namespace dae {
 
     void SceneData::Update() const
     {
-        for (GameObject* player : GetPlayers()) {
-            if (player && isOnEnemy(*player)) {
-                player->GetComponent<game::Player>()->Die();
+	    if (!m_enemys.empty()|| !m_rocks.empty())
+	    {
+            for (GameObject* player : GetPlayers()) {
+                if (!m_enemys.empty())
+                {
+                    if (player && isOnEnemy(*player)) {
+                        player->GetComponent<game::Player>()->Die();
+                    }
+                }
+                if (!m_rocks.empty())
+                {
+                    if (player && IsOnRock(*player))
+                    {
+                        player->GetComponent<game::Player>()->Die();
+                    }
+                }
+
             }
-           /* else if (player && IsOnRock(*player))
-            {
-                player->GetComponent<game::Player>()->Die();
-            }*/
-        }
+	    }
     }
 
     bool SceneData::IsOnSpecificObjectType(GameObject& object, const std::vector<GameObject*>& objects)

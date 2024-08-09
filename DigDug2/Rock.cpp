@@ -233,8 +233,7 @@ bool Rock::CheckCollisionWithObjects()
         }
 
         // Award the points to the player who triggered the fall
-        auto playerScoreComponent = m_PlayerThatTriggeredFall->GetComponent<dae::PointComponent>();
-        if (playerScoreComponent)
+        if (const auto playerScoreComponent = m_PlayerThatTriggeredFall->GetComponent<dae::PointComponent>())
         {
             playerScoreComponent->SetScore(playerScoreComponent->GetScore() + points);
         }

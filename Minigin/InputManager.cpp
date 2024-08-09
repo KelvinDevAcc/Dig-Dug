@@ -88,22 +88,10 @@ void InputManager::UnbindCommand(unsigned int button, KeyState state, InputType 
     {
         for (auto& bindings : m_controllerBindings)
         {
-            if (bindings.empty()) {
-                continue; 
-            }
-
-            for (auto it = bindings.begin(); it != bindings.end();)
+            auto it = bindings.find({ button, state });
+            if (it != bindings.end())
             {
-                const auto& binding = *it;
-
-                if (binding.first.first == button && binding.first.second == state)
-                {
-                    it = bindings.erase(it);
-                }
-                else
-                {
-                    ++it;
-                }
+                bindings.erase(it);
             }
         }
     }
@@ -154,29 +142,41 @@ int InputManager::GetConnectedControllerCount()
     return connectedCount;
 }
 
-void InputManager::HandleControllerInput() {
-    for (int i = 0; i < static_cast<int>(m_gameControllers.size()); ++i) {
-        if (!m_gameControllers[i].IsConnected()) {
+void InputManager::HandleControllerInput()
+{
+    for (int i = 0; i < static_cast<int>(m_gameControllers.size()); ++i)
+    {
+        if (!m_gameControllers[i].IsConnected())
+        {
             continue; // Skip disconnected controllers
         }
 
-        for (const auto& binding : m_controllerBindings[i]) {
+        for (const auto& binding : m_controllerBindings[i])
+        {
             const auto button = binding.first.first;
+            const auto state = binding.first.second;
 
-            switch (const auto state = binding.first.second) {
+            switch (state)
+            {
             case KeyState::Down:
-                if (m_gameControllers[i].IsButtonDown(button)) {
+                if (m_gameControllers[i].IsButtonDown(button))
+                {
                     binding.second->Execute();
+                    goto NextController; // Move to the next controller after executing
                 }
                 break;
             case KeyState::Up:
-                if (m_gameControllers[i].IsButtonUp(button)) {
+                if (m_gameControllers[i].IsButtonUp(button))
+                {
                     binding.second->Execute();
+                    goto NextController; // Move to the next controller after executing
                 }
                 break;
             case KeyState::Pressed:
-                if (m_gameControllers[i].IsButtonPressed(button)) {
+                if (m_gameControllers[i].IsButtonPressed(button))
+                {
                     binding.second->Execute();
+                    goto NextController; // Move to the next controller after executing
                 }
                 break;
             default:
@@ -184,6 +184,7 @@ void InputManager::HandleControllerInput() {
                 break;
             }
         }
+    NextController:; // Label to jump to next controller
     }
 }
 

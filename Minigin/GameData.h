@@ -28,6 +28,7 @@ public:
     int GetNumberOfPlayers() const;
 
     void ResetPlayerData(int playerID);
+    void CheckGameState();
 
     enum class GameState { SINGLE_PLAYER, MULTIPLAYER, VERSUS };
     GameState GetGameState() const { return m_gameState; }

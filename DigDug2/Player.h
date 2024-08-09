@@ -100,5 +100,7 @@ namespace game
 
         Direction m_CurrentDirection = Direction::None;
 
+        float m_deathTimer;
+        bool m_isDying;
     };
 }

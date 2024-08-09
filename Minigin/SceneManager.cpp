@@ -7,8 +7,10 @@
 #include "GameData.h"
 #include "SceneData.h"
 #include "servicelocator.h"
-#include "../BugerTime/Player.h"
+#include "../DigDug2/Player.h"
 #include "../DigDug2/PookaComponent.h"
+
+
 
 
 class PookaComponent;
@@ -34,13 +36,13 @@ namespace dae
         {
             if ((*it)->GetName() == name)
             {
-                GameData::GetInstance().FindAndStorePlayerData();
                 m_activeSceneIterator = it;
 
                 SceneData::GetInstance().RemoveAllGameObjects();
                 (*m_activeSceneIterator)->RemoveAll();
 
                 (*m_activeSceneIterator)->Activate();
+                GameData::GetInstance().FindAndStorePlayerData();
 
                 // Stop the background music of the previously active scene
                 /*if (m_previousActiveSceneIterator != m_scenes.end())
@@ -96,27 +98,33 @@ namespace dae
     void SceneManager::RestartCurrentSceneWithPersistentObjects()
     {
         // Store the current state of objects that should persist
-        std::vector<GameObject*> persistentObjects;
-        for (const auto& obj : (*m_activeSceneIterator)->GetObjects())
-        {
-            // Add logic here to determine if the object should persist
-            persistentObjects.push_back(obj.get());  // Store the raw pointer
-        }
+        //std::vector<GameObject*> persistentObjects;
+        //for (const auto& obj : (*m_activeSceneIterator)->GetObjects())
+        //{
+        //    // Add logic here to determine if the object should persist
+        //    persistentObjects.push_back(obj.get());  // Store the raw pointer
+        //}
 
+        const auto players = SceneData::GetInstance().GetPlayers();
+        const auto enemies = SceneData::GetInstance().GetEnemies();
         // Re-add persistent objects
-        for (const auto& obj : persistentObjects)
+      
+        for (const auto& obj : enemies)
         {
-            if (const auto player = obj->GetComponent<game::Player>())
-            {
-                player->ReSpawn();
-            }
             if (const auto pooka = obj->GetComponent<PookaComponent>())
             {
                 pooka->ReSpawn();
             }
         }
-        // Reactivate the scene
-        //(*m_activeSceneIterator)->Activate();
+        for (const auto& obj : players)
+        {
+            if (const auto player = obj->GetComponent<game::Player>())
+            {
+                player->ReSpawn();
+            }
+
+        }
+
     }
 
     void SceneManager::Update() const

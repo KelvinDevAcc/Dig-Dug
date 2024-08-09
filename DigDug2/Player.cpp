@@ -15,7 +15,7 @@ namespace game
         : m_GameObject(gameObject),
         m_timeSinceLastAction(0.0f), m_inactivityThreshold(6.0f),
         m_CurrentAnimationState(AnimationState::Idle),
-        pumpDirection(glm::vec3(1, 0, 0))
+        pumpDirection(glm::vec3(1, 0, 0)),m_deathTimer(0),m_isDying(false)
     {
         m_animationComponent = m_GameObject->GetComponent<dae::AnimationComponent>();
         m_healthComponent = m_GameObject->GetComponent<dae::HealthComponent>();
@@ -27,11 +27,22 @@ namespace game
 
     void Player::Update()
     {
-        m_timeSinceLastAction += dae::GameTime::GetDeltaTime();
+        const float deltaTime = dae::GameTime::GetDeltaTime();
+
+        m_timeSinceLastAction += deltaTime;
         if (m_timeSinceLastAction >= m_inactivityThreshold)
         {
             Idle();
             m_timeSinceLastAction = 0;
+        }
+
+        if (m_isDying)
+        {
+            m_deathTimer -= deltaTime;
+            if (m_deathTimer <= 0.0f)  // Compare with 0.0f for clarity
+            {
+                dae::SceneManager::GetInstance().RestartCurrentSceneWithPersistentObjects();
+            }
         }
 
         for (const auto& pump : m_pumps)
@@ -42,10 +53,9 @@ namespace game
             }
         }
 
-        const float deltaTime = dae::GameTime::GetDeltaTime();
         UpdatePumpTimer(deltaTime);
 
-        if (m_healthComponent->GetLives() < 0)
+       /* if (m_healthComponent->GetLives() < 0)
         {
             m_healthComponent->SetLives(-1);
             const auto playerSize = dae::SceneData::GetInstance().GetPlayers().size();
@@ -67,21 +77,27 @@ namespace game
                 dae::SceneData::GetInstance().RemoveGameObject(GetParentObject(), dae::GameObjectType::Player);
                 dae::SceneManager::GetInstance().GetActiveScene()->Remove(GetParentObject());
             }
-        }
+        }*/
     }
 
     void Player::Die()
     {
         if (!m_healthComponent) return;
 
+        m_GameObject->GetComponent<HitBox>()->Disable();
         SetAnimationState(AnimationState::Dying);
+       
+
         dae::Message message;
         message.type = dae::PlaySoundMessageType::Sound;
         message.arguments.emplace_back(static_cast<sound_id>(2));
         dae::EventQueue::Broadcast(message);
 
         m_healthComponent->SetHealth(m_healthComponent->GetHealth() - 100);
-        ReSpawn();
+        m_deathTimer =static_cast<float>(m_animationComponent->GetAnimationDuration());
+        m_isDying = true;
+
+        // Start a timer for the duration of the dying animation
     }
 
     void Player::Render() const
@@ -97,7 +113,7 @@ namespace game
 
     void Player::ShootPump()
     {
-        if (!m_pointComponent) {
+        if (!m_pointComponent || m_isDying) {
             return;
         }
 
@@ -135,6 +151,9 @@ namespace game
 
     void Player::AddPumpPart()
     {
+        if (m_isDying)
+            return;
+
         glm::vec3 offsetPosition(0.0f);
         if (!m_pumps.empty())
         {
@@ -211,12 +230,17 @@ namespace game
     void Player::ReSpawn()
     {
         m_GameObject->SetLocalPosition(m_startPosition);
+        m_GameObject->GetComponent<HitBox>()->Enable();
+        m_isDying = false;
         Idle();
     }
 
 
     void Player::Move(float deltaX, float deltaY)
     {
+	    if (m_isDying)
+            return;
+
         // Check if the direction changed
         Direction newDirection = Direction::None;
         if (deltaX > 0)
@@ -306,7 +330,6 @@ namespace game
 
         glm::vec3 position = m_GameObject->GetWorldPosition();
         float newPosX = position.x + deltaX * dae::GameTime::GetDeltaTime() * m_Speed;
-       // newPosX = SnapToGridLineX(newPosX);
         SetAnimationState(deltaX > 0 ? AnimationState::Walk_Right : AnimationState::Walk_Left);
         UpdateTunnelType(position, true, deltaX > 0);
         m_GameObject->SetLocalPosition(glm::vec3(newPosX, position.y, position.z));
@@ -318,7 +341,6 @@ namespace game
 
         glm::vec3 position = m_GameObject->GetWorldPosition();
         float newPosY = position.y + deltaY * dae::GameTime::GetDeltaTime() * m_Speed;
-        //newPosY = SnapToGridLineY(newPosY);
         SetAnimationState(deltaY > 0 ? AnimationState::Walk_Down : AnimationState::Walk_Up);
         UpdateTunnelType(position, false, deltaY > 0);
         m_GameObject->SetLocalPosition(glm::vec3(position.x, newPosY, position.z));

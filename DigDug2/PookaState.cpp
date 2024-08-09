@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "AnimationComponent.h"
+#include "GameData.h"
 #include "GameObject.h"
 #include "GameTime.h"
 #include "PointComponent.h"
@@ -90,7 +91,7 @@ void PookaGhostState::Exit(PookaComponent* pooka) {
 }
 
 void PookaWandering::Enter(PookaComponent* pooka) {
-    pooka->ChooseRandomDirection();
+	pooka->ChooseRandomDirection();
     pooka->m_Owner->GetComponent<dae::AnimationComponent>()->Play("Walk_Up", true);
 }
 
@@ -212,6 +213,7 @@ void PookaDeadState::Enter(PookaComponent* pooka) {
 
     // Remove the Pooka object from the scene after the death animation plays
     dae::SceneData::GetInstance().RemoveGameObject(pooka->m_Owner, dae::GameObjectType::enemy);
+    GameData::GetInstance().CheckGameState();
     dae::SceneManager::GetInstance().GetActiveScene()->Remove(pooka->m_Owner);
 }
 
