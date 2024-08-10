@@ -7,11 +7,8 @@
 #endif
 #endif
 
-#include <iostream>
 #include <random>
 
-#include "AnimationComponent.h"
-#include "EnemyComponent.h"
 #include "FPSCounterComponent.h"
 #include "GameData.h"
 #include "HighScores.h"
@@ -24,17 +21,60 @@
 #include "PointsDisplayComponent.h"
 #include "PookaComponent.h"
 #include "ResourceManager.h"
-#include "Rock.h"
 #include "SceneData.h"
 #include "SceneHelpers.h"
 #include "SceneManager.h"
+#include "sdl_sound_system.h"
 #include "servicelocator.h"
-#include "SpriteRendererComponent.h"
 #include "TextComponent.h"
 #include "TweenManager.h"
 
 void loadResources()
 {
+#if _DEBUG
+    servicelocator::register_sound_system(
+        std::make_unique<logging_sound_system>(std::make_unique<sdl_sound_system>()));
+#else
+    servicelocator::register_sound_system(std::make_unique<sdl_sound_system>());
+#endif
+    auto& ss = servicelocator::get_sound_system();
+
+    ss.setVolume(0.f);
+    ss.register_sound_file("../Data/Sounds/02-GameStartMusic.mp3");
+    ss.register_sound_file("../Data/Sounds/12-HighScoreMusic.mp3");
+    ss.register_sound_file("../Data/Sounds/13-NameEntryMusic.mp3");
+    ss.register_sound_file("../Data/Sounds/18_menu_select.mp3");
+    ss.register_sound_file("../Data/Sounds/20_menu_move.mp3");
+    ss.register_sound_file("../Data/Sounds/DeathAnimation.mp3");
+    ss.register_sound_file("../Data/Sounds/EnemyDeath.mp3");
+    ss.register_sound_file("../Data/Sounds/GameOver.mp3");
+    ss.register_sound_file("../Data/Sounds/PlayerHit.mp3");
+    ss.register_sound_file("../Data/Sounds/PumpShoot.mp3");
+    ss.register_sound_file("../Data/Sounds/PumpToEnemy.wav");
+    ss.register_sound_file("../Data/Sounds/RockBroken.mp3");
+    ss.register_sound_file("../Data/Sounds/RockHit.wav");
+    ss.register_sound_file("../Data/Sounds/RockDropping.mp3");
+    ss.register_sound_file("../Data/Sounds/Victory.wav");
+    ss.register_sound_file("../Data/Sounds/walkmusic.wav");
+
+    // Load each sound file once
+    ss.load_sound(20, "../Data/Sounds/02-GameStartMusic.mp3",true);
+    ss.load_sound(1, "../Data/Sounds/12-HighScoreMusic.mp3", true);
+    ss.load_sound(2, "../Data/Sounds/13-NameEntryMusic.mp3", true);
+    ss.load_sound(3, "../Data/Sounds/DeathAnimation.mp3");
+    ss.load_sound(4, "../Data/Sounds/EnemyDeath.mp3");
+    ss.load_sound(5, "../Data/Sounds/GameOver.mp3");
+    ss.load_sound(6, "../Data/Sounds/PlayerHit.mp3");
+    ss.load_sound(7, "../Data/Sounds/PumpShoot.mp3");
+    ss.load_sound(8, "../Data/Sounds/PumpToEnemy.wav");
+    ss.load_sound(9, "../Data/Sounds/RockBroken.mp3");
+    ss.load_sound(10, "../Data/Sounds/RockHit.wav");
+    ss.load_sound(11, "../Data/Sounds/RockDropping.mp3");
+    ss.load_sound(12, "../Data/Sounds/Victory.wav");
+    ss.load_sound(13, "../Data/Sounds/walkmusic.wav");
+    ss.load_sound(15, "../Data/Sounds/18_menu_select.mp3");
+    ss.load_sound(14, "../Data/Sounds/20_menu_move.mp3");
+
     dae::ResourceManager::LoadFont("arcadeclassic", "ARCADECLASSIC.TTF", 48);
     dae::ResourceManager::LoadFont("digdug", "DIG DUG.ttf", 48);
     dae::ResourceManager::LoadFont("font", "font.ttf", 28);
@@ -218,7 +258,6 @@ void UnBindNameCommands(dae::InputManager& inputManager)
 void BindMenuCommands(dae::InputManager& inputManager)
 {
     UnBindPlayerCommands(inputManager);
-    UnBindMenuCommands(inputManager);
     UnBindNameCommands(inputManager);
     // Bind keyboard commands
     inputManager.BindCommand(SDL_SCANCODE_W, KeyState::Up, std::make_unique<NavigateUpCommand>(), InputType::Keyboard);
@@ -237,7 +276,7 @@ void BindKeyboardCommands(dae::InputManager& inputManager, int playerId) {
     inputManager.BindCommand(SDL_SCANCODE_A, KeyState::Pressed, std::make_unique<MoveCommand>(playerId, -1.5f, 0.0f), InputType::Keyboard);
     inputManager.BindCommand(SDL_SCANCODE_D, KeyState::Pressed, std::make_unique<MoveCommand>(playerId, 1.5f, 0.0f), InputType::Keyboard); inputManager.BindCommand(SDL_SCANCODE_X, KeyState::Up, std::make_unique<ScorePointCommand>(playerId), InputType::Keyboard);
     inputManager.BindCommand(SDL_SCANCODE_Z, KeyState::Up, std::make_unique<ScorePointCommand>(playerId), InputType::Keyboard);
-    inputManager.BindCommand(SDL_SCANCODE_C, KeyState::Up, std::make_unique<DamageCommand>(playerId), InputType::Keyboard);
+    //inputManager.BindCommand(SDL_SCANCODE_C, KeyState::Up, std::make_unique<DamageCommand>(playerId), InputType::Keyboard);
 }
 
 void BindControllerCommands(dae::InputManager& inputManager, int playerId, int controllerIndex) {
@@ -246,12 +285,13 @@ void BindControllerCommands(dae::InputManager& inputManager, int playerId, int c
     inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadLeft), KeyState::Pressed, std::make_unique<MoveCommand>(playerId, -1.5f, 0.0f), InputType::Controller, controllerIndex);
     inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadRight), KeyState::Pressed, std::make_unique<MoveCommand>(playerId, 1.5f, 0.0f), InputType::Controller, controllerIndex);
     inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::A), KeyState::Up, std::make_unique<ScorePointCommand>(playerId), InputType::Controller, controllerIndex);
-    inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::X), KeyState::Up, std::make_unique<DamageCommand>(playerId), InputType::Controller, controllerIndex);
+   // inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::X), KeyState::Up, std::make_unique<DamageCommand>(playerId), InputType::Controller, controllerIndex);
 }
 
 void HandlePlayerInput(dae::InputManager& inputManager, int playerId)
 {
     UnBindMenuCommands(inputManager);
+    UnBindNameCommands(inputManager);
     const int numControllers = inputManager.GetConnectedControllerCount();
 
     // Bind keyboard commands for Player 0 (always)
@@ -320,7 +360,7 @@ void BindControllerNameCommands(dae::InputManager& inputManager, int playerId, I
     inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadUp), KeyState::Up, std::make_unique<NavigateUpLetterCommand>(playerId), inputType, controllerId);
     inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadDown), KeyState::Up, std::make_unique<NavigateDownLetterCommand>(playerId), inputType, controllerId);
     inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::X), KeyState::Up, std::make_unique<SelectOptionLetterCommand>(playerId), inputType, controllerId);
-    inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::Y), KeyState::Up, std::make_unique<saveScoreCommand>(playerId), inputType, controllerId);
+    inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::A), KeyState::Up, std::make_unique<saveScoreCommand>(playerId), inputType, controllerId);
 }
 
 void BindNameCommands(dae::InputManager& inputManager)
@@ -350,6 +390,7 @@ void LoadStartMenu(dae::Scene* startMenuScene)
     auto& inputManager = dae::InputManager::GetInstance();
     const int numControllers = inputManager.GetConnectedControllerCount();
     BindMenuCommands(inputManager);
+    GameData::GetInstance().ResetRound();
 
     // Create GameObject for FPS counter
     auto fpsCounterObject = std::make_unique<dae::GameObject>();
@@ -398,7 +439,7 @@ void LoadStartMenu(dae::Scene* startMenuScene)
     startMenuScene->Add(std::move(playerInfoTxt));
 
 
-    if (numControllers == 1) {
+    if (numControllers > 0) {
         auto player02InfoTxt = std::make_unique<dae::GameObject>();
         auto player02textcomponent = std::make_unique<dae::TextComponent>("2UP", dae::ResourceManager::GetFont("arcade"), SDL_Color{ 255, 0, 0, 255 }, *player02InfoTxt);
         player02InfoTxt->AddComponent(std::move(player02textcomponent));
@@ -434,15 +475,17 @@ void LoadStartMenu(dae::Scene* startMenuScene)
     std::vector<std::function<void()>> callbacks =
     {
         []() {
-            std::cout << "single player" << std::endl;
+
+            GameData::GetInstance().SetGameState(GameData::GameState::SINGLE_PLAYER);
             dae::SceneManager::GetInstance().SetActiveScene("Game");
         },
         []() {
-            std::cout << "multiplayer" << std::endl;
-            dae::SceneManager::GetInstance().SetActiveScene("Game2");
+            GameData::GetInstance().SetGameState(GameData::GameState::MULTIPLAYER);
+            dae::SceneManager::GetInstance().SetActiveScene("Game");
         },
         []() {
-            std::cout << "versus Mode" << std::endl;
+            GameData::GetInstance().SetGameState(GameData::GameState::VERSUS);
+            dae::SceneManager::GetInstance().SetActiveScene("Game");
         },
         []() {
             dae::SceneManager::GetInstance().SetActiveScene("ScoreboardScene");
@@ -496,6 +539,8 @@ void LoadStartMenu(dae::Scene* startMenuScene)
     auto moveTweenInfocharacter2Txt02 = std::make_unique<Tween>(Infocharacter2Txt02.get(), finalPositionInfocharacter2Txt02, 10.0f, Easing::Linear);
     TweenManager::GetInstance().AddTween(std::move(moveTweenInfocharacter2Txt02));
     startMenuScene->Add(std::move(Infocharacter2Txt02));
+
+    startMenuScene->SetBackgroundMusic(20);
 }
 
 void LoadScoreboard(dae::Scene* ScoreBoardScene)
@@ -578,6 +623,8 @@ void LoadScoreboard(dae::Scene* ScoreBoardScene)
     menuObject->AddComponent(std::move(menuComponent));
     ScoreBoardScene->Add(std::move(menuObject));
     BindMenuCommands(inputManager);
+
+    ScoreBoardScene->SetBackgroundMusic(1);
 }
 
 void LoadUi(dae::Scene* scene)
@@ -613,13 +660,14 @@ void LoadUi(dae::Scene* scene)
     // Add HighScoreObject to the scene (assuming 'this' is a scene class)
     scene->Add(std::move(HighScoreObject));
 
+
     glm::vec3 initialPositionPoints(1090, 235, 0.f);
 
     for (size_t i = 0; i < players.size(); ++i) {
         const auto player = players[i];
         if (auto PointComponent = player->GetComponent<dae::PointComponent>())
         {
-            constexpr float distanceBetweenPoints = 50.0f;
+            constexpr float distanceBetweenPoints = 70.0f;
             auto pointsDisplayObject = std::make_unique<dae::GameObject>();
             glm::vec3 position = initialPositionPoints + glm::vec3(0.0f, i * distanceBetweenPoints, 0.0f);
             pointsDisplayObject->SetLocalPosition(position);
@@ -628,11 +676,22 @@ void LoadUi(dae::Scene* scene)
         	pointsDisplayObject->AddComponent(std::move(pointsDisplayComponent));
             scene->Add(std::move(pointsDisplayObject));
 
+            auto ScoretextObject = std::make_unique<dae::GameObject>();
+            glm::vec3 Scoreposition = initialPositionPoints + glm::vec3(0.0f, i * distanceBetweenPoints - 20.f, 0.0f);
+            ScoretextObject->SetLocalPosition(Scoreposition);
+            auto ScoretextObjectTextComponent = std::make_unique<dae::TextComponent>(
+                "SCORE",
+                dae::ResourceManager::GetFont("arcade"),
+                SDL_Color{ 255, 0, 0, 255 },
+                *ScoretextObject
+            );
+            ScoretextObject->AddComponent(std::move(ScoretextObjectTextComponent));
+            scene->Add(std::move(ScoretextObject));
         }
     }
 
 
-    glm::vec3 initialPositionHealth(1090, 535, 0.f);
+    glm::vec3 initialPositionHealth(1040, 535, 0.f);
 
     for (size_t i = 0; i < players.size(); ++i) {
 	    const auto player = players[i];
@@ -647,6 +706,38 @@ void LoadUi(dae::Scene* scene)
             scene->Add(std::move(livesDisplayObject));
 		}
     }
+
+    auto roundTextObject = std::make_unique<dae::GameObject>();
+
+    // Create the "ROUND:" label
+    auto roundLabelComponent = std::make_unique<dae::TextComponent>(
+        "ROUND",
+        dae::ResourceManager::GetFont("arcade"),
+        SDL_Color{ 255, 255, 0, 255 }, // Yellow color
+        *roundTextObject
+    );
+    roundTextObject->SetLocalPosition(glm::vec3(1090, 635, 0.f)); // Adjust position as needed
+    roundTextObject->AddComponent(std::move(roundLabelComponent));
+
+    scene->Add(std::move(roundTextObject));
+
+    // Create the round number text component
+    auto roundNumberObject = std::make_unique<dae::GameObject>();
+
+    // Assuming you have a method to get the current round, you will replace 1 with that method
+    std::string roundNumberStr = std::to_string(GameData::GetInstance().GetCurrentRound());
+
+    auto roundNumberComponent = std::make_unique<dae::TextComponent>(
+        roundNumberStr,
+        dae::ResourceManager::GetFont("arcade"),
+        SDL_Color{ 255, 255, 255, 255 }, // White color
+        *roundNumberObject
+    );
+    roundNumberObject->SetLocalPosition(glm::vec3(1090, 655, 0.f)); // Adjust position as needed
+    roundNumberObject->AddComponent(std::move(roundNumberComponent));
+
+    scene->Add(std::move(roundNumberObject));
+
 }
 
 void loadInputScore(dae::Scene* scene)
@@ -692,15 +783,13 @@ void loadInputScore(dae::Scene* scene)
     scene->Add(std::move(TitleObject));
 
     BindNameCommands(inputManager);
+    scene->SetBackgroundMusic(2);
 }
 
 void GameScene(dae::Scene* scene)
 {
-    
+
     auto& inputManager = dae::InputManager::GetInstance();
-    UnBindPlayerCommands(inputManager);
-    UnBindMenuCommands(inputManager);
-    UnBindNameCommands(inputManager);
 
     // Create GameObject for FPS counter
     auto fpsCounterObject = std::make_unique<dae::GameObject>();
@@ -711,135 +800,50 @@ void GameScene(dae::Scene* scene)
     fpsCounterObject->AddComponent(std::move(fpsCounterComponent));
     fpsCounterObject->SetLocalPosition(glm::vec3(100.f, 20.f, 0.0f));
     scene->Add(std::move(fpsCounterObject));
-	constexpr glm::vec3 startPos(300, 20, 0.0f);
+    constexpr glm::vec3 startPos(300, 20, 0.0f);
     constexpr glm::vec2 mapScale(40, 40);
 
-    const LoadMap loadMap("../Data/maps/map1.map", "../Data/maps/map1.ingmap");
+    std::string Tunnelmap = "";
+    std::string entitymap = "";
+    switch (GameData::GetInstance().GetGameState()) {
+    case GameData::GameState::SINGLE_PLAYER:
+        Tunnelmap = "map1.1.tunmap";
+        entitymap = "map1.1.entmap";
+        break;
+    case GameData::GameState::MULTIPLAYER:
+        Tunnelmap = "map1.2.tunmap";
+        entitymap = "map1.2.entmap";
+        break;
+    case GameData::GameState::VERSUS:
+        Tunnelmap = "map1.3.tunmap";
+        entitymap = "map1.1.entmap";
+        break;
+    default:
+        Tunnelmap = "map1.tunmap";
+        break;
+    }
+
+    const LoadMap loadMap("../Data/maps/map1.map", "../Data/maps/" + Tunnelmap, "../Data/maps/" + entitymap);
     SceneHelpers::LoadMapIntoScene(loadMap, scene, startPos, mapScale);
-
     SceneHelpers::LoadTunnelMapIntoScene(loadMap, scene, startPos, mapScale);
+    SceneHelpers::LoadEntitysMapIntoScene(loadMap, scene, startPos, mapScale);
 
-    int score;
-    int lives;
-    auto PlayerObject = std::make_unique<dae::GameObject>();
-    if (GameData::GetInstance().GetPlayerData(0).score != 0)
-        score = GameData::GetInstance().GetPlayerData(0).score;
+
+    if (GameData::GetInstance().GetGameState() == GameData::GameState::SINGLE_PLAYER)
+    {
+        HandlePlayerInput(inputManager, 0);
+    }
     else
-        score = 0;
-    
-    auto Character1points = std::make_unique<dae::PointComponent>(score);
-    PlayerObject->AddComponent(std::move(Character1points));
-
-    if (GameData::GetInstance().GetPlayerData(0).lives != 3)
-        lives = GameData::GetInstance().GetPlayerData(0).lives;
-    else
-        lives = 3;
-
-    auto Character1Health = std::make_unique<dae::HealthComponent>(100, lives);
-    PlayerObject->AddComponent(std::move(Character1Health));
-
-    auto spriteRenderComponent = std::make_unique<dae::SpriteRendererComponent>(PlayerObject.get(), dae::ResourceManager::GetSprite("Player"));
-    spriteRenderComponent->SetDimensions(40, 40);
-    PlayerObject->AddComponent(std::move(spriteRenderComponent));
-
-    auto animationComponent = std::make_unique<dae::AnimationComponent>(PlayerObject.get(), PlayerObject->GetComponent<dae::SpriteRendererComponent>(), "Idle");
-    PlayerObject->AddComponent(std::move(animationComponent));
-    PlayerObject->SetLocalPosition(glm::vec3(580, 380, 1.0f));
-
-    auto hitBox = std::make_unique<HitBox>(glm::vec2(40, 40));
-    hitBox->SetGameObject(PlayerObject.get());
-    PlayerObject->AddComponent(std::move(hitBox));
-
-    auto PlayerComponent = std::make_unique<game::Player>(PlayerObject.get());
-    PlayerObject->AddComponent(std::move(PlayerComponent));
-
-
-    dae::SceneData::GetInstance().AddGameObject(PlayerObject.get(), dae::GameObjectType::Player);
-
-    scene->Add(std::move(PlayerObject));
-
-   //enemie 1 
-    auto PookaObject = std::make_unique<dae::GameObject>();
-    std::cout << "Creating PookaObject" << std::endl;
-
-    auto spriterenderComponent2 = std::make_unique<dae::SpriteRendererComponent>(PookaObject.get(), dae::ResourceManager::GetSprite("enemy"));
-    spriterenderComponent2->SetDimensions(40, 40);
-    PookaObject->AddComponent(std::move(spriterenderComponent2));
-
-    auto animationComponent2 = std::make_unique<dae::AnimationComponent>(PookaObject.get(), PookaObject->GetComponent<dae::SpriteRendererComponent>(), "Normal");
-    animationComponent2->Play("Walk_Down", true);
-    PookaObject->AddComponent(std::move(animationComponent2));
-
-    PookaObject->SetLocalPosition(glm::vec3(380, 260, 1.0f));
-
-    auto hitBox2 = std::make_unique<HitBox>(glm::vec2(40, 40));
-    hitBox2->SetGameObject(PookaObject.get());
-    PookaObject->AddComponent(std::move(hitBox2));
-
-    auto pookaComponent = std::make_unique<PookaComponent>(PookaObject.get());
-    PookaObject->AddComponent(std::move(pookaComponent));
-
-    dae::SceneData::GetInstance().AddGameObject(PookaObject.get(), dae::GameObjectType::enemy);
-    scene->Add(std::move(PookaObject));
-
-    //enemie 2
-    auto SaugeObject2 = std::make_unique<dae::GameObject>();
-    auto spriterenderComponent3 = std::make_unique<dae::SpriteRendererComponent>(SaugeObject2.get(), dae::ResourceManager::GetSprite("Fygar"));
-    spriterenderComponent3->SetDimensions(40, 40);
-    SaugeObject2->AddComponent(std::move(spriterenderComponent3));
-
-    auto animationComponent3 = std::make_unique<dae::AnimationComponent>(SaugeObject2.get(), SaugeObject2->GetComponent<dae::SpriteRendererComponent>(), "Normal");
-    animationComponent3->Play("Walk_Down", true);
-    SaugeObject2->AddComponent(std::move(animationComponent3));
-
-    SaugeObject2->SetLocalPosition(glm::vec3(820, 180, 1.0f));
-
-    auto hitBox3 = std::make_unique<HitBox>(glm::vec2(40, 40));
-    hitBox3->SetGameObject(SaugeObject2.get());
-    SaugeObject2->AddComponent(std::move(hitBox3));
-
-    auto pookaComponent2 = std::make_unique<PookaComponent>(SaugeObject2.get());
-    SaugeObject2->AddComponent(std::move(pookaComponent2));
-    std::cout << "SaugeObject2: PookaComponent added" << std::endl;
-
-    dae::SceneData::GetInstance().AddGameObject(SaugeObject2.get(), dae::GameObjectType::enemy);
-    scene->Add(std::move(SaugeObject2));
-
-
-
-    auto RockObject = std::make_unique<dae::GameObject>();
-
-    auto spriterenderComponent4 = std::make_unique<dae::SpriteRendererComponent>(RockObject.get(), dae::ResourceManager::GetSprite("Rock"));
-    spriterenderComponent4->SetDimensions(40, 40);
-    RockObject->AddComponent(std::move(spriterenderComponent4));
-
-    auto RockObjectanimationComponent = std::make_unique<dae::AnimationComponent>(RockObject.get(), RockObject->GetComponent<dae::SpriteRendererComponent>(), "Digging");
-	RockObjectanimationComponent->Play("Idle", true);
-    RockObject->AddComponent(std::move(RockObjectanimationComponent));
-    RockObject->SetLocalPosition(glm::vec3(660, 420, 1.0f));
-
-    auto RockObjecthitBox = std::make_unique<HitBox>(glm::vec2(40, 40));
-    RockObjecthitBox->SetGameObject(RockObject.get());
-    RockObject->AddComponent(std::move(RockObjecthitBox));
-
-    auto RockComponnet = std::make_unique<Rock>(RockObject.get());
-    RockObject->AddComponent(std::move(RockComponnet));
-    dae::SceneData::GetInstance().AddGameObject(RockObject.get(), dae::GameObjectType::Rock);
-
-    scene->Add(std::move(RockObject));
-
-    HandlePlayerInput(inputManager, 0);
+    {
+        HandlePlayerInput(inputManager, 0);
+        HandlePlayerInput(inputManager, 1);
+    }
     LoadUi(scene);
-
-
 }
 
 void GameScene2(dae::Scene* scene)
 {
     auto& inputManager = dae::InputManager::GetInstance();
-    UnBindPlayerCommands(inputManager);
-    UnBindMenuCommands(inputManager);
-    UnBindNameCommands(inputManager);
 
     // Create GameObject for FPS counter
     auto fpsCounterObject = std::make_unique<dae::GameObject>();
@@ -855,106 +859,98 @@ void GameScene2(dae::Scene* scene)
     constexpr glm::vec3 startPos(300, 20, 0.0f);
     constexpr glm::vec2 mapScale(40, 40);
 
-    const LoadMap loadMap("../Data/maps/map1.map", "../Data/maps/map1.ingmap");
+    std::string Tunnelmap = "";
+    std::string entitymap = "";
+    switch (GameData::GetInstance().GetGameState()) {
+    case GameData::GameState::SINGLE_PLAYER:
+        Tunnelmap = "map1.1.tunmap";
+        entitymap = "map1.1.entmap";
+        break;
+    case GameData::GameState::MULTIPLAYER:
+        Tunnelmap = "map1.2.tunmap";
+        entitymap = "map1.1.entmap";
+        break;
+    case GameData::GameState::VERSUS:
+        Tunnelmap = "map1.3.tunmap";
+        entitymap = "map1.1.entmap";
+        break;
+    default:
+        Tunnelmap = "map1.tunmap";
+        break;
+    }
+
+    const LoadMap loadMap("../Data/maps/map1.map", "../Data/maps/" + Tunnelmap, "../Data/maps/" + entitymap);
     SceneHelpers::LoadMapIntoScene(loadMap, scene, startPos, mapScale);
-
     SceneHelpers::LoadTunnelMapIntoScene(loadMap, scene, startPos, mapScale);
+    SceneHelpers::LoadEntitysMapIntoScene(loadMap, scene, startPos, mapScale);
 
-    //auto lifeSprite = std::make_unique<dae::GameObject>();
-    //auto spriteComponent = std::make_unique<dae::SpriteRendererComponent>(lifeSprite.get(), dae::ResourceManager::GetInstance().GetTexture("ArrowLine"));
-    //spriteComponent->SetDimensions(SceneHelpers::GetGridSize().x, SceneHelpers::GetGridSize().y);
-    //lifeSprite->AddComponent(std::move(spriteComponent));
-    //lifeSprite->SetLocalPosition(glm::vec3((SceneHelpers::GetMinCoordinates().x + SceneHelpers::GetMaxCoordinates().x) / 2, (SceneHelpers::GetMinCoordinates().y + SceneHelpers::GetMaxCoordinates().y) / 2, -1.0f)); // Adjust position for each sprite
-    //scene->Add(std::move(lifeSprite));
 
-    //SceneHelpers::LoadMapIntoScene(loadMap, scene, startPos, mapScale);
-
-    int score;
-    int lives;
-    auto PlayerObject = std::make_unique<dae::GameObject>();
-    if (GameData::GetInstance().GetPlayerData(0).score != 0)
-        score = GameData::GetInstance().GetPlayerData(0).score;
+    if (GameData::GetInstance().GetGameState() == GameData::GameState::SINGLE_PLAYER)
+    {
+        HandlePlayerInput(inputManager, 0);
+    }
     else
-        score = 0;
+    {
+        HandlePlayerInput(inputManager, 0);
+        HandlePlayerInput(inputManager, 1);
+    }
+    LoadUi(scene);
 
-    auto Character1points = std::make_unique<dae::PointComponent>(score);
-    PlayerObject->AddComponent(std::move(Character1points));
+}
 
-    if (GameData::GetInstance().GetPlayerData(0).lives != 3)
-        lives = GameData::GetInstance().GetPlayerData(0).lives;
+void GameScene3(dae::Scene* scene)
+{
+    auto& inputManager = dae::InputManager::GetInstance();
+
+    // Create GameObject for FPS counter
+    auto fpsCounterObject = std::make_unique<dae::GameObject>();
+    auto fpsTextComponent = std::make_unique<dae::TextComponent>("FPS: ", dae::ResourceManager::GetFont("font"), SDL_Color{ 252, 157, 3, 255 }, *fpsCounterObject);
+    fpsCounterObject->AddComponent(std::move(fpsTextComponent));
+    auto fpsTextComponentPtr = fpsCounterObject->GetComponent<dae::TextComponent>();
+    auto fpsCounterComponent = std::make_unique<dae::FPSCounterComponent>(fpsTextComponentPtr);
+    fpsCounterObject->AddComponent(std::move(fpsCounterComponent));
+    fpsCounterObject->SetLocalPosition(glm::vec3(100.f, 20.f, 0.0f));
+    scene->Add(std::move(fpsCounterObject));
+
+
+    constexpr glm::vec3 startPos(300, 20, 0.0f);
+    constexpr glm::vec2 mapScale(40, 40);
+
+    std::string Tunnelmap = "";
+    std::string entitymap = "";
+    switch (GameData::GetInstance().GetGameState()) {
+    case GameData::GameState::SINGLE_PLAYER:
+        Tunnelmap = "map1.1.tunmap";
+        entitymap = "map1.1.entmap";
+        break;
+    case GameData::GameState::MULTIPLAYER:
+        Tunnelmap = "map1.2.tunmap";
+        entitymap = "map1.1.entmap";
+        break;
+    case GameData::GameState::VERSUS:
+        Tunnelmap = "map1.3.tunmap";
+        entitymap = "map1.1.entmap";
+        break;
+    default:
+        Tunnelmap = "map1.tunmap";
+        break;
+    }
+
+    const LoadMap loadMap("../Data/maps/map1.map", "../Data/maps/" + Tunnelmap, "../Data/maps/" + entitymap);
+    SceneHelpers::LoadMapIntoScene(loadMap, scene, startPos, mapScale);
+    SceneHelpers::LoadTunnelMapIntoScene(loadMap, scene, startPos, mapScale);
+    SceneHelpers::LoadEntitysMapIntoScene(loadMap, scene, startPos, mapScale);
+
+
+    if (GameData::GetInstance().GetGameState() == GameData::GameState::SINGLE_PLAYER)
+    {
+        HandlePlayerInput(inputManager, 0);
+    }
     else
-        lives = 3;
-
-    auto Character1Health = std::make_unique<dae::HealthComponent>(100, lives);
-    PlayerObject->AddComponent(std::move(Character1Health));
-
-    auto spriteRenderComponent = std::make_unique<dae::SpriteRendererComponent>(PlayerObject.get(), dae::ResourceManager::GetSprite("Player"));
-    spriteRenderComponent->SetDimensions(40, 40);
-    PlayerObject->AddComponent(std::move(spriteRenderComponent));
-
-    auto animationComponent = std::make_unique<dae::AnimationComponent>(PlayerObject.get(), PlayerObject->GetComponent<dae::SpriteRendererComponent>(), "Idle");
-    animationComponent->Play("Walk_Right", true);
-    PlayerObject->AddComponent(std::move(animationComponent));
-    PlayerObject->SetLocalPosition(glm::vec3(580, 380, 1.0f));
-
-
-    auto hitBox = std::make_unique<HitBox>(glm::vec2(40, 40));
-    hitBox->SetGameObject(PlayerObject.get());
-    PlayerObject->AddComponent(std::move(hitBox));
-
-    auto PlayerComponent = std::make_unique<game::Player>(PlayerObject.get());
-    PlayerObject->AddComponent(std::move(PlayerComponent));
-
-
-    dae::SceneData::GetInstance().AddGameObject(PlayerObject.get(), dae::GameObjectType::Player);
-
-    scene->Add(std::move(PlayerObject));
-
-
-
-    int score2;
-    int lives2;
-    auto PlayerObject2 = std::make_unique<dae::GameObject>();
-    if (GameData::GetInstance().GetPlayerData(1).score != 0)
-        score2 = GameData::GetInstance().GetPlayerData(1).score;
-    else
-        score2 = 0;
-
-    auto Character1points2 = std::make_unique<dae::PointComponent>(score2);
-    PlayerObject2->AddComponent(std::move(Character1points2));
-
-    if (GameData::GetInstance().GetPlayerData(1).lives != 3)
-        lives2 = GameData::GetInstance().GetPlayerData(1).lives;
-    else
-        lives2 = 3;
-
-    auto Character1Health2 = std::make_unique<dae::HealthComponent>(100, lives2);
-    PlayerObject2->AddComponent(std::move(Character1Health2));
-
-    auto spriteRenderComponent2 = std::make_unique<dae::SpriteRendererComponent>(PlayerObject2.get(), dae::ResourceManager::GetSprite("Player"));
-    spriteRenderComponent2->SetDimensions(40, 40);
-    PlayerObject2->AddComponent(std::move(spriteRenderComponent2));
-
-    auto animationComponent2 = std::make_unique<dae::AnimationComponent>(PlayerObject2.get(), PlayerObject2->GetComponent<dae::SpriteRendererComponent>(), "Idle");
-    animationComponent2->Play("Walk_Right", true);
-    PlayerObject2->AddComponent(std::move(animationComponent2));
-    PlayerObject2->SetLocalPosition(glm::vec3(620, 380, 1.0f));
-
-
-    auto hitBox2 = std::make_unique<HitBox>(glm::vec2(40, 40));
-    hitBox2->SetGameObject(PlayerObject2.get());
-    PlayerObject2->AddComponent(std::move(hitBox2));
-
-    auto PlayerComponent2 = std::make_unique<game::Player>(PlayerObject2.get());
-    PlayerObject2->AddComponent(std::move(PlayerComponent2));
-
-
-    dae::SceneData::GetInstance().AddGameObject(PlayerObject2.get(), dae::GameObjectType::Player);
-
-    scene->Add(std::move(PlayerObject2));
-
-    HandlePlayerInput(inputManager, 0);
-    HandlePlayerInput(inputManager, 1);
+    {
+        HandlePlayerInput(inputManager, 0);
+        HandlePlayerInput(inputManager, 1);
+    }
     LoadUi(scene);
 
 }
@@ -964,11 +960,15 @@ void load()
     BindExtraControlls(dae::InputManager::GetInstance());
     loadResources();
     auto& sceneManager = dae::SceneManager::GetInstance();
+    auto& highscore = HighScores::GetInstance();
+
+    highscore.loadScores();
 
     const auto& startMenuScene = sceneManager.CreateScene("StartMenu");
     const auto& ScoreBoardScene = sceneManager.CreateScene("ScoreboardScene");
     const auto& Game = sceneManager.CreateScene("Game");
     const auto& Game2 = sceneManager.CreateScene("Game2");
+    const auto& Game3 = sceneManager.CreateScene("Game3");
     const auto& SaveSoreScene = sceneManager.CreateScene("SaveScoreScene");
 
 
@@ -976,6 +976,7 @@ void load()
     ScoreBoardScene->SetOnActivateCallback([ScoreBoardScene]() {LoadScoreboard(ScoreBoardScene); });
     Game->SetOnActivateCallback([Game]() { GameScene(Game); });
     Game2->SetOnActivateCallback([Game2]() { GameScene2(Game2); });
+    Game3->SetOnActivateCallback([Game3]() { GameScene3(Game3); });
     SaveSoreScene->SetOnActivateCallback([SaveSoreScene]() { loadInputScore(SaveSoreScene); });
 
 

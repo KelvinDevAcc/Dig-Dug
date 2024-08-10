@@ -55,7 +55,10 @@ void Rock::Update()
                 // Player has moved away, start jittering animation
                 m_PlayerMovedAway = true;
                 m_animationComponnent->Play("Falling", true);
-
+                dae::Message message;
+                message.type = dae::PlaySoundMessageType::Sound;
+                message.arguments.emplace_back(static_cast<sound_id>(11));
+                dae::EventQueue::Broadcast(message);
                 // Get the duration of the "Falling" animation
                 const auto animationDuration = static_cast<float>(m_animationComponnent->GetAnimationDuration()* 2);
                 m_animationTimer = animationDuration;
@@ -83,6 +86,10 @@ void Rock::Die()
 {
     m_dieing = true;
     m_IsFalling = false;
+    dae::Message message;
+    message.type = dae::PlaySoundMessageType::Sound;
+    message.arguments.emplace_back(static_cast<sound_id>(9));
+    dae::EventQueue::Broadcast(message);
     m_animationComponnent->Play("Dying");
     // Get the duration of the "Dying" animation
     const auto animationDuration = static_cast<float>(m_animationComponnent->GetAnimationDuration());
@@ -209,6 +216,11 @@ bool Rock::CheckCollisionWithObjects()
         const auto enemyHitBox = enemy->GetComponent<HitBox>();
         if (hitBox && enemyHitBox && hitBox->IsColliding(*enemyHitBox))
         {
+
+            dae::Message message;
+            message.type = dae::PlaySoundMessageType::Sound;
+            message.arguments.emplace_back(static_cast<sound_id>(10));
+            dae::EventQueue::Broadcast(message);
             // Notify the enemy about being crushed
             enemy->GetComponent<PookaComponent>()->OnCrushed();  // Call OnCrushed on the enemy
             ++enemiesKilled;  // Increment the kill count

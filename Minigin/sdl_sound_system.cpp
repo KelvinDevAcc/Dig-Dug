@@ -1,5 +1,8 @@
 #include "sdl_sound_system.h"
 
+#include <iostream>
+#include <ostream>
+
 
 sdl_sound_system::sdl_sound_system() : m_running(true),m_muted(false), m_volume(0), m_previousVolume(0) {
     // Initialize SDL mixer
@@ -215,4 +218,14 @@ void logging_sound_system::onPlaySoundMessage(const dae::Message& message) {
     }
 }
 
+void sdl_sound_system::StopPlay(sound_id id) {
+    std::lock_guard<std::mutex> lock(m_sound_requests_mutex);
+    const auto musicIt = m_id_to_music_map.find(id);
 
+    if (musicIt != m_id_to_music_map.end()) {
+        Mix_HaltMusic();  // Stop the currently playing music
+    }
+    else {
+        std::cerr << "No music found for sound ID: " << id << std::endl;
+    }
+}

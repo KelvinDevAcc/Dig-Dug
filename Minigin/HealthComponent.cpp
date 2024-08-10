@@ -18,13 +18,6 @@ namespace dae
             m_Health = 100; 
             if (m_Lives < 0)
             {
-                dae::Message message;
-
-                message.type = dae::PlaySoundMessageType::Sound;
-
-                message.arguments.emplace_back(static_cast<sound_id>(1));
-
-                dae::EventQueue::Broadcast(message);
                 GameData::GetInstance().FindAndStorePlayerData();
                 GameData::GetInstance().CheckGameState();
             }
@@ -42,6 +35,10 @@ namespace dae
     void HealthComponent::SetLives(int lives)
     {
         m_Lives = lives;
+        dae::Message message;
+        message.type = dae::PlaySoundMessageType::Sound;
+        message.arguments.emplace_back(static_cast<sound_id>(6));
+        dae::EventQueue::Broadcast(message);
         Notify(); // Notify observers after updating lives
     }
 }

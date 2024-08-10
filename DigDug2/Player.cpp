@@ -87,12 +87,6 @@ namespace game
         m_GameObject->GetComponent<HitBox>()->Disable();
         SetAnimationState(AnimationState::Dying);
        
-
-        dae::Message message;
-        message.type = dae::PlaySoundMessageType::Sound;
-        message.arguments.emplace_back(static_cast<sound_id>(2));
-        dae::EventQueue::Broadcast(message);
-
         m_healthComponent->SetHealth(m_healthComponent->GetHealth() - 100);
         m_deathTimer =static_cast<float>(m_animationComponent->GetAnimationDuration());
         m_isDying = true;
@@ -117,17 +111,18 @@ namespace game
             return;
         }
 
-        if (m_CurrentAnimationState == AnimationState::Dying)
-        {
-            return;
-        }
-
         m_pumps.clear();
         m_pumpPartCount = 0;
         if (!m_pumps.empty() && m_pumps.back()->IsActive())
         {
             return; // A pump is already active, so don't shoot a new one
         }
+
+
+        dae::Message message;
+        message.type = dae::PlaySoundMessageType::Sound;
+        message.arguments.emplace_back(static_cast<sound_id>(7));
+        dae::EventQueue::Broadcast(message);
 
         m_timeSinceLastPumpPart = 0.0f; // Reset the timer for adding new pump parts
         AddPumpPart(); // Start by adding the first pump part immediately
@@ -137,7 +132,8 @@ namespace game
 
     void Player::UpdatePumpTimer(float deltaTime)
     {
-        if (m_pumps.empty() || m_pumpPartCount > 5)
+
+        if (m_pumps.empty() || m_pumpPartCount > 5|| m_isDying)
         {
             return; // No active pumps to update
         }
@@ -196,6 +192,17 @@ namespace game
 
         if (dae::SceneData::GetInstance().isOnEnemy(*tempPumpObject))
         {
+
+            static bool soundPlayed = false;
+            if (!soundPlayed)
+            {
+                dae::Message message;
+                message.type = dae::PlaySoundMessageType::Sound;
+                message.arguments.emplace_back(static_cast<sound_id>(8));
+                dae::EventQueue::Broadcast(message);
+
+                soundPlayed = true; // Ensure the sound plays only once
+            }
           return true;  
         }
 

@@ -192,6 +192,7 @@ void PookaPumpedState::Update(PookaComponent* pooka) {
 void PookaPumpedState::Exit(PookaComponent* pooka) {
     std::cout << "Pooka exiting Pumped State" << std::endl;
     pooka->DetectsPlayer();
+    
 }
 
 
@@ -215,6 +216,10 @@ void PookaDeadState::Enter(PookaComponent* pooka) {
     dae::SceneData::GetInstance().RemoveGameObject(pooka->m_Owner, dae::GameObjectType::enemy);
     GameData::GetInstance().CheckGameState();
     dae::SceneManager::GetInstance().GetActiveScene()->Remove(pooka->m_Owner);
+    dae::Message message;
+    message.type = dae::PlaySoundMessageType::Sound;
+    message.arguments.emplace_back(static_cast<sound_id>(4));
+    dae::EventQueue::Broadcast(message);
 }
 
 void PookaDeadState::Update(PookaComponent* /*pooka*/) {

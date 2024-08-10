@@ -16,6 +16,7 @@ public:
 
 	virtual void play(const sound_id id) = 0;
 	virtual void mute() = 0;
+	virtual void StopPlay(sound_id id) = 0;
 	virtual void onPlaySoundMessage(const dae::Message& message) = 0;
 	virtual void register_sound_file(const std::string& file_path) = 0;
 	virtual sound_id get_sound_id_for_file_path(const std::string& file_path) = 0;

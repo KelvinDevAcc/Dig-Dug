@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <ostream>
+#include <SDL_mixer.h>
 #include <stdexcept>
 
 #include "GameData.h"
@@ -38,29 +39,31 @@ namespace dae
             {
                 m_activeSceneIterator = it;
 
+                if (m_activeSceneIterator != m_scenes.end()) // Check if there is an active scene
+                {
+                    auto& soundSystem = servicelocator::get_sound_system();
+                    const sound_id previousSoundID = (*m_activeSceneIterator)->GetBackgroundMusicID();
+                    std::cout << (*m_activeSceneIterator)->GetBackgroundMusicID();
+                    if (previousSoundID != 0)
+                    {
+                        soundSystem.StopPlay(previousSoundID);  // Stop the specific music for the active scene
+                    }
+                }
+
+                // Set the new active scene
+                GameData::GetInstance().FindAndStorePlayerData();
                 SceneData::GetInstance().RemoveAllGameObjects();
                 (*m_activeSceneIterator)->RemoveAll();
 
                 (*m_activeSceneIterator)->Activate();
-                GameData::GetInstance().FindAndStorePlayerData();
 
-                // Stop the background music of the previously active scene
-                /*if (m_previousActiveSceneIterator != m_scenes.end())
+
+                // Start the background music for the newly active scene (if any)
+                const sound_id newSoundID = (*m_activeSceneIterator)->GetBackgroundMusicID();
+                if (newSoundID != 0)
                 {
                     auto& soundSystem = servicelocator::get_sound_system();
-                    const sound_id soundID = (*m_previousActiveSceneIterator)->GetBackgroundMusicID();
-                    if (soundID != 0)
-                    {
-                        soundSystem.stop(soundID);
-                    }
-                }*/
-
-                // Play the music of the newly activated scene
-                auto& soundSystem = servicelocator::get_sound_system();
-                const sound_id soundID = (*m_activeSceneIterator)->GetBackgroundMusicID();
-                if (soundID != 0)
-                {
-                    soundSystem.play(soundID);
+                    soundSystem.play(newSoundID);
                 }
 
                 // Store the previous active scene iterator for future reference

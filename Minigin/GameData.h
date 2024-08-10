@@ -30,6 +30,11 @@ public:
     void ResetPlayerData(int playerID);
     void CheckGameState();
 
+    // Round management
+    int GetCurrentRound() const { return m_currentRound; }
+    void IncrementRound() { ++m_currentRound; }
+    void ResetRound() { m_currentRound = 1; }
+
     enum class GameState { SINGLE_PLAYER, MULTIPLAYER, VERSUS };
     GameState GetGameState() const { return m_gameState; }
     void SetGameState(GameState gameState) { m_gameState = gameState; }
@@ -38,5 +43,6 @@ private:
     std::map<int, PlayerData> m_playerData;
 
     GameState m_gameState;
+    int m_currentRound = 1;
 };
 

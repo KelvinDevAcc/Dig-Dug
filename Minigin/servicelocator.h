@@ -31,6 +31,7 @@ public:
     void load_sound(sound_id /*id*/, const std::string& /*file_path*/, bool /*isBackgroundMusic*/) override {}
     void unload_sound(sound_id /*id*/) override {}
     void mute() override{}
+    void StopPlay(sound_id /*id*/) override {}
     void setVolume(float /*volume*/) override {}
     float getVolume() override { return 0.0f; }
 };

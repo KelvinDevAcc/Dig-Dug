@@ -1,6 +1,5 @@
 #pragma once
 
-#include <iostream>
 #include <map>
 #include <memory>
 #include <mutex>
@@ -28,13 +27,13 @@ public:
     void setVolume(float volume) override;
     void process_events();
     void stop();
+    void StopPlay(sound_id id) override;
     void register_sound_file(const std::string& file_path) override;
     sound_id get_sound_id_for_file_path(const std::string& file_path) override;
     void load_sound(sound_id id, const std::string& file_path, bool isBackgroundMusic = false) override;
     void unload_sound(sound_id id) override;
 
 private:
-
     void onPlaySoundMessage(const dae::Message& message) override;
 
     struct SoundRequest {
@@ -96,6 +95,10 @@ public:
     void mute() override
     {
         _real_ss->mute();
+    }
+    void StopPlay(sound_id id) override
+    {
+        _real_ss->StopPlay(id);
     }
 
     void setVolume(float volume) override {

@@ -175,7 +175,7 @@ void NavigateUpCommand::Execute() {
 
         message.type = dae::PlaySoundMessageType::Sound;
 
-        message.arguments.emplace_back(static_cast<sound_id>(20)); 
+        message.arguments.emplace_back(static_cast<sound_id>(14)); 
 
         dae::EventQueue::Broadcast(message);
         menu->NavigateUp();
@@ -204,7 +204,7 @@ void NavigateDownCommand::Execute() {
 
         message.type = dae::PlaySoundMessageType::Sound;
 
-        message.arguments.emplace_back(static_cast<sound_id>(20)); 
+        message.arguments.emplace_back(static_cast<sound_id>(14)); 
 
         dae::EventQueue::Broadcast(message);
         menu->NavigateDown();
@@ -232,7 +232,7 @@ void SelectOptionCommand::Execute() {
 
         message.type = dae::PlaySoundMessageType::Sound;
 
-        message.arguments.emplace_back(static_cast<sound_id>(18)); 
+        message.arguments.emplace_back(static_cast<sound_id>(15)); 
 
         dae::EventQueue::Broadcast(message);
         menu->SelectOption();
@@ -258,7 +258,7 @@ void NavigateUpLetterCommand::Execute() {
     if (const auto selectName = FindSelectNameComponent()) {
         dae::Message message;
         message.type = dae::PlaySoundMessageType::Sound;
-        message.arguments.emplace_back(static_cast<sound_id>(20)); 
+        message.arguments.emplace_back(static_cast<sound_id>(14)); 
         dae::EventQueue::Broadcast(message);
         selectName->AddLetter();
     }
@@ -283,7 +283,7 @@ void NavigateDownLetterCommand::Execute() {
     if (const auto selectName = FindSelectNameComponent()) {
         dae::Message message;
         message.type = dae::PlaySoundMessageType::Sound;
-        message.arguments.emplace_back(static_cast<sound_id>(20)); 
+        message.arguments.emplace_back(static_cast<sound_id>(15)); 
         dae::EventQueue::Broadcast(message);
         selectName->SubtractLetter();
     }
@@ -308,7 +308,7 @@ void SelectOptionLetterCommand::Execute() {
     if (const auto selectName = FindSelectNameComponent()) {
         dae::Message message;
         message.type = dae::PlaySoundMessageType::Sound;
-        message.arguments.emplace_back(static_cast<sound_id>(18)); 
+        message.arguments.emplace_back(static_cast<sound_id>(15)); 
         dae::EventQueue::Broadcast(message);
         selectName->ConfirmLetter();
     }

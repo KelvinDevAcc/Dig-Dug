@@ -95,7 +95,8 @@ namespace dae {
             for (GameObject* player : GetPlayers()) {
                 if (!m_enemys.empty())
                 {
-                    if (player && isOnEnemy(*player)) {
+                    if (player && isOnEnemy(*player)) 
+                    {
                         player->GetComponent<game::Player>()->Die();
                     }
                 }

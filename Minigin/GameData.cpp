@@ -5,7 +5,7 @@
 #include "HealthComponent.h"
 #include "PointComponent.h"
 #include "SceneData.h"
-#include "SceneManager.h"  // Assuming you have a SceneManager to switch scenes
+#include "SceneManager.h" 
 
 namespace dae
 {
@@ -40,9 +40,6 @@ void GameData::FindAndStorePlayerData()
 
         m_playerData[i] = playerData;
     }
-
-    // After updating the player data, check the game state
-    //CheckGameState();
 }
 
 int GameData::GetNumberOfPlayers() const
@@ -95,18 +92,30 @@ void GameData::CheckGameState()
 
     if (playersAlive == 0)
     {
+        dae::Message message;
+        message.type = dae::PlaySoundMessageType::Sound;
+        message.arguments.emplace_back(static_cast<sound_id>(5));
+        dae::EventQueue::Broadcast(message);
         // All players are dead, transition to the save name and score scene
         dae::SceneManager::GetInstance().SetActiveScene("SaveScoreScene");
         return;
     }
     else if (numberOfPlayers == 1 && playersAlive == 1 && m_playerData[lastPlayerID].lives <= 0)
     {
+        dae::Message message;
+        message.type = dae::PlaySoundMessageType::Sound;
+        message.arguments.emplace_back(static_cast<sound_id>(5));
+        dae::EventQueue::Broadcast(message);
         // Single player and the last player's lives are less than or equal to 0
         dae::SceneManager::GetInstance().SetActiveScene("SaveScoreScene");
         return;
     }
     else if (numberOfPlayers > 1 && playersAlive == 1 && m_playerData[lastPlayerID].lives <= 0)
     {
+        dae::Message message;
+        message.type = dae::PlaySoundMessageType::Sound;
+        message.arguments.emplace_back(static_cast<sound_id>(5));
+        dae::EventQueue::Broadcast(message);
         // Two players, and the last remaining player's lives are less than or equal to 0
         dae::SceneManager::GetInstance().SetActiveScene("SaveScoreScene");
         return;
@@ -117,7 +126,27 @@ void GameData::CheckGameState()
 
     if (enemies.empty())
     {
-        // If all enemies are defeated, switch to the next round or level
-        dae::SceneManager::GetInstance().SetActiveScene("Game2");
+
+        dae::Message message;
+        message.type = dae::PlaySoundMessageType::Sound;
+        message.arguments.emplace_back(static_cast<sound_id>(12));
+        dae::EventQueue::Broadcast(message);
+
+        IncrementRound();
+        const int currentRound = GetCurrentRound(); // Assumed that there is a function to get the current round
+
+        // Determine which scene to load based on the current round
+        if (currentRound % 3 == 1)
+        {
+            dae::SceneManager::GetInstance().SetActiveScene("Game");
+        }
+        else if (currentRound % 3 == 2)
+        {
+            dae::SceneManager::GetInstance().SetActiveScene("Game2");
+        }
+        else if (currentRound % 3 == 0)
+        {
+            dae::SceneManager::GetInstance().SetActiveScene("Game3");
+        }
     }
 }

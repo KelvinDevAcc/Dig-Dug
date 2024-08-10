@@ -11,6 +11,7 @@ public:
     static void LoadMapIntoScene(const LoadMap& loadMap, dae::Scene* scene, const glm::vec3& startPos, glm::vec2 scale);
 
     static void LoadTunnelMapIntoScene(const LoadMap& loadMap, dae::Scene* scene, const glm::vec3& startPos, glm::vec2 scale);
+    static void LoadEntitysMapIntoScene(const LoadMap& loadMap, dae::Scene* scene, const glm::vec3& startPos, glm::vec2 scale);
 
     static glm::vec2 GetMinCoordinates();
     static glm::vec2 GetMaxCoordinates();
@@ -26,6 +27,12 @@ private:
     static void CreateFloor(dae::Scene* scene, float x, float y, glm::vec2 scale, const std::string& textureName);
     static void CreateWalkThough(dae::Scene* scene, float x, float y, glm::vec2 scale, const std::string& textureName, char tileChar);
     static void CreateEmpty(dae::Scene* scene, float x, float y, glm::vec2 scale, const std::string& textureName);
+    static void SpawnPooka(dae::Scene* scene, float x, float y, glm::vec2 scale);
+    static void SpawnFygar(dae::Scene* scene, float x, float y, glm::vec2 scale);
+    static void SpawnStone(dae::Scene* scene, float x, float y, glm::vec2 scale);
+
+    static void SpawnPlayer(dae::Scene* scene, float x, float y, glm::vec2 scale);
+    static void SpawnPlayerEnemy(dae::Scene* scene, float x, float y, glm::vec2 scale);
 
     static LoadMap* s_loadMap;
     static std::vector<std::vector<char>> s_tunnelMap;
