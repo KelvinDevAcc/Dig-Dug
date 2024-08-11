@@ -32,8 +32,7 @@
 void loadResources()
 {
 #if _DEBUG
-    servicelocator::register_sound_system(
-        std::make_unique<logging_sound_system>(std::make_unique<sdl_sound_system>()));
+    servicelocator::register_sound_system(std::make_unique<logging_sound_system>(std::make_unique<sdl_sound_system>()));
 #else
     servicelocator::register_sound_system(std::make_unique<sdl_sound_system>());
 #endif
@@ -71,7 +70,7 @@ void loadResources()
     ss.load_sound(10, "../Data/Sounds/RockHit.wav");
     ss.load_sound(11, "../Data/Sounds/RockDropping.mp3");
     ss.load_sound(12, "../Data/Sounds/Victory.wav");
-    ss.load_sound(13, "../Data/Sounds/walkmusic.wav");
+    ss.load_sound(13, "../Data/Sounds/walkmusic.wav" , true);
     ss.load_sound(15, "../Data/Sounds/18_menu_select.mp3");
     ss.load_sound(14, "../Data/Sounds/20_menu_move.mp3");
 
@@ -127,6 +126,10 @@ void loadResources()
 
     dae::ResourceManager::LoadTexture("PumpLine", "SpriteSheetFinal.png", SDL_Rect(384, 144, 32, 16));
     dae::ResourceManager::LoadTexture("PumpEnd", "SpriteSheetFinal.png", SDL_Rect(352, 144, 32, 16));
+
+    dae::ResourceManager::LoadTexture("BreathFireStage1", "SpriteSheetFinal.png", SDL_Rect(224, 96, 32, 32));
+    dae::ResourceManager::LoadTexture("BreathFireStage2", "SpriteSheetFinal.png", SDL_Rect(256, 96, 64, 32)); // Adjust X to the right by 32 pixels
+    dae::ResourceManager::LoadTexture("BreathFireStage3", "SpriteSheetFinal.png", SDL_Rect(320, 96, 96, 32)); // Adjust X to the right by 64 pixels
 
 
     dae::ResourceManager::LoadSprite("Player",
@@ -187,6 +190,7 @@ void loadResources()
         14,   // colCount
         {
             { "Normal", { { { 0, 4 }}, 1 } },
+            { "Normal", { { { 0, 4 }}, 1 } },
             { "Walk_Right", { {  { 0, 4 }, { 1, 4 } }, 1 } },
             { "Walk_Left", { {  { 0, 4 }, { 1, 4 } }, 1 } },
             { "Walk_Up", { { { 0, 4 }, { 1, 4 } }, 1 } },
@@ -198,11 +202,9 @@ void loadResources()
             { "Dying", { { { 4, 6 }, { 5, 6 }, { 6, 6 }, { 7, 6 } }, 1 } },
             { "Ghost", { { { 0, 6 }, { 1, 6 }}, 1 } },
             { "Crushed", { { { 8, 5 }}, 1 } },
-            { "Atacking", { { { 8, 5 }}, 1 } }
+            { "Attacking", { { { 5, 3 },{2,4}, { 5, 3 },{2,4}}, 1 } }
 
         });
-
-
 
 }
 
@@ -332,6 +334,31 @@ void HandlePlayerInput(dae::InputManager& inputManager, int playerId)
 
 
 }
+
+void HandleEnemyPLayerCommands(dae::InputManager& inputManager, int playerId)
+{
+    const int numControllers = inputManager.GetConnectedControllerCount();
+    if (numControllers == 1)
+    {
+        inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadUp), KeyState::Pressed, std::make_unique<MoveEnemyCommand>(playerId, 0.0f, -1.5f), InputType::Controller, 0);
+        inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadDown), KeyState::Pressed, std::make_unique<MoveEnemyCommand>(playerId, 0.0f, 1.5f), InputType::Controller, 0);
+        inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadLeft), KeyState::Pressed, std::make_unique<MoveEnemyCommand>(playerId, -1.5f, 0.0f), InputType::Controller, 0);
+        inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadRight), KeyState::Pressed, std::make_unique<MoveEnemyCommand>(playerId, 1.5f, 0.0f), InputType::Controller, 0);
+        inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::A), KeyState::Up, std::make_unique<AttackEnemyCommand>(playerId), InputType::Controller, 0);
+        inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::B), KeyState::Up, std::make_unique<GhostEnemyplayercommand>(playerId), InputType::Controller, 0);
+
+    }
+    else if (numControllers >= 2)
+    {
+        inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadUp), KeyState::Pressed, std::make_unique<MoveCommand>(playerId, 0.0f, -1.5f), InputType::Controller, 1);
+        inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadDown), KeyState::Pressed, std::make_unique<MoveCommand>(playerId, 0.0f, 1.5f), InputType::Controller, 1);
+        inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadLeft), KeyState::Pressed, std::make_unique<MoveCommand>(playerId, -1.5f, 0.0f), InputType::Controller, 1);
+        inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadRight), KeyState::Pressed, std::make_unique<MoveCommand>(playerId, 1.5f, 0.0f), InputType::Controller, 1);
+        inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::A), KeyState::Up, std::make_unique<SchootCommand>(playerId), InputType::Controller, 1);
+
+    }
+}
+
 
 void BindExtraControlls(dae::InputManager& inputManager)
 {
@@ -830,17 +857,22 @@ void GameScene(dae::Scene* scene)
     SceneHelpers::LoadTunnelMapIntoScene(loadMap, scene, startPos, mapScale);
     SceneHelpers::LoadEntitysMapIntoScene(loadMap, scene, startPos, mapScale);
 
-
     if (GameData::GetInstance().GetGameState() == GameData::GameState::SINGLE_PLAYER)
     {
         HandlePlayerInput(inputManager, 0);
     }
+    else if (GameData::GetInstance().GetGameState() == GameData::GameState::VERSUS)
+    {
+        HandlePlayerInput(inputManager, 0);
+        HandleEnemyPLayerCommands(inputManager,0);
+    }
     else
     {
         HandlePlayerInput(inputManager, 0);
-        HandlePlayerInput(inputManager, 1);
+        HandlePlayerInput(inputManager, 0);
     }
     LoadUi(scene);
+    scene->SetBackgroundMusic(13);
 }
 
 void GameScene2(dae::Scene* scene)
@@ -897,7 +929,7 @@ void GameScene2(dae::Scene* scene)
         HandlePlayerInput(inputManager, 1);
     }
     LoadUi(scene);
-
+    scene->SetBackgroundMusic(13);
 }
 
 void GameScene3(dae::Scene* scene)
@@ -954,15 +986,17 @@ void GameScene3(dae::Scene* scene)
         HandlePlayerInput(inputManager, 1);
     }
     LoadUi(scene);
-
+    scene->SetBackgroundMusic(13);
 }
 
 void load()
 {
-    BindExtraControlls(dae::InputManager::GetInstance());
     loadResources();
     auto& sceneManager = dae::SceneManager::GetInstance();
+    auto& inputmanager = dae::InputManager::GetInstance();
     auto& highscore = HighScores::GetInstance();
+
+    BindExtraControlls(inputmanager);
 
     highscore.loadScores();
 

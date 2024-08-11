@@ -9,6 +9,7 @@
 #include "SceneData.h"
 #include "SpriteRendererComponent.h"
 #include "TileComponent.h"
+#include "../DigDug2/EnemyPlayer.h"
 #include "../DigDug2/Player.h"
 #include "../DigDug2/PookaComponent.h"
 #include "../DigDug2/Rock.h"
@@ -229,7 +230,7 @@ void SceneHelpers::SpawnPlayerEnemy(dae::Scene* scene, float x, float y, glm::ve
     PlayerObject->AddComponent(std::move(spriterenderComponent));
 
     auto animationComponent = std::make_unique<dae::AnimationComponent>(PlayerObject.get(), PlayerObject->GetComponent<dae::SpriteRendererComponent>(), "Normal");
-    animationComponent->Play("Normal", true);
+    animationComponent->Play("Walk_Right", true);
     PlayerObject->AddComponent(std::move(animationComponent));
     PlayerObject->SetLocalPosition(glm::vec3(x, y, 1.0f));
 
@@ -237,11 +238,10 @@ void SceneHelpers::SpawnPlayerEnemy(dae::Scene* scene, float x, float y, glm::ve
     hitBox->SetGameObject(PlayerObject.get());
     PlayerObject->AddComponent(std::move(hitBox));
 
-    auto PlayerComponent = std::make_unique<game::Player>(PlayerObject.get());
+    auto PlayerComponent = std::make_unique<game::EnemyPlayer>(PlayerObject.get());
     PlayerObject->AddComponent(std::move(PlayerComponent));
 
     dae::SceneData::GetInstance().AddGameObject(PlayerObject.get(), dae::GameObjectType::enemyPlayers);
-
 
     auto tempobject = std::make_unique<dae::GameObject>();
 
@@ -447,4 +447,21 @@ void SceneHelpers::SetTileTypeAtPosition(const glm::vec3& position, TunnelType n
             CreateWalkThough(m_scene, 300 + gridX * GetCellSize().x, 20 + gridY * GetCellSize().y, glm::vec2(GetCellSize().x, GetCellSize().y), it->second.second, it->second.first);
         }
     }
+}
+
+glm::vec3 SceneHelpers::GetCenterOfTile(const glm::vec3& position) {
+    // Calculate the grid coordinates based on the position
+    const int gridX = static_cast<int>((position.x - GetMinCoordinates().x) / GetCellSize().x);
+    const int gridY = static_cast<int>((position.y - GetMinCoordinates().y) / GetCellSize().y);
+
+    // Calculate the tile's top-left corner in world space
+    const float tilePosX = GetMinCoordinates().x + gridX * GetCellSize().x;
+    const float tilePosY = GetMinCoordinates().y + gridY * GetCellSize().y;
+
+    // Calculate the center of the tile
+    //const float centerX = tilePosX + GetCellSize().x / 2.0f;
+    //const float centerY = tilePosY + GetCellSize().y / 2.0f;
+
+    // Return the center position in 3D space (z is unchanged)
+    return glm::vec3(tilePosX, tilePosY, position.z);
 }

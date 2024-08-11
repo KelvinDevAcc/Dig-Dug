@@ -23,6 +23,7 @@ namespace game
         m_startPosition = m_GameObject->GetWorldPosition();
 
         SetAnimationState(AnimationState::Idle);
+        m_GameObject->GetComponent<HitBox>()->Disable();
     }
 
     void Player::Update()
@@ -257,6 +258,7 @@ namespace game
             newDirection = Direction::Down;
         else if (deltaY < 0)
             newDirection = Direction::Up;
+       
 
         if (newDirection != m_CurrentDirection)
         {

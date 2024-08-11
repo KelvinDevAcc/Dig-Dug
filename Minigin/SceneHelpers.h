@@ -22,7 +22,7 @@ public:
 
     static TunnelType GetTileTypeAtPosition(const glm::vec3& position);
     static void SetTileTypeAtPosition(const glm::vec3& position, TunnelType newType);
-
+    static glm::vec3 GetCenterOfTile(const glm::vec3& position);
 private:
     static void CreateFloor(dae::Scene* scene, float x, float y, glm::vec2 scale, const std::string& textureName);
     static void CreateWalkThough(dae::Scene* scene, float x, float y, glm::vec2 scale, const std::string& textureName, char tileChar);

@@ -42,7 +42,7 @@
     <ClCompile Include="EnemyPlayer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="EnemyPlayerStates.cpp">
+    <ClCompile Include="BreathFireComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -71,7 +71,7 @@
     <ClInclude Include="EnemyPlayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="EnemyPlayerStates.h">
+    <ClInclude Include="BreathFireComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

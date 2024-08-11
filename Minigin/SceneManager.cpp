@@ -37,18 +37,19 @@ namespace dae
         {
             if ((*it)->GetName() == name)
             {
-                m_activeSceneIterator = it;
-
-                if (m_activeSceneIterator != m_scenes.end()) // Check if there is an active scene
-                {
-                    auto& soundSystem = servicelocator::get_sound_system();
+	            if (it != m_scenes.begin())
+	            {
                     const sound_id previousSoundID = (*m_activeSceneIterator)->GetBackgroundMusicID();
-                    std::cout << (*m_activeSceneIterator)->GetBackgroundMusicID();
                     if (previousSoundID != 0)
                     {
-                        soundSystem.StopPlay(previousSoundID);  // Stop the specific music for the active scene
+                        auto& soundSystem = servicelocator::get_sound_system();
+                        soundSystem.StopPlay(previousSoundID);  // Stop the specific music for the previously active scene
                     }
-                }
+	            }
+
+                m_activeSceneIterator = it;
+
+               
 
                 SceneData::GetInstance().RemoveAllGameObjects();
                 (*m_activeSceneIterator)->RemoveAll();

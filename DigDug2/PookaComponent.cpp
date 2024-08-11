@@ -1,5 +1,4 @@
 #include "PookaComponent.h"
-#include <iostream>
 #include <random>
 #include <limits>
 #include <algorithm>
@@ -60,7 +59,6 @@ void PookaComponent::MoveToNextWaypoint() {
         direction = glm::normalize(direction);
         if (!TryMove(direction * speed)) {
             // If move fails, try smaller steps
-            std::cout << "Failed to move directly, trying smaller steps." << std::endl;
             for (float step = speed / 2; step > 0.1f; step /= 2) {
                 if (TryMove(direction * step)) {
                     break;
@@ -170,7 +168,6 @@ glm::vec3 PookaComponent::FindNearestValidSpot() {
     }
 
     // If no valid spot was found within the search range
-    std::cout << "No valid spot found within the search range." << std::endl;
     return m_CurrentPosition; // Return the current position if no valid spot is found
 }
 
@@ -181,7 +178,6 @@ bool PookaComponent::DetectsPlayer() {
 
     m_DetectedPlayers.clear(); // Clear previously detected players
 
-    std::cout << "Detecting players..." << std::endl;
 
     // Assuming detection is always active (no distance check)
     for (const auto& player : players) {
@@ -190,21 +186,17 @@ bool PookaComponent::DetectsPlayer() {
 
         // For debugging: Print the detected players' positions
         glm::vec3 playerPosition = player->GetWorldPosition();
-        std::cout << "Player detected at: (" << playerPosition.x << ", " << playerPosition.y << ", " << playerPosition.z << ")" << std::endl;
     }
 
-    std::cout << "Number of detected players: " << m_DetectedPlayers.size() << std::endl;
 
     return !m_DetectedPlayers.empty();
 }
 
 void PookaComponent::EnableGhostMode() {
-    std::cout << "Pooka ghost mode enabled." << std::endl;
     m_GhostModeEnabled = true;
 }
 
 void PookaComponent::DisableGhostMode() {
-    std::cout << "Pooka ghost mode disabled." << std::endl;
     m_GhostModeEnabled = false;
 }
 
@@ -221,7 +213,6 @@ bool PookaComponent::CanRemainGhost() {
 }
 
 void PookaComponent::ChooseRandomDirection() {
-    std::cout << "Pooka choosing a random direction." << std::endl;
 
     const std::vector<Direction> directions = { Direction::Up, Direction::Down, Direction::Left, Direction::Right };
 
@@ -260,13 +251,11 @@ void PookaComponent::ChooseRandomDirection() {
         if (lastValidPosition != m_CurrentPosition) {
             m_Destination = lastValidPosition;
             validDirectionFound = true;
-            std::cout << "New Destination: (" << m_Destination.x << ", " << m_Destination.y << ", " << m_Destination.z << ")\n";
             break;
         }
     }
 
     if (!validDirectionFound) {
-        std::cout << "No valid direction found. Staying in current position." << std::endl;
         m_Destination = m_CurrentPosition;
     }
 }
@@ -280,7 +269,6 @@ bool PookaComponent::SeesPlayer() {
 void PookaComponent::ChasePlayer() {
     if (m_DetectedPlayers.empty()) return;
 
-    std::cout << "Pooka is moving towards the nearest player." << std::endl;
 
     const dae::GameObject* closestPlayer = nullptr;
     float closestDistance = std::numeric_limits<float>::max();
@@ -338,7 +326,6 @@ void PookaComponent::UpdateTimer() {
             static std::uniform_real_distribution<float> chanceDis(0.0f, 1.0f);
             if (chanceDis(gen) > 0.5f) {
                 m_GhostModeEnabled = !m_GhostModeEnabled;
-                std::cout << "Pooka ghost mode " << (m_GhostModeEnabled ? "enabled." : "disabled.") << std::endl;
             }
         }
     }
@@ -402,7 +389,6 @@ int PookaComponent::DetermineLayer(float yPosition) {
 }
 
 void PookaComponent::ReSpawn() {
-    std::cout << "Pooka respawning at starting position." << std::endl;
 
     m_CurrentPosition = m_startPosition;
     m_Owner->SetLocalPosition(m_CurrentPosition);

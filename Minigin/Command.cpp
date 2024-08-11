@@ -5,7 +5,13 @@
 #include "SceneManager.h"
 #include "servicelocator.h"
 #include "GameData.h"
+#include "../DigDug2/EnemyPlayer.h"
 #include  "../DigDug2/Player.h"
+
+namespace game
+{
+	class EnemyPlayer;
+}
 
 MoveCommand::MoveCommand(int playerNumber, float deltaX, float deltaY)
     : m_deltaX(deltaX), m_deltaY(deltaY)
@@ -164,7 +170,7 @@ void GhostEnemyplayercommand::Execute()
     {
         if (const auto enemyComponent = m_gameObject->GetComponent<game::EnemyPlayer>())
         {
-            enemyComponent->Beghost();
+            enemyComponent->Ghost();
         }
     }
 }
@@ -218,7 +224,7 @@ IncreaseVolumeCommand::IncreaseVolumeCommand(sound_system* soundSystem)
 void IncreaseVolumeCommand::Execute() {
     if (m_soundSystem) {
         const float currentVolume = m_soundSystem->getVolume();
-        m_soundSystem->setVolume(std::min(currentVolume + 10.0f, 128.0f));
+        m_soundSystem->setVolume(std::min(currentVolume + 5.0f, 128.0f));
     }
 }
 
@@ -228,7 +234,7 @@ DecreaseVolumeCommand::DecreaseVolumeCommand(sound_system* soundSystem)
 void DecreaseVolumeCommand::Execute() {
     if (m_soundSystem) {
         const float currentVolume = m_soundSystem->getVolume();
-        m_soundSystem->setVolume(std::max(currentVolume - 10.0f, 0.0f));
+        m_soundSystem->setVolume(std::max(currentVolume - 5.0f, 0.0f));
     }
 }
 

@@ -49,7 +49,7 @@ void PrintSDLVersion()
 
 dae::minigin::minigin(const std::string& dataPath)
 {
-    //PrintSDLVersion();
+    PrintSDLVersion();
 
     // Set SDL hint for VSync
     SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");

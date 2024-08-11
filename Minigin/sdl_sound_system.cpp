@@ -163,20 +163,29 @@ void sdl_sound_system::unload_sound(sound_id id) {
 }
 
 void sdl_sound_system::mute() {
-    // Lock the mutex before modifying the mute state and volume
     std::lock_guard<std::mutex> lock(m_sound_requests_mutex);
     if (m_muted) {
         // Unmute: Restore previous volume
         m_muted = false;
         m_volume = m_previousVolume;
-        Mix_VolumeMusic(m_volume); // Set the volume back to the previous level
+        Mix_VolumeMusic(m_volume);
+
+        // Restore volume to all active channels
+        for (int i = 0; i < Mix_AllocateChannels(-1); ++i) {
+            Mix_Volume(i, m_volume);
+        }
     }
     else {
         // Mute: Store current volume and set volume to 0
         m_muted = true;
-        m_previousVolume = m_volume; // Store the current volume
+        m_previousVolume = m_volume;
         m_volume = 0;
-        Mix_VolumeMusic(0); // Mute the music
+        Mix_VolumeMusic(0);
+
+        // Mute all active channels
+        for (int i = 0; i < Mix_AllocateChannels(-1); ++i) {
+            Mix_Volume(i, 0);
+        }
     }
 }
 
@@ -186,6 +195,10 @@ void sdl_sound_system::setVolume(float volume) {
     m_volume = static_cast<int>(volume * MIX_MAX_VOLUME);
     if (!m_muted) {
         Mix_VolumeMusic(m_volume);
+
+        for (int i = 0; i < Mix_AllocateChannels(-1); ++i) {
+            Mix_Volume(i, m_volume);
+        }
     }
     else {
         // If sound is muted, don't set volume directly, just store it for when it's unmuted
@@ -221,11 +234,15 @@ void logging_sound_system::onPlaySoundMessage(const dae::Message& message) {
 void sdl_sound_system::StopPlay(sound_id id) {
     std::lock_guard<std::mutex> lock(m_sound_requests_mutex);
     const auto musicIt = m_id_to_music_map.find(id);
+    const auto chunkIt = m_id_to_chunk_map.find(id);
 
     if (musicIt != m_id_to_music_map.end()) {
         Mix_HaltMusic();  // Stop the currently playing music
     }
+    else if (chunkIt != m_id_to_chunk_map.end()) {
+        Mix_HaltChannel(-1);  // Stop all channels, or you could track the specific channel and stop it
+    }
     else {
-        std::cerr << "No music found for sound ID: " << id << std::endl;
+        std::cerr << "No music or sound chunk found for sound ID: " << id << std::endl;
     }
 }
