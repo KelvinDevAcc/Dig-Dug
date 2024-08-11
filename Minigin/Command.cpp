@@ -61,7 +61,7 @@ void MoveCommand::Execute()
 }
 
 
-DamageCommand::DamageCommand(int playerNumber)
+DieCommand::DieCommand(int playerNumber)
 {
     const std::vector<dae::GameObject*> players = dae::SceneData::GetInstance().GetPlayers();
 
@@ -71,7 +71,7 @@ DamageCommand::DamageCommand(int playerNumber)
     }
 }
 
-void DamageCommand::Execute()
+void DieCommand::Execute()
 {
     if (m_gameObject)
     {
@@ -83,7 +83,7 @@ void DamageCommand::Execute()
 }
 
 
-ScorePointCommand::ScorePointCommand(int playerNumber)
+SchootCommand::SchootCommand(int playerNumber)
 {
     const std::vector<dae::GameObject*> players = dae::SceneData::GetInstance().GetPlayers();
 
@@ -93,13 +93,78 @@ ScorePointCommand::ScorePointCommand(int playerNumber)
     }
 }
 
-void ScorePointCommand::Execute()
+void SchootCommand::Execute()
 {
     if (m_gameObject)
     {
 	    if (const auto playerComponent = m_gameObject->GetComponent<game::Player>())
         {
             playerComponent->ShootPump();
+        }
+    }
+}
+
+MoveEnemyCommand::MoveEnemyCommand(int enemyNumber, float deltaX, float deltaY)
+    : m_deltaX(deltaX), m_deltaY(deltaY)
+{
+    const auto& enemies = dae::SceneData::GetInstance().GetenemyPlayers();
+
+    if (enemyNumber >= 0 && enemyNumber < static_cast<int>(enemies.size()))
+    {
+        m_gameObject = enemies[enemyNumber];
+    }
+}
+
+void MoveEnemyCommand::Execute()
+{
+    if (m_gameObject)
+    {
+        if (const auto enemyComponent = m_gameObject->GetComponent<game::EnemyPlayer>())
+        {
+            enemyComponent->Move(m_deltaX, m_deltaY);
+        }
+    }
+}
+
+
+AttackEnemyCommand::AttackEnemyCommand(int enemyNumber)
+{
+    const auto& enemies = dae::SceneData::GetInstance().GetenemyPlayers();
+
+    if (enemyNumber >= 0 && enemyNumber < static_cast<int>(enemies.size()))
+    {
+        m_gameObject = enemies[enemyNumber];
+    }
+}
+
+void AttackEnemyCommand::Execute()
+{
+    if (m_gameObject)
+    {
+        if (const auto enemyComponent = m_gameObject->GetComponent<game::EnemyPlayer>())
+        {
+            enemyComponent->Attack();
+        }
+    }
+}
+
+GhostEnemyplayercommand::GhostEnemyplayercommand(int enemyNumber)
+{
+    const auto& enemies = dae::SceneData::GetInstance().GetenemyPlayers();
+
+    if (enemyNumber >= 0 && enemyNumber < static_cast<int>(enemies.size()))
+    {
+        m_gameObject = enemies[enemyNumber];
+    }
+}
+
+void GhostEnemyplayercommand::Execute()
+{
+    if (m_gameObject)
+    {
+        if (const auto enemyComponent = m_gameObject->GetComponent<game::EnemyPlayer>())
+        {
+            enemyComponent->Beghost();
         }
     }
 }

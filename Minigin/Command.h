@@ -38,9 +38,9 @@ private:
 
 
 
-class DamageCommand final : public Command {
+class DieCommand final : public Command {
 public:
-    DamageCommand(int playerNumber);
+    DieCommand(int playerNumber);
 
     virtual void Execute() override;
 
@@ -50,15 +50,49 @@ private:
 
 
 
-class ScorePointCommand final : public Command {
+class SchootCommand final : public Command {
 public:
-    ScorePointCommand(int playerNumber);
+    SchootCommand(int playerNumber);
 
     virtual void Execute() override;
 
 private:
     dae::GameObject* m_gameObject{};
 };
+
+class MoveEnemyCommand : public Command
+{
+public:
+    MoveEnemyCommand(int playerNumber, float deltaX, float deltaY);
+    void Execute() override;
+
+private:
+    dae::GameObject* m_gameObject{};
+    float m_deltaX;
+    float m_deltaY;
+    int m_playerNum{};
+};
+
+class AttackEnemyCommand final : public Command {
+public:
+    AttackEnemyCommand(int playerNumber);
+
+    virtual void Execute() override;
+
+private:
+    dae::GameObject* m_gameObject{};
+};
+
+class GhostEnemyplayercommand final : public Command {
+public:
+    GhostEnemyplayercommand(int playerNumber);
+
+    virtual void Execute() override;
+
+private:
+    dae::GameObject* m_gameObject{};
+};
+
 
 class GoToNextSceneCommand final : public Command {
 public:

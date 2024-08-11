@@ -148,6 +148,8 @@ void loadResources()
 
         });
 
+
+
     dae::ResourceManager::LoadSprite("Rock",
         "Extra.png",
         3,  // rowCount
@@ -274,8 +276,8 @@ void BindKeyboardCommands(dae::InputManager& inputManager, int playerId) {
     inputManager.BindCommand(SDL_SCANCODE_W, KeyState::Pressed, std::make_unique<MoveCommand>(playerId, 0.0f, -1.5f), InputType::Keyboard);
     inputManager.BindCommand(SDL_SCANCODE_S, KeyState::Pressed, std::make_unique<MoveCommand>(playerId, 0.0f, 1.5f), InputType::Keyboard);
     inputManager.BindCommand(SDL_SCANCODE_A, KeyState::Pressed, std::make_unique<MoveCommand>(playerId, -1.5f, 0.0f), InputType::Keyboard);
-    inputManager.BindCommand(SDL_SCANCODE_D, KeyState::Pressed, std::make_unique<MoveCommand>(playerId, 1.5f, 0.0f), InputType::Keyboard); inputManager.BindCommand(SDL_SCANCODE_X, KeyState::Up, std::make_unique<ScorePointCommand>(playerId), InputType::Keyboard);
-    inputManager.BindCommand(SDL_SCANCODE_Z, KeyState::Up, std::make_unique<ScorePointCommand>(playerId), InputType::Keyboard);
+    inputManager.BindCommand(SDL_SCANCODE_D, KeyState::Pressed, std::make_unique<MoveCommand>(playerId, 1.5f, 0.0f), InputType::Keyboard); inputManager.BindCommand(SDL_SCANCODE_X, KeyState::Up, std::make_unique<SchootCommand>(playerId), InputType::Keyboard);
+    inputManager.BindCommand(SDL_SCANCODE_Z, KeyState::Up, std::make_unique<SchootCommand>(playerId), InputType::Keyboard);
     //inputManager.BindCommand(SDL_SCANCODE_C, KeyState::Up, std::make_unique<DamageCommand>(playerId), InputType::Keyboard);
 }
 
@@ -284,7 +286,7 @@ void BindControllerCommands(dae::InputManager& inputManager, int playerId, int c
     inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadDown), KeyState::Pressed, std::make_unique<MoveCommand>(playerId, 0.0f, 1.5f), InputType::Controller, controllerIndex);
     inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadLeft), KeyState::Pressed, std::make_unique<MoveCommand>(playerId, -1.5f, 0.0f), InputType::Controller, controllerIndex);
     inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadRight), KeyState::Pressed, std::make_unique<MoveCommand>(playerId, 1.5f, 0.0f), InputType::Controller, controllerIndex);
-    inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::A), KeyState::Up, std::make_unique<ScorePointCommand>(playerId), InputType::Controller, controllerIndex);
+    inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::A), KeyState::Up, std::make_unique<SchootCommand>(playerId), InputType::Controller, controllerIndex);
    // inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::X), KeyState::Up, std::make_unique<DamageCommand>(playerId), InputType::Controller, controllerIndex);
 }
 
@@ -816,7 +818,7 @@ void GameScene(dae::Scene* scene)
         break;
     case GameData::GameState::VERSUS:
         Tunnelmap = "map1.3.tunmap";
-        entitymap = "map1.1.entmap";
+        entitymap = "map1.3.entmap";
         break;
     default:
         Tunnelmap = "map1.tunmap";
@@ -868,7 +870,7 @@ void GameScene2(dae::Scene* scene)
         break;
     case GameData::GameState::MULTIPLAYER:
         Tunnelmap = "map1.2.tunmap";
-        entitymap = "map1.1.entmap";
+        entitymap = "map1.2.entmap";
         break;
     case GameData::GameState::VERSUS:
         Tunnelmap = "map1.3.tunmap";
@@ -925,7 +927,7 @@ void GameScene3(dae::Scene* scene)
         break;
     case GameData::GameState::MULTIPLAYER:
         Tunnelmap = "map1.2.tunmap";
-        entitymap = "map1.1.entmap";
+        entitymap = "map1.2.entmap";
         break;
     case GameData::GameState::VERSUS:
         Tunnelmap = "map1.3.tunmap";

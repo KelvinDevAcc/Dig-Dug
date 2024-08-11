@@ -5,7 +5,6 @@
 struct PlayerData {
     int score = 0;
     int lives = 3;
-    int pepperCount = 5;
 };
 
 class GameData final: public dae::Singleton<GameData> {
@@ -19,7 +18,7 @@ public:
     GameData(GameData&&) noexcept = delete;
     GameData& operator=(GameData&&) noexcept = delete;
 
-    void FindAndStorePlayerData();
+    void AddPlayer(int playerID, const PlayerData& playerData);
 
     PlayerData GetPlayerData(int playerID) const;
 
@@ -29,6 +28,10 @@ public:
 
     void ResetPlayerData(int playerID);
     void CheckGameState();
+
+    void LoadNextScene();
+    void BroadcastEndGame();
+    void BroadcastLevelCompleted();
 
     // Round management
     int GetCurrentRound() const { return m_currentRound; }

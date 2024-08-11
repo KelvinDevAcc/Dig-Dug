@@ -41,7 +41,30 @@ namespace game
             m_deathTimer -= deltaTime;
             if (m_deathTimer <= 0.0f)  // Compare with 0.0f for clarity
             {
-                dae::SceneManager::GetInstance().RestartCurrentSceneWithPersistentObjects();
+                const int playerID = GetPlayerID();  // Ensure you have a method to get player ID
+                if (playerID != -1)  // Ensure player ID is valid
+                {
+                    PlayerData playerData = GameData::GetInstance().GetPlayerData(playerID);
+                    playerData.lives = m_healthComponent->GetLives();  // Update with current lives
+                    GameData::GetInstance().UpdatePlayerData(playerID, playerData);
+                }
+
+                if (m_healthComponent->GetLives() < 0)
+                {
+                    const auto playerSize = dae::SceneData::GetInstance().GetPlayers().size();
+                    if (playerSize > 1)
+                    {
+                        GameData::GetInstance().CheckGameState();
+                        dae::SceneData::GetInstance().RemoveGameObject(GetParentObject(), dae::GameObjectType::Player);
+                        dae::SceneManager::GetInstance().GetActiveScene()->Remove(GetParentObject());
+                    }
+                    else
+                    {
+                        GameData::GetInstance().CheckGameState();
+                    }
+                }
+                else
+                    dae::SceneManager::GetInstance().RestartCurrentSceneWithPersistentObjects();
             }
         }
 
@@ -55,29 +78,7 @@ namespace game
 
         UpdatePumpTimer(deltaTime);
 
-       /* if (m_healthComponent->GetLives() < 0)
-        {
-            m_healthComponent->SetLives(-1);
-            const auto playerSize = dae::SceneData::GetInstance().GetPlayers().size();
-            if (playerSize == 1)
-            {
-                SetAnimationState(AnimationState::Dying);
-                dae::Message message;
-                message.type = dae::PlaySoundMessageType::Sound;
-                message.arguments.emplace_back(static_cast<sound_id>(2));
-                dae::EventQueue::Broadcast(message);
-
-                GameData::GetInstance().FindAndStorePlayerData();
-                dae::SceneData::GetInstance().RemoveGameObject(GetParentObject(), dae::GameObjectType::Player);
-                dae::SceneManager::GetInstance().GetActiveScene()->Remove(GetParentObject());
-            }
-            else if (playerSize > 1)
-            {
-                GameData::GetInstance().FindAndStorePlayerData();
-                dae::SceneData::GetInstance().RemoveGameObject(GetParentObject(), dae::GameObjectType::Player);
-                dae::SceneManager::GetInstance().GetActiveScene()->Remove(GetParentObject());
-            }
-        }*/
+      
     }
 
     void Player::Die()
@@ -87,11 +88,9 @@ namespace game
         m_GameObject->GetComponent<HitBox>()->Disable();
         SetAnimationState(AnimationState::Dying);
        
-        m_healthComponent->SetHealth(m_healthComponent->GetHealth() - 100);
+        m_healthComponent->SetLives(m_healthComponent->GetLives() - 1);
         m_deathTimer =static_cast<float>(m_animationComponent->GetAnimationDuration());
         m_isDying = true;
-
-        // Start a timer for the duration of the dying animation
     }
 
     void Player::Render() const

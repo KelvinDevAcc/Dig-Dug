@@ -16,11 +16,6 @@ namespace dae
         {
             m_Lives--;
             m_Health = 100; 
-            if (m_Lives < 0)
-            {
-                GameData::GetInstance().FindAndStorePlayerData();
-                GameData::GetInstance().CheckGameState();
-            }
             Notify();
         }
 

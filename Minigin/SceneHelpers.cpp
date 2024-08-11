@@ -162,21 +162,23 @@ void SceneHelpers::SpawnStone(dae::Scene* scene, float x, float y, glm::vec2 sca
 
 void SceneHelpers::SpawnPlayer(dae::Scene* scene, float x, float y, glm::vec2 scale)
 {
-    int score;
-    int lives;
+    int score = 0;
+    int lives = 3;
+
+    // Check if the player already exists in GameData and retrieve existing data
+    PlayerData existingData = GameData::GetInstance().GetPlayerData(playerCount);
+
+    if (existingData.score != 0)
+        score = existingData.score;
+
+    if (existingData.lives != 3)
+        lives = existingData.lives;
+
+    // Create the Player GameObject
     auto PlayerObject = std::make_unique<dae::GameObject>();
-    if (GameData::GetInstance().GetPlayerData(0).score != 0)
-        score = GameData::GetInstance().GetPlayerData(0).score;
-    else
-        score = 0;
 
     auto Character1points = std::make_unique<dae::PointComponent>(score);
     PlayerObject->AddComponent(std::move(Character1points));
-
-    if (GameData::GetInstance().GetPlayerData(0).lives != 3)
-        lives = GameData::GetInstance().GetPlayerData(0).lives;
-    else
-        lives = 3;
 
     auto Character1Health = std::make_unique<dae::HealthComponent>(100, lives);
     PlayerObject->AddComponent(std::move(Character1Health));
@@ -194,11 +196,22 @@ void SceneHelpers::SpawnPlayer(dae::Scene* scene, float x, float y, glm::vec2 sc
     PlayerObject->AddComponent(std::move(hitBox));
 
     auto PlayerComponent = std::make_unique<game::Player>(PlayerObject.get());
+    PlayerComponent->SetPlayerID(playerCount);
     PlayerObject->AddComponent(std::move(PlayerComponent));
 
-    dae::SceneData::GetInstance().AddGameObject(PlayerObject.get(), dae::GameObjectType::Player);
 
+    // Add the GameObject to the scene
+    dae::SceneData::GetInstance().AddGameObject(PlayerObject.get(), dae::GameObjectType::Player);
     scene->Add(std::move(PlayerObject));
+
+    // Create and add PlayerData to GameData
+    PlayerData playerData;
+    playerData.score = score;
+    playerData.lives = lives;
+    GameData::GetInstance().AddPlayer(playerCount, playerData);
+
+    // Increment playerCount if necessary
+    playerCount++;
 }
 
 void SceneHelpers::SpawnPlayerEnemy(dae::Scene* scene, float x, float y, glm::vec2 scale)
@@ -211,12 +224,12 @@ void SceneHelpers::SpawnPlayerEnemy(dae::Scene* scene, float x, float y, glm::ve
     auto Character1points = std::make_unique<dae::PointComponent>(0);
     PlayerObject->AddComponent(std::move(Character1points));
 
-    auto spriterenderComponent = std::make_unique<dae::SpriteRendererComponent>(PlayerObject.get(), dae::ResourceManager::GetSprite("sausage"));
+    auto spriterenderComponent = std::make_unique<dae::SpriteRendererComponent>(PlayerObject.get(), dae::ResourceManager::GetSprite("Fygar"));
     spriterenderComponent->SetDimensions(40, 40);
     PlayerObject->AddComponent(std::move(spriterenderComponent));
 
-    auto animationComponent = std::make_unique<dae::AnimationComponent>(PlayerObject.get(), PlayerObject->GetComponent<dae::SpriteRendererComponent>(), "Idle");
-    animationComponent->Play("Idle", true);
+    auto animationComponent = std::make_unique<dae::AnimationComponent>(PlayerObject.get(), PlayerObject->GetComponent<dae::SpriteRendererComponent>(), "Normal");
+    animationComponent->Play("Normal", true);
     PlayerObject->AddComponent(std::move(animationComponent));
     PlayerObject->SetLocalPosition(glm::vec3(x, y, 1.0f));
 
@@ -342,6 +355,9 @@ void SceneHelpers::LoadEntitysMapIntoScene(const LoadMap& loadMap, dae::Scene* s
                 break;
             case 'C':
                 SpawnPlayer(scene, posX, posY, glm::vec2(scale.x, scale.y));
+                break;
+            case 'E':
+                SpawnPlayerEnemy(scene, posX, posY, glm::vec2(scale.x, scale.y));
                 break;
             default:
                 break;

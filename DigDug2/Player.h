@@ -52,6 +52,9 @@ namespace game
 
         std::type_info const& GetComponentType() const override { return typeid(Player); }
 
+        void SetPlayerID(int id) { m_playerID = id; }
+        int GetPlayerID() const { return m_playerID; }
+
         float m_deltaY{ 0 };
         float m_deltaX{ 0 };
 
@@ -102,5 +105,6 @@ namespace game
 
         float m_deathTimer;
         bool m_isDying;
+        int m_playerID;
     };
 }

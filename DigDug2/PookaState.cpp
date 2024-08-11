@@ -6,6 +6,7 @@
 #include "GameData.h"
 #include "GameObject.h"
 #include "GameTime.h"
+#include "Player.h"
 #include "PointComponent.h"
 #include "SceneData.h"
 #include "SceneManager.h"
@@ -209,6 +210,19 @@ void PookaDeadState::Enter(PookaComponent* pooka) {
     if (const auto lastAttacker = pooka->GetLastAttacker()) {
 	    if (const auto playerScoreComponent = lastAttacker->GetComponent<dae::PointComponent>()) {
             playerScoreComponent->SetScore(playerScoreComponent->GetScore() + points); // Award points to the correct player
+            if (const auto playerComponent = lastAttacker->GetComponent<game::Player>()) {
+                int playerID = playerComponent->GetPlayerID();  // Assumes GetPlayerID() exists
+
+                // Get the player data from GameData
+                PlayerData playerData = GameData::GetInstance().GetPlayerData(playerID);
+
+                // Add points to the player's score
+                playerData.score += points;
+
+                // Update the player data in GameData
+                GameData::GetInstance().UpdatePlayerData(playerID, playerData);
+            }
+
         }
     }
 

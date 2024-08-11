@@ -85,7 +85,6 @@ namespace game
                 std::cout << "1 player";
                 if (player.GetParentObject())
                 {
-                    GameData::GetInstance().FindAndStorePlayerData();
                     dae::SceneData::GetInstance().RemoveGameObject(player.GetParentObject(), dae::GameObjectType::Player);
                     dae::SceneManager::GetInstance().GetActiveScene()->Remove(player.GetParentObject());
                     //dae::SceneManager::GetInstance().SetActiveScene("SaveScoreScene");
@@ -94,7 +93,6 @@ namespace game
             else if (playerSize > 1)
             {
                 //dae::SceneManager::GetInstance().SetActiveScene("SaveScoreScene");
-                GameData::GetInstance().FindAndStorePlayerData();
 				dae::SceneData::GetInstance().RemoveGameObject(player.GetParentObject(), dae::GameObjectType::Player);
                 dae::SceneManager::GetInstance().GetActiveScene()->Remove(player.GetParentObject());
 				//dae::SceneManager::GetInstance().SetActiveScene("SaveScoreScene");

@@ -50,13 +50,9 @@ namespace dae
                     }
                 }
 
-                // Set the new active scene
-                GameData::GetInstance().FindAndStorePlayerData();
                 SceneData::GetInstance().RemoveAllGameObjects();
                 (*m_activeSceneIterator)->RemoveAll();
-
                 (*m_activeSceneIterator)->Activate();
-
 
                 // Start the background music for the newly active scene (if any)
                 const sound_id newSoundID = (*m_activeSceneIterator)->GetBackgroundMusicID();
@@ -79,7 +75,6 @@ namespace dae
 
     void SceneManager::GoToNextScene()
     {
-        GameData::GetInstance().FindAndStorePlayerData();
         m_previousActiveSceneIterator = m_activeSceneIterator;
         // Advance to the next scene
         ++m_activeSceneIterator;
