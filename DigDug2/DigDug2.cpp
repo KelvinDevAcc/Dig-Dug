@@ -55,6 +55,7 @@ void loadResources()
     ss.register_sound_file("../Data/Sounds/RockDropping.mp3");
     ss.register_sound_file("../Data/Sounds/Victory.wav");
     ss.register_sound_file("../Data/Sounds/walkmusic.wav");
+    ss.register_sound_file("../Data/Sounds/12FygarFlame.mp3");
 
     // Load each sound file once
     ss.load_sound(20, "../Data/Sounds/02-GameStartMusic.mp3",true);
@@ -73,6 +74,7 @@ void loadResources()
     ss.load_sound(13, "../Data/Sounds/walkmusic.wav" , true);
     ss.load_sound(15, "../Data/Sounds/18_menu_select.mp3");
     ss.load_sound(14, "../Data/Sounds/20_menu_move.mp3");
+    ss.load_sound(15, "../Data/Sounds/12FygarFlame.mp3");
 
     dae::ResourceManager::LoadFont("arcadeclassic", "ARCADECLASSIC.TTF", 48);
     dae::ResourceManager::LoadFont("digdug", "DIG DUG.ttf", 48);

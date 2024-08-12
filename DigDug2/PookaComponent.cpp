@@ -120,10 +120,12 @@ glm::ivec2 PositionToGrid(const glm::vec3& position)
     float cellSizeX = SceneHelpers::GetCellSize().x;
     float cellSizeY = SceneHelpers::GetCellSize().y;
 
-    return {
-        static_cast<int>(std::floor((position.x - gridStartX) / cellSizeX)),
-        static_cast<int>(std::floor((position.y - gridStartY) / cellSizeY))
+    auto gridPos = glm::ivec2{
+        static_cast<int>((position.x - gridStartX) / cellSizeX),
+        static_cast<int>((position.y - gridStartY) / cellSizeY)
     };
+
+    return gridPos;
 }
 
 glm::vec3 GridToPosition(const glm::ivec2& gridCoords)
@@ -133,15 +135,17 @@ glm::vec3 GridToPosition(const glm::ivec2& gridCoords)
     float cellSizeX = SceneHelpers::GetCellSize().x;
     float cellSizeY = SceneHelpers::GetCellSize().y;
 
-    return {
-        (cellSizeX * gridCoords.x) + gridStartX,
-        (cellSizeY * gridCoords.y) + gridStartY,
+    auto worldPos = glm::vec3{
+        gridStartX + (cellSizeX * gridCoords.x),
+        gridStartY + (cellSizeY * gridCoords.y),
         0.0f
     };
+
+    return worldPos;
 }
 
 glm::vec3 PookaComponent::FindNearestValidSpot() {
-    const float maxSearchDistance = 100.0f; // Maximum distance to search
+    const float maxSearchDistance = SceneHelpers::GetCellSize().x * 5; // Maximum distance to search
     const float stepSize = SceneHelpers::GetCellSize().x; // Step size in grid (assumes square cells)
 
     // Calculate the grid origin in 2D space
@@ -166,28 +170,23 @@ glm::vec3 PookaComponent::FindNearestValidSpot() {
         // Increase the search range
         searchRange += stepSize;
     }
-
     // If no valid spot was found within the search range
     return m_CurrentPosition; // Return the current position if no valid spot is found
 }
+
 
 
 bool PookaComponent::DetectsPlayer() {
     const auto& sceneData = dae::SceneData::GetInstance();
     const auto& players = sceneData.GetPlayers();
 
-    m_DetectedPlayers.clear(); // Clear previously detected players
-
+    m_DetectedPlayers.clear();
 
     // Assuming detection is always active (no distance check)
     for (const auto& player : players) {
         // In this simple case, we're just adding all players
         m_DetectedPlayers.push_back(player);
-
-        // For debugging: Print the detected players' positions
-        glm::vec3 playerPosition = player->GetWorldPosition();
     }
-
 
     return !m_DetectedPlayers.empty();
 }
@@ -315,14 +314,14 @@ void PookaComponent::UpdateTimer() {
             // Randomly decide if the Pooka should enter ghost mode
             static std::random_device rd;
             static std::mt19937 gen(rd());
-            std::uniform_real_distribution<float> dis(5.0f, 15.0f); // Interval between 50 and 150 seconds
+            std::uniform_real_distribution<float> dis(5.0f, 15.0f); // Interval between 5 and 15 seconds
             m_GhostModeInterval = dis(gen);
 
             // Reset the timer for the next check
             m_GhostModeTimer = m_GhostModeInterval;
 
             // Randomly decide if the Pooka should enter ghost mode
-            // Example: 50% chance to enable ghost mode
+            // Example: 50% chance to enable ghost mode 
             static std::uniform_real_distribution<float> chanceDis(0.0f, 1.0f);
             if (chanceDis(gen) > 0.5f) {
                 m_GhostModeEnabled = !m_GhostModeEnabled;

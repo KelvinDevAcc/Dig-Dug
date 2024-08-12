@@ -110,7 +110,10 @@ void Pump::PumpEnemy()
 {
     if (!m_connectedEnemy) return;
 
-    m_connectedEnemy->GetComponent<PookaComponent>()->HitByPump(m_owner);
+    if (m_connectedEnemy->GetComponent<PookaComponent>())
+    {
+        m_connectedEnemy->GetComponent<PookaComponent>()->HitByPump(m_owner);
+    }
 	m_connectedEnemy = nullptr;
 }
 

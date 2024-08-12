@@ -67,6 +67,10 @@ namespace game
         m_stage = 1; // Start from stage 1
         m_direction = direction; // Set the direction
 
+        dae::Message message;
+        message.type = dae::PlaySoundMessageType::Sound;
+        message.arguments.emplace_back(static_cast<sound_id>(15));
+        dae::EventQueue::Broadcast(message);
         UpdateSizeAndAnimation(); // Initial setup for stage 1
         m_spriterendererComponent->SetTexture(dae::ResourceManager::GetTexture("BreathFireStage1"));
         if (m_direction.x > 0)
