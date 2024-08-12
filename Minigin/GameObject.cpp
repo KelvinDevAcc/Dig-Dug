@@ -16,22 +16,22 @@ namespace dae
 
     void GameObject::Update() const
     {
-        for (auto& component : m_components)
+        for (const auto& component : m_components)
         {
-            if (component)  // Null check
+            if (component)  // Null check for smart pointer
             {
                 component->Update();
             }
             else
             {
-                std::cerr << "Warning: Null component in GameObject::Render\n";
+                std::cerr << "Warning: Null component in GameObject::Update\n";
             }
         }
     }
 
     void GameObject::Render() const
     {
-        for (auto& component : m_components)
+        for (const auto& component : m_components)
         {
             if (component)  // Null check
             {

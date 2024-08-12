@@ -1,4 +1,6 @@
 #include "SceneData.h"
+
+#include <iostream>
 #include <SDL_rect.h>
 #include "SceneHelpers.h"
 #include "../DigDug2/Player.h"
@@ -17,6 +19,7 @@ namespace dae {
         case GameObjectType::enemyPlayers: m_enemyPlayers.push_back(gameObject); break;
         case GameObjectType::WalkThrough: m_WalkThrough.push_back(gameObject); break;
         case GameObjectType::Rock: m_rocks.push_back(gameObject); break;
+        case GameObjectType::fire: m_fire.push_back(gameObject); break;
         case GameObjectType::Empty: m_empty.push_back(gameObject); break;
         default:;
         }
@@ -31,6 +34,7 @@ namespace dae {
         m_enemys.clear();
         m_empty.clear();
         m_rocks.clear();
+        m_fire.clear();
     }
 
     void SceneData::RemoveGameObject(GameObject* gameObject, GameObjectType type)
@@ -58,21 +62,23 @@ namespace dae {
         case GameObjectType::Empty:
             RemoveGameObjectFromList(gameObject, m_empty);
             break;
+        case GameObjectType::fire:
+            RemoveGameObjectFromList(gameObject, m_fire);
+            break;
+        default:;
         }
     }
 
     void SceneData::RemoveGameObjectAtPosition(const glm::vec3& position)
     {
-        auto& gameObjects = m_WalkThrough; // Ensure this is a vector of dae::GameObject*
+        auto& gameObjects = m_WalkThrough; 
 
-        // Use remove_if to find and move the objects to be removed to the end of the vector
         const auto it = std::ranges::remove_if(gameObjects,
                                                [&position](const GameObject* gameObject) {
 	                                               const glm::vec3& objPos = gameObject->GetWorldPosition();
 	                                               return std::abs(objPos.x - position.x) < 0.1f && std::abs(objPos.y - position.y) < 0.1f;
                                                }).begin();
 
-        // Erase the removed objects from the vector
         gameObjects.erase(it, gameObjects.end());
     }
 
@@ -84,7 +90,7 @@ namespace dae {
         auto it = std::find(list.begin(), list.end(), gameObject);
         if (it != list.end())
         {
-            list.erase(it);  // Just remove the pointer, do not delete it
+            list.erase(it); 
         }
     }
 
@@ -107,9 +113,18 @@ namespace dae {
                         player->GetComponent<game::Player>()->Die();
                     }
                 }
+                if (!m_fire.empty())
+                {
+                    if (player && IsOnFire(*player))
+                    {
+                        player->GetComponent<game::Player>()->Die();
+                    }
+                }
 
             }
 	    }
+
+        //std::cout << m_WalkThrough.size() << std::endl;
     }
 
     bool SceneData::IsOnSpecificObjectType(GameObject& object, const std::vector<GameObject*>& objects)
@@ -201,22 +216,6 @@ namespace dae {
         return IsNextwalkthrough(newPosition.x, newPosition.y);
     }
 
-    GameObject* SceneData::GetFloorAt(const glm::vec3& position) const
-    {
-        for (const auto& floor : m_floors) {
-            if (const auto hitBox = floor->GetComponent<HitBox>()) {
-                const SDL_Rect rect = hitBox->GetRect();
-                if (position.x >= rect.x && position.x < rect.x + rect.w &&
-                    position.y >= rect.y && position.y < rect.y + rect.h) {
-                    return floor;
-                }
-            }
-        }
-        return nullptr;
-    }
-
-    
-
     bool SceneData::IsNextwalkthrough(float x, float y) const {
         auto checkCollisionsWithObjects = [&](const std::vector<GameObject*>& objects) {
             for (const auto gameObject : objects) 
@@ -261,5 +260,10 @@ namespace dae {
     bool SceneData::IsOnRock(GameObject& object) const
     {
         return IsOnSpecificObjectType(object, m_rocks);
+    }
+
+    bool SceneData::IsOnFire(GameObject& object) const
+    {
+        return IsOnSpecificObjectType(object, m_fire);
     }
 }

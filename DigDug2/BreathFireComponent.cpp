@@ -1,6 +1,7 @@
 #include "BreathFireComponent.h"
 #include "GameTime.h"
 #include "ResourceManager.h"
+#include "SceneData.h"
 
 namespace game
 {
@@ -26,13 +27,23 @@ namespace game
 
         // Set up the hitbox (optional size adjustment per stage)
         auto hitBox = std::make_unique<HitBox>(glm::vec2(m_spriterendererComponent->GetDimensions().x,
-        m_spriterendererComponent->GetDimensions().y));
+            m_spriterendererComponent->GetDimensions().y));
         m_hitBox = hitBox.get();
         hitBox->SetGameObject(breathFireObject.get());
         breathFireObject->AddComponent(std::move(hitBox));
 
+        dae::SceneData::GetInstance().AddGameObject(breathFireObject.get(), dae::GameObjectType::fire);
         m_breathFireObject = std::move(breathFireObject);
+    }
 
+    BreathFire::~BreathFire()
+    {
+        // Safely remove the breathFireObject from the scene
+        if (m_breathFireObject)
+        {
+            dae::SceneData::GetInstance().RemoveGameObject(m_breathFireObject.get(), dae::GameObjectType::fire);
+        }
+        m_breathFireObject.reset(); // Ensures the unique pointer releases ownership and destroys the object
     }
 
     void BreathFire::Update()
@@ -72,6 +83,7 @@ namespace game
         message.arguments.emplace_back(static_cast<sound_id>(15));
         dae::EventQueue::Broadcast(message);
         UpdateSizeAndAnimation(); // Initial setup for stage 1
+        m_hitBox->Enable();
         m_spriterendererComponent->SetTexture(dae::ResourceManager::GetTexture("BreathFireStage1"));
         if (m_direction.x > 0)
             m_spriterendererComponent->SetFlip(false, false);
@@ -88,6 +100,7 @@ namespace game
     {
         m_isActive = false;
         m_stage = 1; // Reset stage on deactivation
+        m_hitBox->Disable();
     }
 
     void BreathFire::AdjustPosition()

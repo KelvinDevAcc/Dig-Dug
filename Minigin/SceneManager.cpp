@@ -1,20 +1,16 @@
 #include "SceneManager.h"
 
-#include <iostream>
-#include <ostream>
-#include <SDL_mixer.h>
 #include <stdexcept>
 
-#include "GameData.h"
 #include "SceneData.h"
 #include "servicelocator.h"
 #include "../DigDug2/Player.h"
-#include "../DigDug2/PookaComponent.h"
+#include "../DigDug2/EnemyComponent.h"
+#include "../DigDug2/EnemyPlayer.h"
+#include "../DigDug2/FygarComponent.h"
 
 
-
-
-class PookaComponent;
+class EnemyComponent;
 
 namespace dae
 {
@@ -96,33 +92,42 @@ namespace dae
 
     void SceneManager::RestartCurrentSceneWithPersistentObjects()
     {
-        // Store the current state of objects that should persist
-        //std::vector<GameObject*> persistentObjects;
-        //for (const auto& obj : (*m_activeSceneIterator)->GetObjects())
-        //{
-        //    // Add logic here to determine if the object should persist
-        //    persistentObjects.push_back(obj.get());  // Store the raw pointer
-        //}
 
-        const auto players = SceneData::GetInstance().GetPlayers();
         const auto enemies = SceneData::GetInstance().GetEnemies();
-        // Re-add persistent objects
-      
+        const auto enemieplayers = SceneData::GetInstance().GetenemyPlayers();
+        const auto players = SceneData::GetInstance().GetPlayers();
+
         for (const auto& obj : enemies)
         {
-            if (const auto pooka = obj->GetComponent<PookaComponent>())
+
+            if (const auto pooka = obj->GetComponent<EnemyComponent>())
             {
                 pooka->ReSpawn();
             }
+            
         }
+
+        for (const auto& obj : enemieplayers)
+        {
+
+            if (const auto enemyPlayer = obj->GetComponent<game::EnemyPlayer>())
+            {
+                enemyPlayer->ReSpawn();
+            }
+
+        }
+
         for (const auto& obj : players)
         {
             if (const auto player = obj->GetComponent<game::Player>())
             {
                 player->ReSpawn();
             }
+           
 
         }
+
+       
 
     }
 

@@ -11,8 +11,9 @@
 #include "TileComponent.h"
 #include "../DigDug2/EnemyPlayer.h"
 #include "../DigDug2/Player.h"
-#include "../DigDug2/PookaComponent.h"
+#include "../DigDug2/EnemyComponent.h"
 #include "../DigDug2/Rock.h"
+#include "../DigDug2/FygarComponent.h"
 
 LoadMap* SceneHelpers::s_loadMap = nullptr;
 std::vector<std::vector<char>> SceneHelpers::s_tunnelMap;
@@ -38,7 +39,7 @@ void CreateGameObject(dae::Scene* scene, const std::string& textureName, float x
 }
 
 void CreateTile(dae::Scene* scene, const std::string& textureName, float x, float y, glm::vec2 scale, dae::GameObjectType type, TunnelType tunnelType) {
-    auto gameObject = std::make_unique<dae::GameObject>();
+	auto gameObject = std::make_unique<dae::GameObject>();
 
     // Add sprite renderer component
     auto spriteRenderer = std::make_unique<dae::SpriteRendererComponent>(gameObject.get(), dae::ResourceManager::GetTexture(textureName));
@@ -88,8 +89,6 @@ void SceneHelpers::CreateEmpty(dae::Scene* scene, float x, float y, glm::vec2 sc
 void SceneHelpers::SpawnPooka(dae::Scene* scene, float x, float y, glm::vec2 scale)
 {
        auto PookaObject = std::make_unique<dae::GameObject>();
-       std::cout << "Creating PookaObject" << std::endl;
-
        auto spriterenderComponent2 = std::make_unique<dae::SpriteRendererComponent>(PookaObject.get(), dae::ResourceManager::GetSprite("enemy"));
        spriterenderComponent2->SetDimensions(40, 40);
        PookaObject->AddComponent(std::move(spriterenderComponent2));
@@ -104,7 +103,7 @@ void SceneHelpers::SpawnPooka(dae::Scene* scene, float x, float y, glm::vec2 sca
        hitBox2->SetGameObject(PookaObject.get());
        PookaObject->AddComponent(std::move(hitBox2));
 
-       auto pookaComponent = std::make_unique<PookaComponent>(PookaObject.get());
+       auto pookaComponent = std::make_unique<EnemyComponent>(PookaObject.get());
        PookaObject->AddComponent(std::move(pookaComponent));
 
        dae::SceneData::GetInstance().AddGameObject(PookaObject.get(), dae::GameObjectType::enemy);
@@ -113,27 +112,26 @@ void SceneHelpers::SpawnPooka(dae::Scene* scene, float x, float y, glm::vec2 sca
 
 void SceneHelpers::SpawnFygar(dae::Scene* scene, float x, float y, glm::vec2 scale)
 {
-       auto SaugeObject2 = std::make_unique<dae::GameObject>();
-      auto spriterenderComponent3 = std::make_unique<dae::SpriteRendererComponent>(SaugeObject2.get(), dae::ResourceManager::GetSprite("Fygar"));
+       auto fygarObject = std::make_unique<dae::GameObject>();
+      auto spriterenderComponent3 = std::make_unique<dae::SpriteRendererComponent>(fygarObject.get(), dae::ResourceManager::GetSprite("Fygar"));
       spriterenderComponent3->SetDimensions(40, 40);
-      SaugeObject2->AddComponent(std::move(spriterenderComponent3));
+      fygarObject->AddComponent(std::move(spriterenderComponent3));
 
-      auto animationComponent3 = std::make_unique<dae::AnimationComponent>(SaugeObject2.get(), SaugeObject2->GetComponent<dae::SpriteRendererComponent>(), "Normal");
+      auto animationComponent3 = std::make_unique<dae::AnimationComponent>(fygarObject.get(), fygarObject->GetComponent<dae::SpriteRendererComponent>(), "Normal");
       animationComponent3->Play("Walk_Down", true);
-      SaugeObject2->AddComponent(std::move(animationComponent3));
+      fygarObject->AddComponent(std::move(animationComponent3));
 
-      SaugeObject2->SetLocalPosition(glm::vec3(x, y, 1.0f));
+      fygarObject->SetLocalPosition(glm::vec3(x, y, 1.0f));
 
       auto hitBox3 = std::make_unique<HitBox>(glm::vec2(scale));
-      hitBox3->SetGameObject(SaugeObject2.get());
-      SaugeObject2->AddComponent(std::move(hitBox3));
+      hitBox3->SetGameObject(fygarObject.get());
+      fygarObject->AddComponent(std::move(hitBox3));
 
-      auto pookaComponent2 = std::make_unique<PookaComponent>(SaugeObject2.get());
-      SaugeObject2->AddComponent(std::move(pookaComponent2));
-      std::cout << "SaugeObject2: PookaComponent added" << std::endl;
+      auto pookaComponent2 = std::make_unique<FygarComponent>(fygarObject.get());
+      fygarObject->AddComponent(std::move(pookaComponent2));
 
-      dae::SceneData::GetInstance().AddGameObject(SaugeObject2.get(), dae::GameObjectType::enemy);
-      scene->Add(std::move(SaugeObject2));
+      dae::SceneData::GetInstance().AddGameObject(fygarObject.get(), dae::GameObjectType::enemy);
+      scene->Add(std::move(fygarObject));
 }
 
 void SceneHelpers::SpawnStone(dae::Scene* scene, float x, float y, glm::vec2 scale)
@@ -242,17 +240,8 @@ void SceneHelpers::SpawnPlayerEnemy(dae::Scene* scene, float x, float y, glm::ve
     PlayerObject->AddComponent(std::move(PlayerComponent));
 
     dae::SceneData::GetInstance().AddGameObject(PlayerObject.get(), dae::GameObjectType::enemyPlayers);
+    dae::SceneData::GetInstance().AddGameObject(PlayerObject.get(), dae::GameObjectType::enemy);
 
-    auto tempobject = std::make_unique<dae::GameObject>();
-
-    auto tempobjecthitBox = std::make_unique<HitBox>(scale);
-    tempobjecthitBox->SetGameObject(tempobject.get());
-    tempobject->AddComponent(std::move(tempobjecthitBox));
-
-    tempobject->SetParent(PlayerObject.get());
-    dae::SceneData::GetInstance().AddGameObject(tempobject.get(), dae::GameObjectType::enemy);
-
-    scene->Add(std::move(tempobject));
     scene->Add(std::move(PlayerObject));
 }
 

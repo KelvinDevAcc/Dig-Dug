@@ -70,7 +70,9 @@ dae::Texture2D* dae::ResourceManager::GetTexture(const std::string& name)
     {
         return it->second.get();
     }
+	if (!name.empty())
     std::cerr << "Error: Texture '" << name << "' not found.\n";
+
     return nullptr;
 }
 

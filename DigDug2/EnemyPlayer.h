@@ -35,7 +35,8 @@ namespace game
         void Move(float deltaX, float deltaY);
         void Attack();
         void Ghost();
-
+        void ReSpawn();
+        void HitByPump();
         std::type_info const& GetComponentType() const override { return typeid(EnemyPlayer); }
 
     private:
@@ -44,6 +45,7 @@ namespace game
         void UpdateAnimationState(Enemyanimationstate state);
         bool IsAtTileCenter(const dae::GameObject& gameObject) const;
         void SnapToTileCenter();
+        void HandlePumpHits();
     	dae::GameObject* m_GameObject{ nullptr };
         float m_Speed{ 40.0f };
 
@@ -55,5 +57,11 @@ namespace game
         bool m_breathingFire;
         float m_warmupAnimationtime;
         float m_cooldownAnimationtime;
+        glm::vec3 m_startPosition;
+
+        int m_PumpHits;
+
+        bool m_markedForDeletion;
+        float m_deletionDelay;
     };
 }

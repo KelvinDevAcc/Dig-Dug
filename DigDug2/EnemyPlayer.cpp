@@ -13,8 +13,13 @@
 namespace game
 {
     EnemyPlayer::EnemyPlayer(dae::GameObject* gameObject)
-	    : m_GameObject(gameObject), m_breathingFire(false), m_warmupAnimationtime(0), m_cooldownAnimationtime(0)
+	    : m_GameObject(gameObject), m_breathingFire(false), m_warmupAnimationtime(0), m_cooldownAnimationtime(0),
+	      m_PumpHits(0),
+	      m_markedForDeletion(false),
+	      m_deletionDelay(0)
     {
+	    m_startPosition = m_GameObject->GetWorldPosition();
+
 	    m_animationComponent = m_GameObject->GetComponent<dae::AnimationComponent>();
 	    auto breathFire = std::make_unique<BreathFire>(m_GameObject, glm::vec3(1, 0, 0), 100.0f, 3.0f);
 	    m_breathFire = breathFire.get();
@@ -23,6 +28,18 @@ namespace game
 
     void EnemyPlayer::Update()
     {
+        if (m_markedForDeletion)
+        {
+            m_deletionDelay -= dae::GameTime::GetDeltaTime();
+            if (m_deletionDelay <= 0.0f)
+            {
+                dae::SceneData::GetInstance().RemoveGameObject(m_GameObject, dae::GameObjectType::enemy);
+                dae::SceneData::GetInstance().RemoveGameObject(m_GameObject, dae::GameObjectType::enemyPlayers);
+                dae::SceneManager::GetInstance().GetActiveScene()->Remove(m_GameObject);
+                return; // Exit update method after removal
+            }
+        }
+
         if (m_breathingFire)
         {
             m_warmupAnimationtime -= dae::GameTime::GetDeltaTime();
@@ -190,6 +207,44 @@ namespace game
 	    const glm::vec3 position = m_GameObject->GetWorldPosition();
         const glm::vec2 tileCenter = SceneHelpers::GetCenterOfTile(position); // Assuming GetTileCenter returns the center of the tile
         m_GameObject->SetLocalPosition(glm::vec3(tileCenter.x, tileCenter.y, position.z));
+    }
+
+    void EnemyPlayer::ReSpawn()
+    {
+        m_GameObject->SetLocalPosition(m_startPosition);
+        SnapToTileCenter();
+        m_breathFire->Deactivate();
+        m_PumpHits = 0;
+        UpdateAnimationState(Enemyanimationstate::Idle);
+    }
+
+    void EnemyPlayer::HitByPump() {
+        ++m_PumpHits;
+        HandlePumpHits();
+    }
+
+    void EnemyPlayer::HandlePumpHits()
+    {
+        switch (m_PumpHits)
+        {
+        case 1:
+            m_animationComponent->Play("Pumped1", true);
+            break;
+        case 2:
+            m_animationComponent->Play("Pumped2", true);
+            break;
+        case 3:
+            m_animationComponent->Play("Pumped3", true);
+            break;
+        case 4:
+            m_animationComponent->Play("Pumped4", true);
+            m_deletionDelay =static_cast<float>(m_animationComponent->GetAnimationDuration());
+            m_markedForDeletion = true;
+            break;
+        default:
+            // Handle case where PumpHits is greater than 4, if needed
+            break;
+        }
     }
 
     void EnemyPlayer::UpdateAnimationState(Enemyanimationstate state)

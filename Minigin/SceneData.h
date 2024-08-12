@@ -11,8 +11,8 @@ namespace dae {
         Player,
         enemyPlayers,
         enemy,
-        Dirt,
         Rock,
+        fire,
         Empty
     };
 
@@ -38,12 +38,13 @@ namespace dae {
         std::vector<GameObject*> GetWalkThrough() const {return m_WalkThrough;}
         std::vector<GameObject*> getFloors() const {return m_floors;}
         std::vector<GameObject*> getRocks() const {return m_rocks;}
-        GameObject* GetFloorAt(const glm::vec3& position) const;
+        std::vector<GameObject*> GetFire() const {return m_fire;}
 
         bool IsOnFloor(GameObject& gameObject) const;
         bool isOnEnemy(GameObject& gameObject) const;
         bool IsOnwalkthrough(GameObject& gameObject) const;
         bool IsOnRock(GameObject& gameObject) const;
+        bool IsOnFire(GameObject& gameObject) const;
 
         bool CanEntityMove(float moveX, float moveY, GameObject& entity) const;
         bool CanEnemyMove(float moveX, float moveY, const GameObject& entity) const;
@@ -68,6 +69,7 @@ namespace dae {
         std::vector<GameObject*> m_enemys;
         std::vector<GameObject*> m_rocks;
         std::vector<GameObject*> m_empty;
+        std::vector<GameObject*> m_fire;
 
     };
 }

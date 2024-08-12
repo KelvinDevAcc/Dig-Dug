@@ -25,6 +25,7 @@ void TileComponent::SetType(TunnelType type)
     switch (m_Type)
     {
     case TunnelType::Empty:
+        UpdateTexture("empty");
         break;
     case TunnelType::topEnd:
         UpdateTexture("topEnd");

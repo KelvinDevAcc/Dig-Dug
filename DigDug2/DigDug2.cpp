@@ -19,7 +19,7 @@
 #include "Player.h"
 #include "PointComponent.h"
 #include "PointsDisplayComponent.h"
-#include "PookaComponent.h"
+#include "EnemyComponent.h"
 #include "ResourceManager.h"
 #include "SceneData.h"
 #include "SceneHelpers.h"
@@ -191,7 +191,6 @@ void loadResources()
         7,  // rowCount
         14,   // colCount
         {
-            { "Normal", { { { 0, 4 }}, 1 } },
             { "Normal", { { { 0, 4 }}, 1 } },
             { "Walk_Right", { {  { 0, 4 }, { 1, 4 } }, 1 } },
             { "Walk_Left", { {  { 0, 4 }, { 1, 4 } }, 1 } },
@@ -871,7 +870,7 @@ void GameScene(dae::Scene* scene)
     else
     {
         HandlePlayerInput(inputManager, 0);
-        HandlePlayerInput(inputManager, 0);
+        HandlePlayerInput(inputManager, 1);
     }
     LoadUi(scene);
     scene->SetBackgroundMusic(13);

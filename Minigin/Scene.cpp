@@ -26,7 +26,7 @@ namespace dae
 	                                               }
 	                                               return false;
                                                }).begin(), m_objects.end());
-        SortObjects();
+        m_needsSorting = true;
     }
 
     void Scene::RemoveAll() const

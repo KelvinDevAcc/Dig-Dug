@@ -23,7 +23,7 @@ namespace game
         m_startPosition = m_GameObject->GetWorldPosition();
 
         SetAnimationState(AnimationState::Idle);
-        m_GameObject->GetComponent<HitBox>()->Disable();
+        //m_GameObject->GetComponent<HitBox>()->Disable();
     }
 
     void Player::Update()

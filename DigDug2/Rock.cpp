@@ -1,7 +1,7 @@
 #include "Rock.h"
 #include "GameTime.h"
 #include "Player.h"
-#include "PookaComponent.h"
+#include "EnemyComponent.h"
 #include "SceneData.h"
 #include "SceneHelpers.h"
 #include "SceneManager.h"
@@ -13,7 +13,6 @@ Rock::Rock(dae::GameObject* owner):
 	, m_Owner(owner), m_timer(0), m_PlayerMovedAway(false), m_IsAnimating(false), m_animationTimer(0), m_dieing(false)
 {
 	m_animationComponnent = m_Owner->GetComponent<dae::AnimationComponent>();
-	dae::SceneData::GetInstance().AddGameObject(m_Owner, dae::GameObjectType::Rock);
 }
 
 void Rock::Update()
@@ -222,7 +221,7 @@ bool Rock::CheckCollisionWithObjects()
             message.arguments.emplace_back(static_cast<sound_id>(10));
             dae::EventQueue::Broadcast(message);
             // Notify the enemy about being crushed
-            enemy->GetComponent<PookaComponent>()->OnCrushed();  // Call OnCrushed on the enemy
+            enemy->GetComponent<EnemyComponent>()->OnCrushed();  // Call OnCrushed on the enemy
             ++enemiesKilled;  // Increment the kill count
         }
     }

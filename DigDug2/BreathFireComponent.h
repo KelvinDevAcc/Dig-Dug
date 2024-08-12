@@ -12,7 +12,7 @@ namespace game
     {
     public:
         BreathFire(dae::GameObject* owner, const glm::vec3& direction, float speed, float lifetime);
-
+        ~BreathFire() override;
         void Update() override;
         void Render() const override;
 
@@ -20,6 +20,7 @@ namespace game
         void Deactivate();
         bool IsActive() const { return m_isActive; }
         void AdjustPosition();
+        float GetLifetime() const {return m_lifetime;}
 
         std::type_info const& GetComponentType() const override { return typeid(BreathFire); }
 

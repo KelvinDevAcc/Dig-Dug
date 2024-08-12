@@ -4,7 +4,9 @@
 
 #include "EnemyComponent.h"
 #include "GameTime.h"
-#include "PookaComponent.h"
+#include "EnemyComponent.h"
+#include "EnemyPlayer.h"
+#include "FygarComponent.h"
 #include "ResourceManager.h"
 #include "SceneData.h"
 
@@ -110,10 +112,19 @@ void Pump::PumpEnemy()
 {
     if (!m_connectedEnemy) return;
 
-    if (m_connectedEnemy->GetComponent<PookaComponent>())
+    if (m_connectedEnemy->GetComponent<EnemyComponent>())
     {
-        m_connectedEnemy->GetComponent<PookaComponent>()->HitByPump(m_owner);
+        m_connectedEnemy->GetComponent<EnemyComponent>()->HitByPump(m_owner);
     }
+    else if (m_connectedEnemy->GetComponent<FygarComponent>())
+    {
+        m_connectedEnemy->GetComponent<FygarComponent>()->HitByPump(m_owner);
+    }
+    else if (m_connectedEnemy->GetComponent<game::EnemyPlayer>())
+    {
+        m_connectedEnemy->GetComponent<game::EnemyPlayer>()->HitByPump();
+    }
+
 	m_connectedEnemy = nullptr;
 }
 
