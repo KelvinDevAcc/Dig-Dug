@@ -14,7 +14,6 @@ namespace game
         breathFireObject->SetParent(m_owner);
         breathFireObject->SetLocalPosition(glm::vec3(0, 0, 0.f));
 
-        // Set up the sprite renderer
         const unsigned int BreathFireStage1ID = dae::HashString("BreathFireStage1");
         auto spriteRenderComponent = std::make_unique<dae::SpriteRendererComponent>(
             breathFireObject.get(), dae::ResourceManager::GetTexture(BreathFireStage1ID)
@@ -26,7 +25,6 @@ namespace game
         m_spriterendererComponent = spriteRenderComponent.get(); // Store reference
         breathFireObject->AddComponent(std::move(spriteRenderComponent));
 
-        // Set up the hitbox (optional size adjustment per stage)
         auto hitBox = std::make_unique<HitBox>(glm::vec2(m_spriterendererComponent->GetDimensions().x,
             m_spriterendererComponent->GetDimensions().y));
         m_hitBox = hitBox.get();
@@ -39,12 +37,11 @@ namespace game
 
     BreathFire::~BreathFire()
     {
-        // Safely remove the breathFireObject from the scene
         if (m_breathFireObject)
         {
             dae::SceneData::GetInstance().RemoveGameObject(m_breathFireObject.get(), dae::GameObjectType::fire);
         }
-        m_breathFireObject.reset(); // Ensures the unique pointer releases ownership and destroys the object
+        m_breathFireObject.reset();
     }
 
     void BreathFire::Update()
@@ -59,7 +56,7 @@ namespace game
             return;
         }
 
-        UpdateSizeAndAnimation(); // Update size and animation based on the current stage
+        UpdateSizeAndAnimation(); 
 
         m_breathFireObject->Update();
     }
@@ -75,18 +72,18 @@ namespace game
     void BreathFire::Activate(const glm::vec3& direction)
     {
         m_isActive = true;
-        m_lifetime = 3.0f; // Duration for the fire breath
-        m_stage = 1; // Start from stage 1
-        m_direction = direction; // Set the direction
+        m_lifetime = 3.0f; 
+        m_stage = 1; 
+        m_direction = direction; 
 
         dae::Message message;
         message.type = dae::PlaySoundMessageType::Sound;
         message.arguments.emplace_back(static_cast<sound_id>(16));
         dae::EventQueue::Broadcast(message);
-        UpdateSizeAndAnimation(); // Initial setup for stage 1
+        UpdateSizeAndAnimation(); 
         m_hitBox->Enable();
         m_spriterendererComponent->SetTexture(dae::ResourceManager::GetTexture(dae::HashString("BreathFireStage1")));
-        if (m_direction.x > 0)
+        if (m_direction.x > 0) // right
             m_spriterendererComponent->SetFlip(false, false);
         else if (m_direction.x < 0) // Left
             m_spriterendererComponent->SetFlip(true, false);
@@ -100,13 +97,12 @@ namespace game
     void BreathFire::Deactivate()
     {
         m_isActive = false;
-        m_stage = 1; // Reset stage on deactivation
+        m_stage = 1; 
         m_hitBox->Disable();
     }
 
     void BreathFire::AdjustPosition()
     {
-        // Get the current sprite dimensions
         const auto& dimensionsowner = m_owner->GetComponent<dae::SpriteRendererComponent>()->GetDimensions();
         float spriteWidthowner = dimensionsowner.x;
 
@@ -133,7 +129,7 @@ namespace game
                     static_cast<float>(dae::ResourceManager::GetTexture(BreathFireStage2ID)->GetSize().x),
                     static_cast<float>(dae::ResourceManager::GetTexture(BreathFireStage2ID)->GetSize().y)
                 );
-                if (m_direction.x > 0)
+                if (m_direction.x > 0)//right
                     m_spriterendererComponent->SetFlip(false, false);
                 else if (m_direction.x < 0) // Left
                     m_spriterendererComponent->SetFlip(true, false);
@@ -152,7 +148,7 @@ namespace game
                     static_cast<float>(dae::ResourceManager::GetTexture(BreathFireStage3ID)->GetSize().x),
                     static_cast<float>(dae::ResourceManager::GetTexture(BreathFireStage3ID)->GetSize().y)
                 );
-                if (m_direction.x > 0)
+                if (m_direction.x > 0)//right
                     m_spriterendererComponent->SetFlip(false, false);
                 else if (m_direction.x < 0) // Left
                     m_spriterendererComponent->SetFlip(true, false);

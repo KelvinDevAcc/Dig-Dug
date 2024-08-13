@@ -1,6 +1,5 @@
 #pragma once
 #include <memory>
-#include <string>
 #include <vector>
 #include <glm/vec3.hpp>
 #include "Component.h"
@@ -19,11 +18,9 @@ class EnemyComponent : public dae::Component {
 
 
 public:
-    // Constructor and destructor
     EnemyComponent(dae::GameObject* owner);
     virtual ~EnemyComponent() override;
 
-    // State management
     virtual void SetState(std::unique_ptr<EnemyState> newState);
     virtual void Update() override;
 
@@ -43,7 +40,7 @@ public:
     virtual void OnCrushed();
 
     // Scoring
-    static int CalculatePoints(int layer, std::string enemyType);
+    static int CalculatePoints(int layer);
     static int DetermineLayer(float yPosition);
 
     // Attack and respawn
@@ -58,10 +55,12 @@ public:
     void StartDeflationTimer();
     bool IsAtWalkthroughLocation();
     glm::vec3 GetWalkthroughCenter();
-    // Component type information
+
     std::type_info const& GetComponentType() const override { return typeid(EnemyComponent); }
 
 protected:
+    glm::vec3 m_startPosition;
+
     // State and position management
     std::unique_ptr<EnemyState> m_CurrentState;
     glm::vec3 m_CurrentPosition;
@@ -76,16 +75,12 @@ protected:
     float m_LastGhostModeChange;
     bool m_GhostModeEnabled;
 
-    // Movement towards player in ghost mode
     glm::vec3 m_TargetPlayerPosition;
     float m_GhostModePursuitTimer;
     float m_GhostModePursuitDuration;
 
-    // Attack tracking
     int m_PumpHits;
     dae::GameObject* m_LastAttacker = nullptr;
 
-    // Deflation timing
     float m_DeflationTimeLimit;
-    glm::vec3 m_startPosition;
 };

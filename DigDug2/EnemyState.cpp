@@ -237,12 +237,22 @@ void EnemyDeadState::Enter(EnemyComponent* enemy) {
     // Determine the layer based on the Y position
     int layer = enemy->DetermineLayer(enemy->m_Owner->GetWorldPosition().y);
 
-    int points = enemy->CalculatePoints(layer, "Pooka");
+    // Calculate points
+    int points = enemy->CalculatePoints(layer);
+
+    // Check if the enemy is a Fygar and if it was killed from the side
+    if (auto fygarComponent = enemy->m_Owner->GetComponent<FygarComponent>()) {
+        if (fygarComponent->WasKilledFromSide()) {
+            points *= 2; // Double points for Fygar killed from the side
+        }
+    }
 
     // Get the last attacker and award points
     if (const auto lastAttacker = enemy->GetLastAttacker()) {
         if (const auto playerScoreComponent = lastAttacker->GetComponent<dae::PointComponent>()) {
-            playerScoreComponent->SetScore(playerScoreComponent->GetScore() + points); // Award points to the correct player
+            // Award points to the player
+            playerScoreComponent->SetScore(playerScoreComponent->GetScore() + points);
+
             if (const auto playerComponent = lastAttacker->GetComponent<game::Player>()) {
                 int playerID = playerComponent->GetPlayerID();  // Assumes GetPlayerID() exists
 
@@ -255,7 +265,6 @@ void EnemyDeadState::Enter(EnemyComponent* enemy) {
                 // Update the player data in GameData
                 GameData::GetInstance().UpdatePlayerData(playerID, playerData);
             }
-
         }
     }
 
@@ -266,11 +275,12 @@ void EnemyDeadState::Enter(EnemyComponent* enemy) {
     dae::EventQueue::Broadcast(message);
 
     // Remove the enemy object from the scene
-    dae::SceneData::GetInstance().RemoveGameObject(enemy->m_Owner, dae::GameObjectType::enemy);
+    auto& sceneData = dae::SceneData::GetInstance();
+    sceneData.RemoveGameObject(enemy->m_Owner, dae::GameObjectType::enemy);
     GameData::GetInstance().CheckGameState();
     dae::SceneManager::GetInstance().GetActiveScene()->Remove(enemy->m_Owner);
-
 }
+
 
 void EnemyDeadState::Update(EnemyComponent* /*enemy*/) {
     // No update logic needed for dead state

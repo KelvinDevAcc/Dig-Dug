@@ -123,7 +123,6 @@ namespace dae {
             }
 	    }
 
-        //std::cout << m_WalkThrough.size() << std::endl;
     }
 
     bool SceneData::IsOnSpecificObjectType(GameObject& object, const std::vector<GameObject*>& objects)
@@ -181,7 +180,6 @@ namespace dae {
                         int top = rect.y;
                         int bottom = rect.y + rect.h;
 
-                        // Player's bounding box
                         const auto playerHitBox = entity.GetComponent<HitBox>()->GetRect();
 
                         // Check if the new position will intersect the obstacle

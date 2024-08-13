@@ -81,5 +81,4 @@ void TileComponent::UpdateTexture(const std::string& name)
 
 void TileComponent::Update()
 {
-    // Implementation for Update, if needed
 }

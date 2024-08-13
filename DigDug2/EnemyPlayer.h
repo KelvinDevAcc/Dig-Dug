@@ -46,6 +46,8 @@ namespace game
         bool IsAtTileCenter(const dae::GameObject& gameObject) const;
         void SnapToTileCenter();
         void HandlePumpHits();
+        void deflating();
+
     	dae::GameObject* m_GameObject{ nullptr };
         float m_Speed{ 40.0f };
 
@@ -60,6 +62,9 @@ namespace game
         glm::vec3 m_startPosition;
 
         int m_PumpHits;
+        bool m_isBeingPumpt;
+        float m_DeflationTimer;
+        float m_DeflationTimeLimit;
 
         bool m_markedForDeletion;
         float m_deletionDelay;

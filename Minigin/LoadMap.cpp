@@ -44,7 +44,6 @@ void LoadMap::loadFromFile(const std::string& mapFilePath, const std::string& tu
     }
     entityFile.close();
 
-    //printMaps();
 }
 
 void LoadMap::printMap(const std::vector<std::vector<char>>& mapToPrint)

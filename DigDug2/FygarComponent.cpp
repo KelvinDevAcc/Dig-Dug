@@ -62,3 +62,29 @@ void FygarComponent::ResetFireBreathCooldown() {
     m_FireBreathInterval = dis(gen);
     m_FireBreathCooldown = m_FireBreathInterval;
 }
+
+bool FygarComponent::WasKilledFromSide() const
+{
+    // Ensure that there is a valid last attacker
+    const auto* lastAttacker = GetLastAttacker();
+    if (!lastAttacker) {
+        return false; // No attacker, can't determine side
+    }
+
+    // Get the killer's position and Fygar's position
+    const glm::vec3 killerPosition = lastAttacker->GetWorldPosition();
+    const glm::vec3 fygarPosition = m_Owner->GetWorldPosition();
+
+    // Define the margin for side detection
+    constexpr float margin = 40.0f;
+
+    // Calculate the absolute difference in x-coordinates
+    float xDifference = glm::abs(killerPosition.x - fygarPosition.x);
+
+    // Check if the difference is greater than the margin
+    bool isSide = xDifference > margin;
+
+    return isSide;
+}
+
+

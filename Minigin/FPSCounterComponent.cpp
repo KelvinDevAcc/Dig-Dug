@@ -1,6 +1,5 @@
 ﻿#include "FPSCounterComponent.h"
 
-#include <iostream>
 
 #include "GameTime.h"
 #include "TextComponent.h"

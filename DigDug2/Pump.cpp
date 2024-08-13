@@ -2,7 +2,6 @@
 
 #include "EnemyComponent.h"
 #include "GameTime.h"
-#include "EnemyComponent.h"
 #include "EnemyPlayer.h"
 #include "FygarComponent.h"
 #include "ResourceManager.h"
@@ -25,7 +24,6 @@ Pump::Pump(dae::GameObject* owner, const glm::vec3& localPosition, const glm::ve
     PumpObject->SetLocalPosition(m_LocalPosition);
     PumpObject->SetRotation(GetRotationFromDirection(m_direction));
 
-    // Create and add sprite render component
     auto texture = dae::ResourceManager::GetTexture(dae::HashString("PumpEnd"));
     auto spriteRenderComponent = std::make_unique<dae::SpriteRendererComponent>(PumpObject.get(), texture);
     spriteRenderComponent->SetDimensions(32, 16);
@@ -33,14 +31,12 @@ Pump::Pump(dae::GameObject* owner, const glm::vec3& localPosition, const glm::ve
     m_spriteRenderComponent = spriteRenderComponent.get();
     PumpObject->AddComponent(std::move(spriteRenderComponent));
 
-    // Create and add hitbox component
     glm::vec2 hitBoxSize = (m_direction.y == 1 || m_direction.y == -1) ? glm::vec2(16, 32) : glm::vec2(32, 16);
     auto hitBox = std::make_unique<HitBox>(hitBoxSize);
-    hitBox->SetGameObject(PumpObject.get());  // Correctly set the GameObject for the hitbox
+    hitBox->SetGameObject(PumpObject.get());  
     m_hitBox = hitBox.get();
     PumpObject->AddComponent(std::move(hitBox));
 
-    // Store the fully initialized PumpObject
     m_pumpObject = std::move(PumpObject);
 }
 
@@ -54,7 +50,7 @@ float Pump::GetRotationFromDirection(const glm::vec3& direction)
         return 90.0f;
     if (direction.y == -1)
         return 270.0f;
-    return 0.0f; // Default rotation if no direction matches
+    return 0.0f; 
 }
 
 void Pump::Update()
@@ -97,7 +93,6 @@ void Pump::PumpEnemy()
         m_connectedEnemy->GetComponent<game::EnemyPlayer>()->HitByPump();
     }
 
-    // Optionally keep the pump active or handle state if needed
     m_connectedEnemy = nullptr;
 }
 
@@ -105,7 +100,6 @@ void Pump::Render() const
 {
     if (!m_isActive) return;
 
-    // Render pump object
     m_pumpObject->Render();
 }
 

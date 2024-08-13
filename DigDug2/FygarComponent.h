@@ -6,6 +6,7 @@ class FygarComponent : public EnemyComponent
 {
     friend class EnemyBreathingFireState;
     friend class EnemyWandering;
+    friend class EnemyDeadState;
 
 public:
     FygarComponent(dae::GameObject* owner);
@@ -17,12 +18,12 @@ protected:
     // Fygar-specific methods
     void UpdateFireBreath();
     bool ShouldBreatheFire() const;
-    void BreatheFire();
     void ResetFireBreathCooldown();
+    bool WasKilledFromSide() const;
 
 private:
     glm::vec3 m_Direction;
-    float m_FireBreathCooldown;  // Timer for when Fygar can breathe fire again
-    float m_FireBreathInterval;  // Interval between fire breaths
+    float m_FireBreathCooldown;  
+    float m_FireBreathInterval; 
     game::BreathFire* m_breathFire;
 };

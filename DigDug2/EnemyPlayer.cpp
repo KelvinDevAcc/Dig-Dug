@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "BreathFireComponent.h"
+#include "GameData.h"
 #include "GameObject.h"
 #include "GameTime.h"
 #include "SceneData.h"
@@ -14,12 +15,11 @@ namespace game
 {
     EnemyPlayer::EnemyPlayer(dae::GameObject* gameObject)
 	    : m_GameObject(gameObject), m_breathingFire(false), m_warmupAnimationtime(0), m_cooldownAnimationtime(0),
-	      m_PumpHits(0),
+	      m_PumpHits(0), m_isBeingPumpt(false), m_DeflationTimer(0), m_DeflationTimeLimit(2.f),
 	      m_markedForDeletion(false),
 	      m_deletionDelay(0)
     {
 	    m_startPosition = m_GameObject->GetWorldPosition();
-
 	    m_animationComponent = m_GameObject->GetComponent<dae::AnimationComponent>();
 	    auto breathFire = std::make_unique<BreathFire>(m_GameObject, glm::vec3(1, 0, 0), 100.0f, 3.0f);
 	    m_breathFire = breathFire.get();
@@ -35,6 +35,7 @@ namespace game
             {
                 dae::SceneData::GetInstance().RemoveGameObject(m_GameObject, dae::GameObjectType::enemy);
                 dae::SceneData::GetInstance().RemoveGameObject(m_GameObject, dae::GameObjectType::enemyPlayers);
+                GameData::GetInstance().CheckGameState();
                 dae::SceneManager::GetInstance().GetActiveScene()->Remove(m_GameObject);
                 return; // Exit update method after removal
             }
@@ -80,20 +81,21 @@ namespace game
             }
         }
 
-
-
+        if (m_isBeingPumpt)
+        {
+            deflating();
+        }
     }
 
     void EnemyPlayer::Render() const
     {
- 
+		
     }
 
     void EnemyPlayer::Move(float deltaX, float deltaY)
     {
-	    if (m_breathingFire)
+	    if (m_breathingFire || m_isBeingPumpt)
             return;
-
         m_breathFire->Deactivate();
         // Update the current direction based on movement
         if (deltaX > 0)
@@ -125,12 +127,6 @@ namespace game
             MoveHorizontally(deltaX);
             MoveVertically(deltaY);
 
-            glm::vec3 currentPosition = m_GameObject->GetWorldPosition();
-            glm::vec3 tileCenter = SceneHelpers::GetCenterOfTile(currentPosition);
-            std::cout << "Current Position: " << currentPosition.x << ", " << currentPosition.y << std::endl;
-            std::cout << "Tile Center: " << tileCenter.x << ", " << tileCenter.y << std::endl;
-
-
             // Check if the enemy is at the center of a walkthrough tile
             if (dae::SceneData::GetInstance().IsOnwalkthrough(*m_GameObject) &&IsAtTileCenter(*m_GameObject))
             {
@@ -152,6 +148,8 @@ namespace game
                 MoveVertically(deltaY);
             }
         }
+
+        
     }
     
 
@@ -176,6 +174,9 @@ namespace game
 
     void EnemyPlayer::Attack()
     {
+        if (m_isBeingPumpt)
+            return;
+
         UpdateAnimationState(Enemyanimationstate::Attacking);
         if (m_breathFire)
         {
@@ -187,6 +188,8 @@ namespace game
 
     void EnemyPlayer::Ghost()
     {
+        if (m_isBeingPumpt)
+            return;
         UpdateAnimationState(Enemyanimationstate::Ghost);
 
     }
@@ -220,6 +223,8 @@ namespace game
 
     void EnemyPlayer::HitByPump() {
         ++m_PumpHits;
+        m_DeflationTimer = m_DeflationTimeLimit;
+        m_isBeingPumpt = true; 
         HandlePumpHits();
     }
 
@@ -229,6 +234,7 @@ namespace game
         {
         case 1:
             m_animationComponent->Play("Pumped1", true);
+            m_isBeingPumpt = true;
             break;
         case 2:
             m_animationComponent->Play("Pumped2", true);
@@ -242,8 +248,42 @@ namespace game
             m_markedForDeletion = true;
             break;
         default:
-            // Handle case where PumpHits is greater than 4, if needed
             break;
+        }
+    }
+
+    void EnemyPlayer::deflating()
+    {
+
+        // Decrease the deflation timer
+        m_DeflationTimer -= dae::GameTime::GetDeltaTime();
+
+        if (m_DeflationTimer <= 0.0f) {
+            // Deflation starts if the timer expires
+            m_PumpHits--;
+
+            if (m_PumpHits >= 0) {
+                // Play the corresponding deflation animation
+                switch (m_PumpHits) {
+                case 0:
+                    m_animationComponent->Play("Normal");
+                    m_isBeingPumpt = false;
+
+                    break;
+                case 1:
+                    m_animationComponent->Play("Pumped1", true);
+                    break;
+                case 2:
+                    m_animationComponent->Play("Pumped2", true);
+                    break;
+                case 3:
+                    m_animationComponent->Play("Pumped3", true);
+                    break;
+                }
+
+                // Reset the deflation timer
+                m_DeflationTimer = m_DeflationTimeLimit;
+            }
         }
     }
 
@@ -260,7 +300,7 @@ namespace game
             if (m_animationComponent)
             {
                 m_animationComponent->Play("Normal");
-                m_animationComponent->FlipSprite(false, false); // Facing right
+                m_animationComponent->FlipSprite(false, false); 
 
             }
             break;

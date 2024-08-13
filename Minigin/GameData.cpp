@@ -49,7 +49,7 @@ void GameData::ResetAllPlayerData()
 {
     for (auto& data : m_playerData | std::views::values)
     {
-        data = PlayerData(); // Assuming PlayerData() initializes to default values
+        data = PlayerData(); 
     }
 }
 

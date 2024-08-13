@@ -58,7 +58,7 @@ namespace dae
         ActivateCallback m_onActivateCallback;
 
 
-        mutable bool m_needsSorting = true; // Flag to track sorting status
+        mutable bool m_needsSorting = true; 
         mutable std::vector<GameObject*> m_sortedObjects;
 
         void SortObjects() const;

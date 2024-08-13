@@ -40,13 +40,13 @@ namespace game
         if (m_isDying)
         {
             m_deathTimer -= deltaTime;
-            if (m_deathTimer <= 0.0f)  // Compare with 0.0f for clarity
+            if (m_deathTimer <= 0.0f) 
             {
-                const int playerID = GetPlayerID();  // Ensure you have a method to get player ID
-                if (playerID != -1)  // Ensure player ID is valid
+                const int playerID = GetPlayerID();  
+                if (playerID != -1) 
                 {
                     PlayerData playerData = GameData::GetInstance().GetPlayerData(playerID);
-                    playerData.lives = m_healthComponent->GetLives();  // Update with current lives
+                    playerData.lives = m_healthComponent->GetLives();  
                     GameData::GetInstance().UpdatePlayerData(playerID, playerData);
                 }
 
@@ -181,30 +181,26 @@ namespace game
 
         if (!isCollidingWithWalkthrough)
         {
-            std::cout << "Collision detected with floor, removing all pump parts." << std::endl;
-            m_pumps.clear(); // Remove all pump parts
-            m_pumpPartCount = 0; // Reset the pump part count
-            return; // Stop adding new pump parts
+            m_pumps.clear();
+            m_pumpPartCount = 0; 
+            return; 
         }
 
         // Check if it collides with an enemy
         bool isCollidingWithEnemy = dae::SceneData::GetInstance().isOnEnemy(*tempPumpObject);
         if (isCollidingWithEnemy)
         {
-            std::cout << "Collision detected with enemy, not adding new pump part." << std::endl;
-            return; // Stop adding new pump part
+            return; 
         }
 
         // Proceed with adding a new pump part if no collision is detected
-        auto pump = std::make_unique<Pump>(m_GameObject, pumpPosition, pumpDirection, 2.0f); // Adjust speed and lifetime as needed
+        auto pump = std::make_unique<Pump>(m_GameObject, pumpPosition, pumpDirection, 2.0f);
         pump->SetGameObject(m_GameObject);
         pump->Activate();
 
-        // Add the new pump part to the list
         m_pumps.push_back(std::move(pump));
-        ++m_pumpPartCount; // Increment the pump part count
+        ++m_pumpPartCount;
 
-        // Update textures for the pump to ensure the last one remains "PumpEnd"
         UpdatePumpTextures();
     }
 

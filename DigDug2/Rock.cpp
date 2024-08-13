@@ -12,7 +12,7 @@ Rock::Rock(dae::GameObject* owner):
 	, m_Gravity(9.8f)
 	, m_Owner(owner), m_timer(0), m_PlayerMovedAway(false), m_IsAnimating(false), m_animationTimer(0), m_dieing(false)
 {
-	m_animationComponnent = m_Owner->GetComponent<dae::AnimationComponent>();
+    m_animationComponent = m_Owner->GetComponent<dae::AnimationComponent>();
 }
 
 void Rock::Update()
@@ -46,20 +46,19 @@ void Rock::Update()
     }
     else if (!m_IsFalling)
     {
-        // Check if the rock should start falling
         if (ShouldStartFalling())
         {
             if (NoplayerUntherneath())
             {
                 // Player has moved away, start jittering animation
                 m_PlayerMovedAway = true;
-                m_animationComponnent->Play("Falling", true);
+                m_animationComponent->Play("Falling", true);
                 dae::Message message;
                 message.type = dae::PlaySoundMessageType::Sound;
                 message.arguments.emplace_back(static_cast<sound_id>(11));
                 dae::EventQueue::Broadcast(message);
                 // Get the duration of the "Falling" animation
-                const auto animationDuration = static_cast<float>(m_animationComponnent->GetAnimationDuration()* 2);
+                const auto animationDuration = static_cast<float>(m_animationComponent->GetAnimationDuration()* 2);
                 m_animationTimer = animationDuration;
                 m_IsAnimating = true;
             }
@@ -67,7 +66,7 @@ void Rock::Update()
     }
     else
     {
-        m_animationComponnent->Play("Idle", true);
+        m_animationComponent->Play("Idle", true);
         m_FallSpeed += m_Gravity * dae::GameTime::GetDeltaTime();
         auto newPosition = m_Owner->GetWorldPosition();
         newPosition.y += m_FallSpeed * dae::GameTime::GetDeltaTime();
@@ -89,16 +88,15 @@ void Rock::Die()
     message.type = dae::PlaySoundMessageType::Sound;
     message.arguments.emplace_back(static_cast<sound_id>(9));
     dae::EventQueue::Broadcast(message);
-    m_animationComponnent->Play("Dying");
+    m_animationComponent->Play("Dying");
     // Get the duration of the "Dying" animation
-    const auto animationDuration = static_cast<float>(m_animationComponnent->GetAnimationDuration());
+    const auto animationDuration = static_cast<float>(m_animationComponent->GetAnimationDuration());
     m_timer = animationDuration;
     m_Owner->GetComponent<HitBox>()->Disable();
 }
 
 bool Rock::ShouldStartFalling()
 {
-    // Get the current position of the rock
     const glm::vec3 currentPosition = m_Owner->GetWorldPosition();
 
     // Move down slightly to check if there's a floor directly below
@@ -129,7 +127,6 @@ bool Rock::ShouldStartFalling()
 
 bool Rock::NoplayerUntherneath()
 {
-    // Get the current position of the rock
     const auto hitBox = m_Owner->GetComponent<HitBox>();
     if (!hitBox) return false;
 
@@ -207,7 +204,7 @@ bool Rock::CheckCollisionWithObjects()
     const auto& sceneData = dae::SceneData::GetInstance();
     const auto& enemies = sceneData.GetEnemies();
 
-    int enemiesKilled = 0;  // Track the number of enemies killed
+    int enemiesKilled = 0; 
 
     for (const auto& enemy : enemies)
     {
@@ -221,8 +218,8 @@ bool Rock::CheckCollisionWithObjects()
             message.arguments.emplace_back(static_cast<sound_id>(10));
             dae::EventQueue::Broadcast(message);
             // Notify the enemy about being crushed
-            enemy->GetComponent<EnemyComponent>()->OnCrushed();  // Call OnCrushed on the enemy
-            ++enemiesKilled;  // Increment the kill count
+            enemy->GetComponent<EnemyComponent>()->OnCrushed(); 
+            ++enemiesKilled;  
         }
     }
 

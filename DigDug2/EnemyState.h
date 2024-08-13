@@ -72,7 +72,7 @@ public:
     void Exit(EnemyComponent* enemy) override;
 
 private:
-    float m_FireAnimationDuration = 0.f; // Duration for how long the fire-breathing lasts
+    float m_FireAnimationDuration = 0.f; 
     float m_ElapsedTime = 0.0f;
     bool m_FireBreathTriggered = false;
 };

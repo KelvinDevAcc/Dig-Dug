@@ -156,37 +156,33 @@ void InputManager::HandleControllerInput()
             const auto button = binding.first.first;
             const auto state = binding.first.second;
 
+            bool shouldExecute = false;
+
             switch (state)
             {
             case KeyState::Down:
-                if (m_gameControllers[i].IsButtonDown(button))
-                {
-                    binding.second->Execute();
-                    goto NextController; // Move to the next controller after executing
-                }
+                shouldExecute = m_gameControllers[i].IsButtonDown(button);
                 break;
             case KeyState::Up:
-                if (m_gameControllers[i].IsButtonUp(button))
-                {
-                    binding.second->Execute();
-                    goto NextController; // Move to the next controller after executing
-                }
+                shouldExecute = m_gameControllers[i].IsButtonUp(button);
                 break;
             case KeyState::Pressed:
-                if (m_gameControllers[i].IsButtonPressed(button))
-                {
-                    binding.second->Execute();
-                    goto NextController; // Move to the next controller after executing
-                }
+                shouldExecute = m_gameControllers[i].IsButtonPressed(button);
                 break;
             default:
                 std::cerr << "Unknown KeyState for controller " << i << "\n";
                 break;
             }
+
+            if (shouldExecute)
+            {
+                binding.second->Execute();
+                break; // Move to the next controller after executing
+            }
         }
-    NextController:; // Label to jump to next controller
     }
 }
+
 
 
 

@@ -41,22 +41,18 @@ void CreateGameObject(dae::Scene* scene, const std::string& textureName, float x
 void CreateTile(dae::Scene* scene, const std::string& textureName, float x, float y, glm::vec2 scale, dae::GameObjectType type, TunnelType tunnelType) {
 	auto gameObject = std::make_unique<dae::GameObject>();
 
-    // Add sprite renderer component
     auto spriteRenderer = std::make_unique<dae::SpriteRendererComponent>(gameObject.get(), dae::ResourceManager::GetTexture(dae::HashString(textureName)));
     spriteRenderer->SetDimensions(scale.x, scale.y);
     gameObject->AddComponent(std::move(spriteRenderer));
     gameObject->SetLocalPosition(glm::vec3(x, y, 0.0f));
 
-    // Add hitbox component
     auto hitBox = std::make_unique<HitBox>(scale);
     hitBox->SetGameObject(gameObject.get());
     gameObject->AddComponent(std::move(hitBox));
 
-    // Add tile component
     auto tile = std::make_unique<TileComponent>(gameObject.get(), tunnelType);
     gameObject->AddComponent(std::move(tile));
 
-    // Add game object to the scene
     dae::SceneData::GetInstance().AddGameObject(gameObject.get(), type);
     scene->Add(std::move(gameObject));
 }
@@ -173,7 +169,6 @@ void SceneHelpers::SpawnPlayer(dae::Scene* scene, float x, float y, glm::vec2 sc
     if (existingData.lives != 3)
         lives = existingData.lives;
 
-    // Create the Player GameObject
     auto PlayerObject = std::make_unique<dae::GameObject>();
 
     auto Character1points = std::make_unique<dae::PointComponent>(score);
@@ -199,7 +194,6 @@ void SceneHelpers::SpawnPlayer(dae::Scene* scene, float x, float y, glm::vec2 sc
     PlayerObject->AddComponent(std::move(PlayerComponent));
 
 
-    // Add the GameObject to the scene
     dae::SceneData::GetInstance().AddGameObject(PlayerObject.get(), dae::GameObjectType::Player);
     scene->Add(std::move(PlayerObject));
 
@@ -209,7 +203,6 @@ void SceneHelpers::SpawnPlayer(dae::Scene* scene, float x, float y, glm::vec2 sc
     playerData.lives = lives;
     GameData::GetInstance().AddPlayer(playerCount, playerData);
 
-    // Increment playerCount if necessary
     playerCount++;
 }
 
@@ -263,15 +256,6 @@ void SceneHelpers::LoadMapIntoScene(const LoadMap& loadMap, dae::Scene* scene, c
         {'9', "floorblock043"}, {'0', "floorblock044"}, {'-', "floorblock045"},
         {'=', "floorblock046"}, {'u', "floorblock04"}
 
-        // New mappings
-     /*   ,{'i', "2skyFloor"}, {'j', "2floorblock01"}, {'k', "2floorblock02"},
-        {'l', "2floorblock021"}, {'m', "2floorblock022"}, {'n', "2floorblock023"},
-        {'o', "2floorblock024"}, {'p', "2floorblock025"}, {'q', "2floorblock026"},
-        {'r', "2floorblock03"}, {'t', "2floorblock031"}, {'y', "2floorblock032"},
-        {'u', "2floorblock033"}, {'v', "2floorblock034"}, {'w', "2floorblock035"},
-        {'x', "2floorblock036"}, {'z', "2floorblock04"}, {'A', "2floorblock041"},
-        {'B', "2floorblock042"}, {'C', "2floorblock043"}, {'D', "2floorblock044"},
-        {'E', "2floorblock045"}, {'F', "2floorblock046"}*/
     };
 
     const float startX = startPos.x;

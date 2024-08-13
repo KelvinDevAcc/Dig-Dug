@@ -353,22 +353,13 @@ void EnemyComponent::OnCrushed() {
         SetState(std::make_unique<EnemyCrushedState>());
 }
 
-int EnemyComponent::CalculatePoints(int layer, std::string enemyType) {
-    if (enemyType == "Pooka") {
-        switch (layer) {
+int EnemyComponent::CalculatePoints(int layer) {
+        switch (layer)
+	{
         case 1: return 200;
         case 2: return 300;
         case 3: return 400;
         case 4: return 500;
-        }
-    }
-    else if (enemyType == "Fygar") {
-        switch (layer) {
-        case 1: return 400;
-        case 2: return 600;
-        case 3: return 800;
-        case 4: return 1000;
-        }
     }
     return 0;
 }

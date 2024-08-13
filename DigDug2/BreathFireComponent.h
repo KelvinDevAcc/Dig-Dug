@@ -36,6 +36,6 @@ namespace game
         std::unique_ptr<dae::GameObject> m_breathFireObject;
         dae::SpriteRendererComponent* m_spriterendererComponent;
         HitBox* m_hitBox;
-        int m_stage; // Keeps track of the current stage of the fire
+        int m_stage; 
     };
 }

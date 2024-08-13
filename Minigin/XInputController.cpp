@@ -22,16 +22,11 @@ void XInputController::UpdateState()
     DWORD result = XInputGetState(m_controllerIndex, &m_CurrentState);
     if (result == ERROR_SUCCESS)
     {
-        if (!m_connected) {
-            std::cout << "Controller " << m_controllerIndex << " connected." << std::endl; // Debugging output
-        }
         m_connected = true;
     }
     else
     {
-        if (m_connected) {
-            std::cout << "Controller " << m_controllerIndex << " disconnected." << std::endl; // Debugging output
-        }
+
         m_connected = false;
     }
 

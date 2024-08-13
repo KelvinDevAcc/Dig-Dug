@@ -59,8 +59,8 @@ void loadResources()
 
     // Load each sound file once
     ss.load_sound(20, "../Data/Sounds/02-GameStartMusic.mp3",true);
-    ss.load_sound(1, "../Data/Sounds/12-HighScoreMusic.mp3");
-    ss.load_sound(2, "../Data/Sounds/13-NameEntryMusic.mp3");
+    ss.load_sound(1, "../Data/Sounds/12-HighScoreMusic.mp3", true);
+    ss.load_sound(2, "../Data/Sounds/13-NameEntryMusic.mp3", true);
     ss.load_sound(3, "../Data/Sounds/DeathAnimation.mp3");
     ss.load_sound(4, "../Data/Sounds/EnemyDeath.mp3");
     ss.load_sound(5, "../Data/Sounds/GameOver.mp3");
@@ -113,33 +113,6 @@ void loadResources()
 	dae::ResourceManager::LoadTexture(dae::HashString("floorblock044"),"spritesheetMap.png",SDL_Rect(24,16,8,8));
 	dae::ResourceManager::LoadTexture(dae::HashString("floorblock045"),"spritesheetMap.png",SDL_Rect(32,16,8,8));
 	dae::ResourceManager::LoadTexture(dae::HashString("floorblock046"),"spritesheetMap.png",SDL_Rect(48,16,8,8));
-
-    /*dae::ResourceManager::LoadTexture(dae::HashString("2skyFloor"), "spritesheetMap.png", SDL_Rect(64, 32, 8, 8));
-    dae::ResourceManager::LoadTexture(dae::HashString("2floorblock01"), "spritesheetMap.png", SDL_Rect(64, 40, 8, 8));
-
-    dae::ResourceManager::LoadTexture(dae::HashString("2floorblock02"), "spritesheetMap.png", SDL_Rect(56, 24, 8, 8));
-    dae::ResourceManager::LoadTexture(dae::HashString("2floorblock021"), "spritesheetMap.png", SDL_Rect(0, 24 ,8, 8));
-    dae::ResourceManager::LoadTexture(dae::HashString("2floorblock022"), "spritesheetMap.png", SDL_Rect(8, 24, 8, 8));
-    dae::ResourceManager::LoadTexture(dae::HashString("2floorblock023"), "spritesheetMap.png", SDL_Rect(16, 24, 8, 8));
-    dae::ResourceManager::LoadTexture(dae::HashString("2floorblock024"), "spritesheetMap.png", SDL_Rect(24, 24, 8, 8));
-    dae::ResourceManager::LoadTexture(dae::HashString("2floorblock025"), "spritesheetMap.png", SDL_Rect(32, 24, 8, 8));
-    dae::ResourceManager::LoadTexture(dae::HashString("2floorblock026"), "spritesheetMap.png", SDL_Rect(48, 24, 8, 8));
-
-    dae::ResourceManager::LoadTexture(dae::HashString("2floorblock03"), "spritesheetMap.png", SDL_Rect(56, 32, 8, 8));
-    dae::ResourceManager::LoadTexture(dae::HashString("2floorblock031"), "spritesheetMap.png", SDL_Rect(0, 32, 8, 8));
-    dae::ResourceManager::LoadTexture(dae::HashString("2floorblock032"), "spritesheetMap.png", SDL_Rect(8, 32, 8, 8));
-    dae::ResourceManager::LoadTexture(dae::HashString("2floorblock033"), "spritesheetMap.png", SDL_Rect(16, 32, 8, 8));
-    dae::ResourceManager::LoadTexture(dae::HashString("2floorblock034"), "spritesheetMap.png", SDL_Rect(24, 32, 8, 8));
-    dae::ResourceManager::LoadTexture(dae::HashString("2floorblock035"), "spritesheetMap.png", SDL_Rect(32, 32, 8, 8));
-    dae::ResourceManager::LoadTexture(dae::HashString("2floorblock036"), "spritesheetMap.png", SDL_Rect(48, 32, 8, 8));
-
-    dae::ResourceManager::LoadTexture(dae::HashString("2floorblock04"), "spritesheetMap.png", SDL_Rect(56, 40, 8, 8));
-    dae::ResourceManager::LoadTexture(dae::HashString("2floorblock041"), "spritesheetMap.png", SDL_Rect(0, 40, 8, 8));
-    dae::ResourceManager::LoadTexture(dae::HashString("2floorblock042"), "spritesheetMap.png", SDL_Rect(8, 40, 8, 8));
-    dae::ResourceManager::LoadTexture(dae::HashString("2floorblock043"), "spritesheetMap.png", SDL_Rect(16, 40, 8, 8));
-    dae::ResourceManager::LoadTexture(dae::HashString("2floorblock044"), "spritesheetMap.png", SDL_Rect(24, 40, 8, 8));
-    dae::ResourceManager::LoadTexture(dae::HashString("2floorblock045"), "spritesheetMap.png", SDL_Rect(32, 40, 8, 8));
-    dae::ResourceManager::LoadTexture(dae::HashString("2floorblock046"), "spritesheetMap.png", SDL_Rect(48, 40, 8, 8));*/
 
     dae::ResourceManager::LoadTexture(dae::HashString("topEnd"), "spritesheetDigging.png", SDL_Rect(0, 0, 16, 16));
     dae::ResourceManager::LoadTexture(dae::HashString("bottomEnd"), "spritesheetDigging.png", SDL_Rect(16, 0, 16, 16));
@@ -309,7 +282,6 @@ void BindKeyboardCommands(dae::InputManager& inputManager, int playerId) {
     inputManager.BindCommand(SDL_SCANCODE_A, KeyState::Pressed, std::make_unique<MoveCommand>(playerId, -1.5f, 0.0f), InputType::Keyboard);
     inputManager.BindCommand(SDL_SCANCODE_D, KeyState::Pressed, std::make_unique<MoveCommand>(playerId, 1.5f, 0.0f), InputType::Keyboard); inputManager.BindCommand(SDL_SCANCODE_X, KeyState::Up, std::make_unique<SchootCommand>(playerId), InputType::Keyboard);
     inputManager.BindCommand(SDL_SCANCODE_Z, KeyState::Up, std::make_unique<SchootCommand>(playerId), InputType::Keyboard);
-    //inputManager.BindCommand(SDL_SCANCODE_C, KeyState::Up, std::make_unique<DamageCommand>(playerId), InputType::Keyboard);
 }
 
 void BindControllerCommands(dae::InputManager& inputManager, int playerId, int controllerIndex) {
@@ -320,19 +292,43 @@ void BindControllerCommands(dae::InputManager& inputManager, int playerId, int c
     inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::A), KeyState::Up, std::make_unique<SchootCommand>(playerId), InputType::Controller, controllerIndex);
 }
 
-void HandlePlayerInput(dae::InputManager& inputManager, int playerId)
+void HandlePlayerInput(dae::InputManager& inputManager, int playerId, bool isenemyplayer = false)
 {
-    UnBindMenuCommands(inputManager);
-    UnBindNameCommands(inputManager);
+   
     const int numControllers = inputManager.GetConnectedControllerCount();
 
     // Bind keyboard commands for Player 0 (always)
     if (playerId == 0)
     {
+        UnBindMenuCommands(inputManager);
+        UnBindNameCommands(inputManager);
         BindKeyboardCommands(inputManager, 0);
     }
 
-    // Handle controller binding based on the number of controllers
+    if (isenemyplayer)
+    {
+        if (numControllers == 1)
+        {
+            inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadUp), KeyState::Pressed, std::make_unique<MoveEnemyCommand>(0, 0.0f, -1.5f), InputType::Controller, 0);
+            inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadDown), KeyState::Pressed, std::make_unique<MoveEnemyCommand>(0, 0.0f, 1.5f), InputType::Controller, 0);
+            inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadLeft), KeyState::Pressed, std::make_unique<MoveEnemyCommand>(0, -1.5f, 0.0f), InputType::Controller, 0);
+            inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadRight), KeyState::Pressed, std::make_unique<MoveEnemyCommand>(0, 1.5f, 0.0f), InputType::Controller, 0);
+            inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::A), KeyState::Up, std::make_unique<AttackEnemyCommand>(0), InputType::Controller, 0);
+            inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::B), KeyState::Up, std::make_unique<GhostEnemyplayercommand>(0), InputType::Controller, 0);
+
+        }
+        else if (numControllers >= 2)
+        {
+            inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadUp), KeyState::Pressed, std::make_unique<MoveEnemyCommand>(0, 0.0f, -1.5f), InputType::Controller, 1);
+            inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadDown), KeyState::Pressed, std::make_unique<MoveEnemyCommand>(0, 0.0f, 1.5f), InputType::Controller, 1);
+            inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadLeft), KeyState::Pressed, std::make_unique<MoveEnemyCommand>(0, -1.5f, 0.0f), InputType::Controller, 1);
+            inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadRight), KeyState::Pressed, std::make_unique<MoveEnemyCommand>(0, 1.5f, 0.0f), InputType::Controller, 1);
+            inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::A), KeyState::Up, std::make_unique<AttackEnemyCommand>(0), InputType::Controller, 1);
+            inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::B), KeyState::Up, std::make_unique<GhostEnemyplayercommand>(0), InputType::Controller, 1);
+
+        }
+    }
+    else// Handle controller binding based on the number of controllers
     if (numControllers == 1)
     {
         if (playerId == 0)
@@ -359,32 +355,8 @@ void HandlePlayerInput(dae::InputManager& inputManager, int playerId)
             BindControllerCommands(inputManager, 1, 1);
         }
     }
+   
 
-
-}
-
-void HandleEnemyPLayerCommands(dae::InputManager& inputManager, int playerId)
-{
-    const int numControllers = inputManager.GetConnectedControllerCount();
-    if (numControllers == 1)
-    {
-        inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadUp), KeyState::Pressed, std::make_unique<MoveEnemyCommand>(playerId, 0.0f, -1.5f), InputType::Controller, 0);
-        inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadDown), KeyState::Pressed, std::make_unique<MoveEnemyCommand>(playerId, 0.0f, 1.5f), InputType::Controller, 0);
-        inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadLeft), KeyState::Pressed, std::make_unique<MoveEnemyCommand>(playerId, -1.5f, 0.0f), InputType::Controller, 0);
-        inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadRight), KeyState::Pressed, std::make_unique<MoveEnemyCommand>(playerId, 1.5f, 0.0f), InputType::Controller, 0);
-        inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::A), KeyState::Up, std::make_unique<AttackEnemyCommand>(playerId), InputType::Controller, 0);
-        inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::B), KeyState::Up, std::make_unique<GhostEnemyplayercommand>(playerId), InputType::Controller, 0);
-
-    }
-    else if (numControllers >= 2)
-    {
-        inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadUp), KeyState::Pressed, std::make_unique<MoveCommand>(playerId, 0.0f, -1.5f), InputType::Controller, 1);
-        inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadDown), KeyState::Pressed, std::make_unique<MoveCommand>(playerId, 0.0f, 1.5f), InputType::Controller, 1);
-        inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadLeft), KeyState::Pressed, std::make_unique<MoveCommand>(playerId, -1.5f, 0.0f), InputType::Controller, 1);
-        inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::DPadRight), KeyState::Pressed, std::make_unique<MoveCommand>(playerId, 1.5f, 0.0f), InputType::Controller, 1);
-        inputManager.BindCommand(GameController::GetButtonMapping(GameController::Button::A), KeyState::Up, std::make_unique<SchootCommand>(playerId), InputType::Controller, 1);
-
-    }
 }
 
 
@@ -449,17 +421,6 @@ void LoadStartMenu(dae::Scene* startMenuScene)
     BindMenuCommands(inputManager);
     GameData::GetInstance().ResetAllPlayerData();
     GameData::GetInstance().ResetRound();
-
-    // Create GameObject for FPS counter
-    unsigned int FontID = dae::HashString("font");
-    auto fpsCounterObject = std::make_unique<dae::GameObject>();
-    auto fpsTextComponent = std::make_unique<dae::TextComponent>("FPS: ", dae::ResourceManager::GetFont(FontID), SDL_Color{ 252, 157, 3, 255 }, *fpsCounterObject);
-    fpsCounterObject->AddComponent(std::move(fpsTextComponent));
-    auto fpsTextComponentPtr = fpsCounterObject->GetComponent<dae::TextComponent>();
-    auto fpsCounterComponent = std::make_unique<dae::FPSCounterComponent>(fpsTextComponentPtr);
-    fpsCounterObject->AddComponent(std::move(fpsCounterComponent));
-    fpsCounterObject->SetLocalPosition(glm::vec3(100.f, 20.f, 0.0f));
-    startMenuScene->Add(std::move(fpsCounterObject));
 
     auto& highScoresInstance = HighScores::GetInstance();
 
@@ -611,7 +572,6 @@ void LoadScoreboard(dae::Scene* ScoreBoardScene)
 	const auto& highScore = HighScores::GetInstance();
 
     const auto& scores = highScore.getHighScores();
-    unsigned int FontID = dae::HashString("font");
     unsigned int TITLEBigID = dae::HashString("TITLEBig");
     unsigned int TITLEID = dae::HashString("TITLE");
     unsigned int arcadeBigID = dae::HashString("arcadeBig");
@@ -663,17 +623,6 @@ void LoadScoreboard(dae::Scene* ScoreBoardScene)
     TitleObject->AddComponent(std::move(titleTextComponent));
     ScoreBoardScene->Add(std::move(TitleObject));
 
-    // Create GameObject for FPS counter
-    auto fpsCounterObject = std::make_unique<dae::GameObject>();
-    auto fpsTextComponent = std::make_unique<dae::TextComponent>("FPS: ", dae::ResourceManager::GetFont(FontID), SDL_Color{ 252, 157, 3, 255 }, *fpsCounterObject);
-    fpsCounterObject->AddComponent(std::move(fpsTextComponent));
-    auto fpsTextComponentPtr = fpsCounterObject->GetComponent<dae::TextComponent>();
-    auto fpsCounterComponent = std::make_unique<dae::FPSCounterComponent>(fpsTextComponentPtr);
-    fpsCounterObject->AddComponent(std::move(fpsCounterComponent));
-    fpsCounterObject->SetLocalPosition(glm::vec3(100.f, 20.f, 0.0f));
-    ScoreBoardScene->Add(std::move(fpsCounterObject));
-
-
     std::vector<std::string> options2 = { "back to menu" };
     std::vector<std::function<void()>> callbacks2 =
     {
@@ -701,7 +650,6 @@ void LoadUi(dae::Scene* scene)
 
     auto HighScoretextObject = std::make_unique<dae::GameObject>();
 
-    // Create the "HIGHSCORE:" text component
     auto titleTextComponent02 = std::make_unique<dae::TextComponent>(
         "HI-SCORE",
         dae::ResourceManager::GetFont(arcadeID),
@@ -714,11 +662,10 @@ void LoadUi(dae::Scene* scene)
     scene->Add(std::move(HighScoretextObject));
 
     auto HighScoreObject = std::make_unique<dae::GameObject>();
-    // Retrieve the top score and convert it to a string
+
     uint32_t topScore = highScoresInstance.getTopScore();
     std::string topScoreStr = std::to_string(topScore);
 
-    // Create the high score value text component using the string
     auto scoreTextComponent = std::make_unique<dae::TextComponent>(topScoreStr, dae::ResourceManager::GetFont(arcadeID), SDL_Color{ 255, 255, 255, 255 }, *HighScoreObject);
     HighScoreObject->SetLocalPosition(glm::vec3(1090, 70, 0.f));
     HighScoreObject->AddComponent(std::move(scoreTextComponent));
@@ -773,14 +720,13 @@ void LoadUi(dae::Scene* scene)
 
     auto roundTextObject = std::make_unique<dae::GameObject>();
 
-    // Create the "ROUND:" label
     auto roundLabelComponent = std::make_unique<dae::TextComponent>(
         "ROUND",
         dae::ResourceManager::GetFont(arcadeID),
         SDL_Color{ 255, 255, 0, 255 }, // Yellow color
         *roundTextObject
     );
-    roundTextObject->SetLocalPosition(glm::vec3(1090, 635, 0.f)); // Adjust position as needed
+    roundTextObject->SetLocalPosition(glm::vec3(1090, 635, 0.f)); 
     roundTextObject->AddComponent(std::move(roundLabelComponent));
 
     scene->Add(std::move(roundTextObject));
@@ -788,7 +734,6 @@ void LoadUi(dae::Scene* scene)
     // Create the round number text component
     auto roundNumberObject = std::make_unique<dae::GameObject>();
 
-    // Assuming you have a method to get the current round, you will replace 1 with that method
     std::string roundNumberStr = std::to_string(GameData::GetInstance().GetCurrentRound());
 
     auto roundNumberComponent = std::make_unique<dae::TextComponent>(
@@ -797,7 +742,7 @@ void LoadUi(dae::Scene* scene)
         SDL_Color{ 255, 255, 255, 255 }, // White color
         *roundNumberObject
     );
-    roundNumberObject->SetLocalPosition(glm::vec3(1090, 655, 0.f)); // Adjust position as needed
+    roundNumberObject->SetLocalPosition(glm::vec3(1090, 655, 0.f)); 
     roundNumberObject->AddComponent(std::move(roundNumberComponent));
 
     scene->Add(std::move(roundNumberObject));
@@ -854,183 +799,77 @@ void loadInputScore(dae::Scene* scene)
     scene->SetBackgroundMusic(2);
 }
 
-void GameScene(dae::Scene* scene)
-{
-    auto& inputManager = dae::InputManager::GetInstance();
-
-    unsigned int fontID = dae::HashString("font");
-
-    // Create GameObject for FPS counter
-    auto fpsCounterObject = std::make_unique<dae::GameObject>();
-    auto fpsTextComponent = std::make_unique<dae::TextComponent>("FPS: ", dae::ResourceManager::GetFont(fontID), SDL_Color{ 252, 157, 3, 255 }, *fpsCounterObject);
-    fpsCounterObject->AddComponent(std::move(fpsTextComponent));
-    auto fpsTextComponentPtr = fpsCounterObject->GetComponent<dae::TextComponent>();
-    auto fpsCounterComponent = std::make_unique<dae::FPSCounterComponent>(fpsTextComponentPtr);
-    fpsCounterObject->AddComponent(std::move(fpsCounterComponent));
-    fpsCounterObject->SetLocalPosition(glm::vec3(100.f, 20.f, 0.0f));
-    scene->Add(std::move(fpsCounterObject));
+void LoadCommonMapElements(const std::string& mapBaseName, const std::string& tunnelMapSuffix, const std::string& entityMapSuffix, dae::Scene* scene) {
     constexpr glm::vec3 startPos(300, 20, 0.0f);
     constexpr glm::vec2 mapScale(40, 40);
 
-    std::string Tunnelmap = "";
-    std::string entitymap = "";
-    switch (GameData::GetInstance().GetGameState()) {
-    case GameData::GameState::SINGLE_PLAYER:
-        Tunnelmap = "map1.1.tunmap";
-        entitymap = "map1.1.entmap";
-        break;
-    case GameData::GameState::MULTIPLAYER:
-        Tunnelmap = "map1.2.tunmap";
-        entitymap = "map1.2.entmap";
-        break;
-    case GameData::GameState::VERSUS:
-        Tunnelmap = "map1.3.tunmap";
-        entitymap = "map1.3.entmap";
-        break;
-    default:
-        Tunnelmap = "map1.tunmap";
-        break;
-    }
+    const LoadMap loadMap(
+        "../Data/maps/" + mapBaseName + ".map",
+        "../Data/maps/" + mapBaseName + tunnelMapSuffix,
+        "../Data/maps/" + mapBaseName + entityMapSuffix
+    );
 
-    const LoadMap loadMap("../Data/maps/map1.map", "../Data/maps/" + Tunnelmap, "../Data/maps/" + entitymap);
     SceneHelpers::LoadMapIntoScene(loadMap, scene, startPos, mapScale);
     SceneHelpers::LoadTunnelMapIntoScene(loadMap, scene, startPos, mapScale);
     SceneHelpers::LoadEntitysMapIntoScene(loadMap, scene, startPos, mapScale);
+}
 
-    if (GameData::GetInstance().GetGameState() == GameData::GameState::SINGLE_PLAYER)
-    {
+void SetupInputForGameState(dae::InputManager& inputManager, GameData::GameState gameState) {
+    if (gameState == GameData::GameState::SINGLE_PLAYER) {
         HandlePlayerInput(inputManager, 0);
     }
-    else if (GameData::GetInstance().GetGameState() == GameData::GameState::VERSUS)
-    {
+    else if (gameState == GameData::GameState::VERSUS) {
         HandlePlayerInput(inputManager, 0);
-        HandleEnemyPLayerCommands(inputManager,0);
+        HandlePlayerInput(inputManager, 1, true);
     }
-    else
-    {
+    else {
         HandlePlayerInput(inputManager, 0);
         HandlePlayerInput(inputManager, 1);
     }
+}
+
+void LoadScene(int sceneNumber, dae::Scene* scene) {
+    auto& inputManager = dae::InputManager::GetInstance();
+
+    std::string baseName = "map" + std::to_string(sceneNumber);
+    std::string tunnelMapSuffix, entityMapSuffix;
+
+    switch (GameData::GetInstance().GetGameState()) {
+    case GameData::GameState::SINGLE_PLAYER:
+        tunnelMapSuffix = ".1.tunmap";
+        entityMapSuffix = ".1.entmap";
+        break;
+    case GameData::GameState::MULTIPLAYER:
+        tunnelMapSuffix = ".2.tunmap";
+        entityMapSuffix = ".2.entmap";
+        break;
+    case GameData::GameState::VERSUS:
+        tunnelMapSuffix = ".3.tunmap";
+        entityMapSuffix = ".3.entmap";
+        break;
+    default:
+        tunnelMapSuffix = "1.tunmap";
+        break;
+    }
+
+    LoadCommonMapElements(baseName, tunnelMapSuffix, entityMapSuffix, scene);
+
+    SetupInputForGameState(inputManager, GameData::GetInstance().GetGameState());
+
     LoadUi(scene);
     scene->SetBackgroundMusic(13);
 }
 
-void GameScene2(dae::Scene* scene)
-{
-    auto& inputManager = dae::InputManager::GetInstance();
-
-    unsigned int fontID = dae::HashString("font");
-
-    // Create GameObject for FPS counter
-    auto fpsCounterObject = std::make_unique<dae::GameObject>();
-    auto fpsTextComponent = std::make_unique<dae::TextComponent>("FPS: ", dae::ResourceManager::GetFont(fontID), SDL_Color{ 252, 157, 3, 255 }, *fpsCounterObject);
-    fpsCounterObject->AddComponent(std::move(fpsTextComponent));
-    auto fpsTextComponentPtr = fpsCounterObject->GetComponent<dae::TextComponent>();
-    auto fpsCounterComponent = std::make_unique<dae::FPSCounterComponent>(fpsTextComponentPtr);
-    fpsCounterObject->AddComponent(std::move(fpsCounterComponent));
-    fpsCounterObject->SetLocalPosition(glm::vec3(100.f, 20.f, 0.0f));
-    scene->Add(std::move(fpsCounterObject));
-
-
-    constexpr glm::vec3 startPos(300, 20, 0.0f);
-    constexpr glm::vec2 mapScale(40, 40);
-
-    std::string Tunnelmap = "";
-    std::string entitymap = "";
-    switch (GameData::GetInstance().GetGameState()) {
-    case GameData::GameState::SINGLE_PLAYER:
-        Tunnelmap = "map2.1.tunmap";
-        entitymap = "map2.1.entmap";
-        break;
-    case GameData::GameState::MULTIPLAYER:
-        Tunnelmap = "map2.2.tunmap";
-        entitymap = "map2.2.entmap";
-        break;
-    case GameData::GameState::VERSUS:
-        Tunnelmap = "map2.3.tunmap";
-        entitymap = "map2.1.entmap";
-        break;
-    default:
-        Tunnelmap = "map1.tunmap";
-        break;
-    }
-
-    const LoadMap loadMap("../Data/maps/map2.map", "../Data/maps/" + Tunnelmap, "../Data/maps/" + entitymap);
-    SceneHelpers::LoadMapIntoScene(loadMap, scene, startPos, mapScale);
-    SceneHelpers::LoadTunnelMapIntoScene(loadMap, scene, startPos, mapScale);
-    SceneHelpers::LoadEntitysMapIntoScene(loadMap, scene, startPos, mapScale);
-
-
-    if (GameData::GetInstance().GetGameState() == GameData::GameState::SINGLE_PLAYER)
-    {
-        HandlePlayerInput(inputManager, 0);
-    }
-    else
-    {
-        HandlePlayerInput(inputManager, 0);
-        HandlePlayerInput(inputManager, 1);
-    }
-    LoadUi(scene);
-    scene->SetBackgroundMusic(13);
+void GameScene(dae::Scene* scene) {
+    LoadScene(1, scene);
 }
 
-void GameScene3(dae::Scene* scene)
-{
-    auto& inputManager = dae::InputManager::GetInstance();
+void GameScene2(dae::Scene* scene) {
+    LoadScene(2, scene);
+}
 
-    unsigned int fontID = dae::HashString("font");
-
-    // Create GameObject for FPS counter
-    auto fpsCounterObject = std::make_unique<dae::GameObject>();
-    auto fpsTextComponent = std::make_unique<dae::TextComponent>("FPS: ", dae::ResourceManager::GetFont(fontID), SDL_Color{ 252, 157, 3, 255 }, *fpsCounterObject);
-    fpsCounterObject->AddComponent(std::move(fpsTextComponent));
-    auto fpsTextComponentPtr = fpsCounterObject->GetComponent<dae::TextComponent>();
-    auto fpsCounterComponent = std::make_unique<dae::FPSCounterComponent>(fpsTextComponentPtr);
-    fpsCounterObject->AddComponent(std::move(fpsCounterComponent));
-    fpsCounterObject->SetLocalPosition(glm::vec3(100.f, 20.f, 0.0f));
-    scene->Add(std::move(fpsCounterObject));
-
-
-    constexpr glm::vec3 startPos(300, 20, 0.0f);
-    constexpr glm::vec2 mapScale(40, 40);
-
-    std::string Tunnelmap = "";
-    std::string entitymap = "";
-    switch (GameData::GetInstance().GetGameState()) {
-    case GameData::GameState::SINGLE_PLAYER:
-        Tunnelmap = "map3.1.tunmap";
-        entitymap = "map3.1.entmap";
-        break;
-    case GameData::GameState::MULTIPLAYER:
-        Tunnelmap = "map3.2.tunmap";
-        entitymap = "map3.2.entmap";
-        break;
-    case GameData::GameState::VERSUS:
-        Tunnelmap = "map3.3.tunmap";
-        entitymap = "map3.1.entmap";
-        break;
-    default:
-        Tunnelmap = "map1.tunmap";
-        break;
-    }
-
-    const LoadMap loadMap("../Data/maps/map3.map", "../Data/maps/" + Tunnelmap, "../Data/maps/" + entitymap);
-    SceneHelpers::LoadMapIntoScene(loadMap, scene, startPos, mapScale);
-    SceneHelpers::LoadTunnelMapIntoScene(loadMap, scene, startPos, mapScale);
-    SceneHelpers::LoadEntitysMapIntoScene(loadMap, scene, startPos, mapScale);
-
-
-    if (GameData::GetInstance().GetGameState() == GameData::GameState::SINGLE_PLAYER)
-    {
-        HandlePlayerInput(inputManager, 0);
-    }
-    else
-    {
-        HandlePlayerInput(inputManager, 0);
-        HandlePlayerInput(inputManager, 1);
-    }
-    LoadUi(scene);
-    scene->SetBackgroundMusic(13);
+void GameScene3(dae::Scene* scene) {
+    LoadScene(3, scene);
 }
 
 void load()

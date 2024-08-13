@@ -29,9 +29,9 @@ private:
 
     bool m_IsFalling;
     float m_FallSpeed;
-    float m_Gravity; // Gravity constant
+    float m_Gravity;
     dae::GameObject* m_Owner;
-    dae::AnimationComponent* m_animationComponnent;
+    dae::AnimationComponent* m_animationComponent;
     float m_timer;
     bool m_PlayerMovedAway;
     bool m_IsAnimating;

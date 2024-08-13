@@ -165,13 +165,7 @@
     <ClInclude Include="SceneData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MenuComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="HighScores.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SelectNameComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GameObjectBenchmark.h">
@@ -194,6 +188,12 @@
     </ClInclude>
     <ClInclude Include="TunnelType.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SelectNameComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="MenuComponent.h">
+      <Filter>Components</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -311,13 +311,7 @@
     <ClCompile Include="SceneData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MenuComponent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="HighScores.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SelectNameComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GameObjectBenchmark.cpp">
@@ -334,6 +328,12 @@
     </ClCompile>
     <ClCompile Include="TileComponent.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MenuComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="SelectNameComponent.cpp">
+      <Filter>Components</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

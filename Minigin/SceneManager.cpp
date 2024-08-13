@@ -1,7 +1,5 @@
 #include "SceneManager.h"
-
 #include <stdexcept>
-
 #include "SceneData.h"
 #include "servicelocator.h"
 #include "../DigDug2/Player.h"
@@ -39,7 +37,7 @@ namespace dae
                     if (previousSoundID != 0)
                     {
                         auto& soundSystem = servicelocator::get_sound_system();
-                        soundSystem.StopPlay(previousSoundID);  // Stop the specific music for the previously active scene
+                        soundSystem.StopPlay(previousSoundID);  
                     }
 	            }
 
@@ -51,7 +49,6 @@ namespace dae
                 (*m_activeSceneIterator)->RemoveAll();
                 (*m_activeSceneIterator)->Activate();
 
-                // Start the background music for the newly active scene (if any)
                 const sound_id newSoundID = (*m_activeSceneIterator)->GetBackgroundMusicID();
                 if (newSoundID != 0)
                 {
@@ -59,13 +56,11 @@ namespace dae
                     soundSystem.play(newSoundID);
                 }
 
-                // Store the previous active scene iterator for future reference
                 m_previousActiveSceneIterator = m_activeSceneIterator;
 
                 return;
             }
         }
-        // Throw an exception if the scene with the specified name is not found
         throw std::runtime_error("Scene not found: " + name);
     }
 
@@ -74,15 +69,13 @@ namespace dae
     {
         m_previousActiveSceneIterator = m_activeSceneIterator;
 
-        // Stop the background music for the currently active scene, if any
         const sound_id previousSoundID = (*m_activeSceneIterator)->GetBackgroundMusicID();
         if (previousSoundID != 0)
         {
             auto& soundSystem = servicelocator::get_sound_system();
-            soundSystem.StopPlay(previousSoundID);  // Stop the specific music for the previously active scene
+            soundSystem.StopPlay(previousSoundID);
         }
 
-        // Advance to the next scene
         ++m_activeSceneIterator;
         if (m_activeSceneIterator == m_scenes.end())
             m_activeSceneIterator = m_scenes.begin();
@@ -93,7 +86,6 @@ namespace dae
 
         auto& soundSystem = servicelocator::get_sound_system();
 
-        // Start the background music for the newly active scene (if any)
         const sound_id newSoundID = (*m_activeSceneIterator)->GetBackgroundMusicID();
         if (newSoundID != 0)
         {
