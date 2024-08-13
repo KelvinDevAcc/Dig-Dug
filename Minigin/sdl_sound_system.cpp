@@ -85,12 +85,12 @@ void sdl_sound_system::process_events() {
         }
 
         if (chunk) {
+            Mix_VolumeChunk(chunk, static_cast<int>(request.volume)); // Apply volume before playing
             Mix_PlayChannel(-1, chunk, 0); // Play the chunk on any available channel
-            Mix_VolumeChunk(chunk, static_cast<int>(request.volume));
         }
         else if (music) {
+            Mix_VolumeMusic(static_cast<int>(request.volume)); // Apply volume before playing
             Mix_PlayMusic(music, -1);
-            Mix_VolumeMusic(static_cast<int>(request.volume));
         }
     }
 

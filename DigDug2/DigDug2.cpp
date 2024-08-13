@@ -38,7 +38,7 @@ void loadResources()
 #endif
     auto& ss = servicelocator::get_sound_system();
 
-    ss.setVolume(0.f);
+    ss.setVolume(1.f);
     ss.register_sound_file("../Data/Sounds/02-GameStartMusic.mp3");
     ss.register_sound_file("../Data/Sounds/12-HighScoreMusic.mp3");
     ss.register_sound_file("../Data/Sounds/13-NameEntryMusic.mp3");
@@ -612,7 +612,7 @@ void LoadScoreboard(dae::Scene* ScoreBoardScene)
     auto titleTextComponent02 = std::make_unique<dae::TextComponent>("DIG DUG", dae::ResourceManager::GetFont("TITLEBig"), SDL_Color{ 0, 0, 255, 255 }, *TitleObject02);
     TitleObject02->SetLocalPosition(glm::vec3(635, 810, 0.f));
     glm::vec3 finalPositioTitleObject02(635.f, 20, 0.f);
-    auto moveTweeTitleObject02 = std::make_unique<Tween>(TitleObject02.get(), finalPositioTitleObject02, 10.0f, Easing::EaseInOutQuad);
+    auto moveTweeTitleObject02 = std::make_unique<Tween>(TitleObject02.get(), finalPositioTitleObject02, 6.0f, Easing::Bounce);
     TweenManager::GetInstance().AddTween(std::move(moveTweeTitleObject02));
     TitleObject02->AddComponent(std::move(titleTextComponent02));
     ScoreBoardScene->Add(std::move(TitleObject02));
@@ -622,7 +622,7 @@ void LoadScoreboard(dae::Scene* ScoreBoardScene)
     auto titleTextComponent = std::make_unique<dae::TextComponent>("DIG DUG", dae::ResourceManager::GetFont("TITLE"), SDL_Color{ 247, 190, 57, 255 }, *TitleObject);
     TitleObject->SetLocalPosition(glm::vec3(635, 810, 0.f));
     glm::vec3 finalPositioTitleObject(635.f, 20, 0.f);
-    auto moveTweenmenuTitleObject = std::make_unique<Tween>(TitleObject.get(), finalPositioTitleObject, 10.0f, Easing::EaseInOutQuad);
+    auto moveTweenmenuTitleObject = std::make_unique<Tween>(TitleObject.get(), finalPositioTitleObject, 6.0f, Easing::Bounce);
     TweenManager::GetInstance().AddTween(std::move(moveTweenmenuTitleObject));
     TitleObject->AddComponent(std::move(titleTextComponent));
     ScoreBoardScene->Add(std::move(TitleObject));

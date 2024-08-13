@@ -224,7 +224,7 @@ IncreaseVolumeCommand::IncreaseVolumeCommand(sound_system* soundSystem)
 void IncreaseVolumeCommand::Execute() {
     if (m_soundSystem) {
         const float currentVolume = m_soundSystem->getVolume();
-        m_soundSystem->setVolume(std::min(currentVolume + 5.0f, 128.0f));
+        m_soundSystem->setVolume(std::min(currentVolume + 0.05f, 1.0f));
     }
 }
 
@@ -234,7 +234,7 @@ DecreaseVolumeCommand::DecreaseVolumeCommand(sound_system* soundSystem)
 void DecreaseVolumeCommand::Execute() {
     if (m_soundSystem) {
         const float currentVolume = m_soundSystem->getVolume();
-        m_soundSystem->setVolume(std::max(currentVolume - 5.0f, 0.0f));
+        m_soundSystem->setVolume(std::max(currentVolume - 0.05f, 0.0f));
     }
 }
 

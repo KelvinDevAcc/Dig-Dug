@@ -1,6 +1,5 @@
 #include "SceneData.h"
 
-#include <iostream>
 #include <SDL_rect.h>
 #include "SceneHelpers.h"
 #include "../DigDug2/Player.h"

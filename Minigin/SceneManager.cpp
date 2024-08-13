@@ -73,20 +73,31 @@ namespace dae
     void SceneManager::GoToNextScene()
     {
         m_previousActiveSceneIterator = m_activeSceneIterator;
+
+        // Stop the background music for the currently active scene, if any
+        const sound_id previousSoundID = (*m_activeSceneIterator)->GetBackgroundMusicID();
+        if (previousSoundID != 0)
+        {
+            auto& soundSystem = servicelocator::get_sound_system();
+            soundSystem.StopPlay(previousSoundID);  // Stop the specific music for the previously active scene
+        }
+
         // Advance to the next scene
         ++m_activeSceneIterator;
         if (m_activeSceneIterator == m_scenes.end())
             m_activeSceneIterator = m_scenes.begin();
+
         SceneData::GetInstance().RemoveAllGameObjects();
         (*m_activeSceneIterator)->RemoveAll();
         (*m_activeSceneIterator)->Activate();
 
-
         auto& soundSystem = servicelocator::get_sound_system();
-        const sound_id soundID = (*m_activeSceneIterator)->GetBackgroundMusicID();
-        if (soundID != 0)
+
+        // Start the background music for the newly active scene (if any)
+        const sound_id newSoundID = (*m_activeSceneIterator)->GetBackgroundMusicID();
+        if (newSoundID != 0)
         {
-            soundSystem.play(soundID);
+            soundSystem.play(newSoundID);
         }
     }
 

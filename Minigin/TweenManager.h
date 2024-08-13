@@ -10,7 +10,8 @@ public:
 
     void AddTween(std::unique_ptr<Tween> tween);
     void Update();
-
+    void ClearAllTweens() { m_Tweens.clear();}
+    const std::vector<std::unique_ptr<Tween>>& GetAllTweens() const{ return m_Tweens;}
 private:
     TweenManager() = default;
     ~TweenManager() = default;

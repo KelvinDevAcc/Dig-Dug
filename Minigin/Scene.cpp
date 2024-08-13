@@ -4,6 +4,7 @@
 #include "HitBox.h"
 #include "servicelocator.h"
 #include "SpriteRendererComponent.h"
+#include "TweenManager.h"
 
 namespace dae
 {
@@ -33,6 +34,7 @@ namespace dae
     {
         m_objects.clear();
         m_sortedObjects.clear();
+        TweenManager::GetInstance().ClearAllTweens();
     }
 
     void Scene::Update() const
