@@ -15,12 +15,13 @@ namespace game
         breathFireObject->SetLocalPosition(glm::vec3(0, 0, 0.f));
 
         // Set up the sprite renderer
+        const unsigned int BreathFireStage1ID = dae::HashString("BreathFireStage1");
         auto spriteRenderComponent = std::make_unique<dae::SpriteRendererComponent>(
-            breathFireObject.get(), dae::ResourceManager::GetTexture("BreathFireStage1")
+            breathFireObject.get(), dae::ResourceManager::GetTexture(BreathFireStage1ID)
         );
         spriteRenderComponent->SetDimensions(
-            static_cast<float>(dae::ResourceManager::GetTexture("BreathFireStage1")->GetSize().x),
-            static_cast<float>(dae::ResourceManager::GetTexture("BreathFireStage1")->GetSize().y)
+            static_cast<float>(dae::ResourceManager::GetTexture(BreathFireStage1ID)->GetSize().x),
+            static_cast<float>(dae::ResourceManager::GetTexture(BreathFireStage1ID)->GetSize().y)
         );
         m_spriterendererComponent = spriteRenderComponent.get(); // Store reference
         breathFireObject->AddComponent(std::move(spriteRenderComponent));
@@ -80,17 +81,17 @@ namespace game
 
         dae::Message message;
         message.type = dae::PlaySoundMessageType::Sound;
-        message.arguments.emplace_back(static_cast<sound_id>(15));
+        message.arguments.emplace_back(static_cast<sound_id>(16));
         dae::EventQueue::Broadcast(message);
         UpdateSizeAndAnimation(); // Initial setup for stage 1
         m_hitBox->Enable();
-        m_spriterendererComponent->SetTexture(dae::ResourceManager::GetTexture("BreathFireStage1"));
+        m_spriterendererComponent->SetTexture(dae::ResourceManager::GetTexture(dae::HashString("BreathFireStage1")));
         if (m_direction.x > 0)
             m_spriterendererComponent->SetFlip(false, false);
         else if (m_direction.x < 0) // Left
             m_spriterendererComponent->SetFlip(true, false);
-        m_hitBox->SetSize(glm::vec2(static_cast<float>(dae::ResourceManager::GetTexture("BreathFireStage1")->GetSize().x),
-            static_cast<float>(dae::ResourceManager::GetTexture("BreathFireStage1")->GetSize().y)));
+        m_hitBox->SetSize(glm::vec2(static_cast<float>(dae::ResourceManager::GetTexture(dae::HashString("BreathFireStage1"))->GetSize().x),
+            static_cast<float>(dae::ResourceManager::GetTexture(dae::HashString("BreathFireStage1"))->GetSize().y)));
         // Adjust position based on direction
         AdjustPosition();
     }
@@ -126,17 +127,18 @@ namespace game
             if (m_lifetime < 2.0f)
             {
                 m_stage = 2;
-                m_spriterendererComponent->SetTexture(dae::ResourceManager::GetTexture("BreathFireStage2"));
+                const unsigned int BreathFireStage2ID = dae::HashString("BreathFireStage2");
+                m_spriterendererComponent->SetTexture(dae::ResourceManager::GetTexture(BreathFireStage2ID));
                 m_spriterendererComponent->SetDimensions(
-                    static_cast<float>(dae::ResourceManager::GetTexture("BreathFireStage2")->GetSize().x),
-                    static_cast<float>(dae::ResourceManager::GetTexture("BreathFireStage2")->GetSize().y)
+                    static_cast<float>(dae::ResourceManager::GetTexture(BreathFireStage2ID)->GetSize().x),
+                    static_cast<float>(dae::ResourceManager::GetTexture(BreathFireStage2ID)->GetSize().y)
                 );
                 if (m_direction.x > 0)
                     m_spriterendererComponent->SetFlip(false, false);
                 else if (m_direction.x < 0) // Left
                     m_spriterendererComponent->SetFlip(true, false);
-                m_hitBox->SetSize(glm::vec2(static_cast<float>(dae::ResourceManager::GetTexture("BreathFireStage2")->GetSize().x),
-                    static_cast<float>(dae::ResourceManager::GetTexture("BreathFireStage2")->GetSize().y)));
+                m_hitBox->SetSize(glm::vec2(static_cast<float>(dae::ResourceManager::GetTexture(BreathFireStage2ID)->GetSize().x),
+                    static_cast<float>(dae::ResourceManager::GetTexture(BreathFireStage2ID)->GetSize().y)));
                 AdjustPosition();
             }
             break;
@@ -144,18 +146,19 @@ namespace game
             if (m_lifetime < 1.0f)
             {
                 m_stage = 3;
-                m_spriterendererComponent->SetTexture(dae::ResourceManager::GetTexture("BreathFireStage3"));
+                const unsigned int BreathFireStage3ID = dae::HashString("BreathFireStage3");
+                m_spriterendererComponent->SetTexture(dae::ResourceManager::GetTexture(BreathFireStage3ID));
                 m_spriterendererComponent->SetDimensions(
-                    static_cast<float>(dae::ResourceManager::GetTexture("BreathFireStage3")->GetSize().x),
-                    static_cast<float>(dae::ResourceManager::GetTexture("BreathFireStage3")->GetSize().y)
+                    static_cast<float>(dae::ResourceManager::GetTexture(BreathFireStage3ID)->GetSize().x),
+                    static_cast<float>(dae::ResourceManager::GetTexture(BreathFireStage3ID)->GetSize().y)
                 );
                 if (m_direction.x > 0)
                     m_spriterendererComponent->SetFlip(false, false);
                 else if (m_direction.x < 0) // Left
                     m_spriterendererComponent->SetFlip(true, false);
 
-                m_hitBox->SetSize(glm::vec2(static_cast<float>(dae::ResourceManager::GetTexture("BreathFireStage3")->GetSize().x),
-                    static_cast<float>(dae::ResourceManager::GetTexture("BreathFireStage3")->GetSize().y)));
+                m_hitBox->SetSize(glm::vec2(static_cast<float>(dae::ResourceManager::GetTexture(BreathFireStage3ID)->GetSize().x),
+                    static_cast<float>(dae::ResourceManager::GetTexture(BreathFireStage3ID)->GetSize().y)));
                 AdjustPosition();
             }
             break;

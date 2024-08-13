@@ -1,7 +1,5 @@
 #include "Pump.h"
 
-#include <iostream>
-
 #include "EnemyComponent.h"
 #include "GameTime.h"
 #include "EnemyComponent.h"
@@ -28,7 +26,7 @@ Pump::Pump(dae::GameObject* owner, const glm::vec3& localPosition, const glm::ve
     PumpObject->SetRotation(GetRotationFromDirection(m_direction));
 
     // Create and add sprite render component
-    auto texture = dae::ResourceManager::GetTexture("PumpEnd");
+    auto texture = dae::ResourceManager::GetTexture(dae::HashString("PumpEnd"));
     auto spriteRenderComponent = std::make_unique<dae::SpriteRendererComponent>(PumpObject.get(), texture);
     spriteRenderComponent->SetDimensions(32, 16);
     spriteRenderComponent->SetFlip(true, false);
@@ -63,27 +61,44 @@ void Pump::Update()
 {
     if (!m_isActive) return;
 
-    // Update pump logic
     if (m_isPumping)
     {
         PumpEnemy();
     }
     else
     {
-        if (IsCollidingWithEnemy())
-        {
+	    if (IsCollidingWithEnemy())
+	    {
             m_isPumping = true;
-        }
-        else 
+	    }
+
+        m_lifetime -= dae::GameTime::GetDeltaTime();
+        if (m_lifetime <= 0)
         {
-            m_lifetime -= dae::GameTime::GetDeltaTime();
-            if (m_lifetime <= 0)
-            {
-                Deactivate();
-            }
+            Deactivate();
         }
     }
-  
+}
+
+void Pump::PumpEnemy()
+{
+    if (!m_connectedEnemy) return;
+
+    if (m_connectedEnemy->GetComponent<EnemyComponent>())
+    {
+        m_connectedEnemy->GetComponent<EnemyComponent>()->HitByPump(m_owner);
+    }
+    else if (m_connectedEnemy->GetComponent<FygarComponent>())
+    {
+        m_connectedEnemy->GetComponent<FygarComponent>()->HitByPump(m_owner);
+    }
+    else if (m_connectedEnemy->GetComponent<game::EnemyPlayer>())
+    {
+        m_connectedEnemy->GetComponent<game::EnemyPlayer>()->HitByPump();
+    }
+
+    // Optionally keep the pump active or handle state if needed
+    m_connectedEnemy = nullptr;
 }
 
 void Pump::Render() const
@@ -108,25 +123,6 @@ void Pump::Deactivate()
     m_connectedEnemy = nullptr;
 }
 
-void Pump::PumpEnemy()
-{
-    if (!m_connectedEnemy) return;
-
-    if (m_connectedEnemy->GetComponent<EnemyComponent>())
-    {
-        m_connectedEnemy->GetComponent<EnemyComponent>()->HitByPump(m_owner);
-    }
-    else if (m_connectedEnemy->GetComponent<FygarComponent>())
-    {
-        m_connectedEnemy->GetComponent<FygarComponent>()->HitByPump(m_owner);
-    }
-    else if (m_connectedEnemy->GetComponent<game::EnemyPlayer>())
-    {
-        m_connectedEnemy->GetComponent<game::EnemyPlayer>()->HitByPump();
-    }
-
-	m_connectedEnemy = nullptr;
-}
 
 void Pump::SetTexture(const dae::Texture2D* texture) const
 {
@@ -159,9 +155,12 @@ bool Pump::IsCollidingWithEnemy()
             if (enemy != m_owner && enemy->GetComponent<HitBox>()->IsColliding(*m_hitBox))
             {
                 m_connectedEnemy = enemy;
+                m_isPumping = true;
                 return true;
             }
         }
     }
     return false;
 }
+
+

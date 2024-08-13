@@ -15,7 +15,7 @@ namespace game
         : m_GameObject(gameObject),
         m_timeSinceLastAction(0.0f), m_inactivityThreshold(6.0f),
         m_CurrentAnimationState(AnimationState::Idle),
-        pumpDirection(glm::vec3(1, 0, 0)),m_deathTimer(0),m_isDying(false)
+        pumpDirection(glm::vec3(1, 0, 0)),m_deathTimer(0),m_isDying(false),m_maxPumps(4)
     {
         m_animationComponent = m_GameObject->GetComponent<dae::AnimationComponent>();
         m_healthComponent = m_GameObject->GetComponent<dae::HealthComponent>();
@@ -23,7 +23,7 @@ namespace game
         m_startPosition = m_GameObject->GetWorldPosition();
 
         SetAnimationState(AnimationState::Idle);
-        //m_GameObject->GetComponent<HitBox>()->Disable();
+        m_GameObject->GetComponent<HitBox>()->Disable();
     }
 
     void Player::Update()
@@ -111,13 +111,20 @@ namespace game
             return;
         }
 
-        m_pumps.clear();
-        m_pumpPartCount = 0;
+        SetAnimationState(AnimationState::Attacking);
         if (!m_pumps.empty() && m_pumps.back()->IsActive())
         {
-            return; // A pump is already active, so don't shoot a new one
+            // Iterate through the pump parts to check for collisions with enemies
+            for (auto& pumpPart : m_pumps)
+            {
+                if (pumpPart->IsActive() && pumpPart->IsCollidingWithEnemy())
+                {
+                    pumpPart->PumpEnemy();
+                    return;  // Stop further processing since the enemy is being pumped
+                }
+            }
+            return;
         }
-
 
         dae::Message message;
         message.type = dae::PlaySoundMessageType::Sound;
@@ -126,17 +133,16 @@ namespace game
 
         m_timeSinceLastPumpPart = 0.0f; // Reset the timer for adding new pump parts
         AddPumpPart(); // Start by adding the first pump part immediately
-       
-        SetAnimationState(AnimationState::Attacking);
+
     }
 
     void Player::UpdatePumpTimer(float deltaTime)
     {
-
-        if (m_pumps.empty() || m_pumpPartCount > 5|| m_isDying)
+        if (m_pumps.empty() || m_pumpPartCount > m_maxPumps || m_isDying)
         {
-            return; // No active pumps to update
+            return;
         }
+
         m_timeSinceLastPumpPart += deltaTime;
         if (m_timeSinceLastPumpPart >= m_pumpPartInterval)
         {
@@ -147,7 +153,7 @@ namespace game
 
     void Player::AddPumpPart()
     {
-        if (m_isDying)
+        if (m_isDying || m_pumpPartCount == m_maxPumps)
             return;
 
         glm::vec3 offsetPosition(0.0f);
@@ -162,14 +168,35 @@ namespace game
 
         glm::vec3 pumpPosition = offsetPosition;
 
+        // Create a temporary game object for collision checking
+        auto tempPumpObject = std::make_unique<dae::GameObject>();
+        tempPumpObject->SetLocalPosition(pumpPosition + m_GameObject->GetWorldPosition());
+
+        auto hitbox = std::make_unique<HitBox>(glm::vec2(32, 16)); // Assuming this matches the pump's size
+        hitbox->SetGameObject(tempPumpObject.get());
+        tempPumpObject->AddComponent(std::move(hitbox));
+
         // Check for collisions before adding a new pump part
-        if (IsCollidingWithSomething(pumpPosition + m_GameObject->GetWorldPosition()))
+        bool isCollidingWithWalkthrough = dae::SceneData::GetInstance().IsOnwalkthrough(*tempPumpObject);
+
+        if (!isCollidingWithWalkthrough)
         {
-            std::cout << "Collision detected, stopping pump addition." << std::endl;
-            return; // Stop adding pump parts if there's a collision
+            std::cout << "Collision detected with floor, removing all pump parts." << std::endl;
+            m_pumps.clear(); // Remove all pump parts
+            m_pumpPartCount = 0; // Reset the pump part count
+            return; // Stop adding new pump parts
         }
 
-        auto pump = std::make_unique<Pump>(m_GameObject, pumpPosition, pumpDirection, 4.0f); // Adjust speed and lifetime as needed
+        // Check if it collides with an enemy
+        bool isCollidingWithEnemy = dae::SceneData::GetInstance().isOnEnemy(*tempPumpObject);
+        if (isCollidingWithEnemy)
+        {
+            std::cout << "Collision detected with enemy, not adding new pump part." << std::endl;
+            return; // Stop adding new pump part
+        }
+
+        // Proceed with adding a new pump part if no collision is detected
+        auto pump = std::make_unique<Pump>(m_GameObject, pumpPosition, pumpDirection, 2.0f); // Adjust speed and lifetime as needed
         pump->SetGameObject(m_GameObject);
         pump->Activate();
 
@@ -181,50 +208,17 @@ namespace game
         UpdatePumpTextures();
     }
 
-    bool Player::IsCollidingWithSomething(const glm::vec3& position)
-    {
-	    const auto tempPumpObject = std::make_unique<dae::GameObject>();
-        tempPumpObject->SetLocalPosition(position);
-
-        auto hitbox = std::make_unique<HitBox>(glm::vec2(32,16));
-        hitbox->SetGameObject(tempPumpObject.get());
-        tempPumpObject->AddComponent(std::move(hitbox));
-
-        if (dae::SceneData::GetInstance().isOnEnemy(*tempPumpObject))
-        {
-
-            static bool soundPlayed = false;
-            if (!soundPlayed)
-            {
-                dae::Message message;
-                message.type = dae::PlaySoundMessageType::Sound;
-                message.arguments.emplace_back(static_cast<sound_id>(8));
-                dae::EventQueue::Broadcast(message);
-
-                soundPlayed = true; // Ensure the sound plays only once
-            }
-          return true;  
-        }
-
-        if (!dae::SceneData::GetInstance().IsOnwalkthrough(*tempPumpObject))
-        {
-            return true;
-        }
-
-        return false;
-    }
-
     void Player::UpdatePumpTextures() const
     {
         for (size_t i = 0; i < m_pumps.size(); ++i)
         {
             if (i == m_pumps.size() - 1)
             {
-                m_pumps[i]->SetTexture(dae::ResourceManager::GetTexture("PumpEnd"));
+                m_pumps[i]->SetTexture(dae::ResourceManager::GetTexture(dae::HashString("PumpEnd")));
             }
             else
             {
-                m_pumps[i]->SetTexture(dae::ResourceManager::GetTexture("PumpLine"));
+                m_pumps[i]->SetTexture(dae::ResourceManager::GetTexture(dae::HashString("PumpLine")));
             }
         }
     }
@@ -247,6 +241,9 @@ namespace game
     {
 	    if (m_isDying)
             return;
+
+        m_pumps.clear();
+        m_pumpPartCount = 0; 
 
         // Check if the direction changed
         Direction newDirection = Direction::None;

@@ -12,74 +12,85 @@
 #include "SceneData.h"
 #include "SceneManager.h"
 
-void EnemyNormalState::Enter(EnemyComponent* /*enemy*/) {
-}
 
-void EnemyNormalState::Update(EnemyComponent* enemy) {
-    enemy->MoveToNextWaypoint();
-
-    if (enemy->ShouldEnterGhostMode()) {
-        enemy->SetState(std::make_unique<EnemyGhostState>());
-    }
-}
-
-void EnemyNormalState::Exit(EnemyComponent* /*enemy*/) {
-}
 
 void EnemyGhostState::Enter(EnemyComponent* enemy) {
     enemy->EnableGhostMode();
-    enemy->m_Owner->GetComponent<dae::AnimationComponent>()->Play("Ghost",true);
+    enemy->m_Owner->GetComponent<dae::AnimationComponent>()->Play("Ghost", true);
     enemy->DetectsPlayer();
 
     if (!enemy->m_DetectedPlayers.empty()) {
+        // Find the closest player and start pursuing
         enemy->m_TargetPlayerPosition = enemy->m_DetectedPlayers.front()->GetWorldPosition();
         enemy->m_GhostModePursuitTimer = enemy->m_GhostModePursuitDuration;
     }
 }
 
 void EnemyGhostState::Update(EnemyComponent* enemy) {
+    // Decrement the pursuit timer
+    enemy->m_GhostModePursuitTimer -= dae::GameTime::GetDeltaTime();
+
+    // Check if the ghost is at a walkthrough location
+    if (enemy->IsAtWalkthroughLocation()) {
+        // Move the ghost to the center of the walkthrough location
+        glm::vec3 walkthroughCenter = enemy->GetWalkthroughCenter();
+        if (enemy->ReachedDestination()) {
+            enemy->m_Destination = walkthroughCenter;
+            enemy->MoveToNextWaypointTowards(walkthroughCenter);
+        }
+
+        // Check if the ghost reached the center of the walkthrough location
+        if (enemy->ReachedDestination()) {
+            // Transition to wandering state
+            enemy->SetState(std::make_unique<EnemyWandering>());
+            return;
+        }
+    }
+
+    // If the pursuit timer expired or target position is invalid
+    if (enemy->m_GhostModePursuitTimer <= 0.0f || enemy->m_TargetPlayerPosition == glm::vec3(0, 0, 0)) {
+        // Move to the nearest valid spot
+        const glm::vec3 nearestValidSpot = enemy->GetWalkthroughCenter();
+        if (nearestValidSpot != enemy->m_CurrentPosition) {
+            enemy->m_Destination = nearestValidSpot;
+            enemy->MoveToNextWaypointTowards(nearestValidSpot);
+        }
+
+        // Check if the ghost reached the nearest valid spot
+        if (enemy->ReachedDestination()) {
+            // Transition to wandering state
+            enemy->SetState(std::make_unique<EnemyWandering>());
+        }
+        return; // Skip further processing in this update cycle
+    }
+
+    // Continuously detect the player
+    enemy->DetectsPlayer();
+
+    if (!enemy->m_DetectedPlayers.empty()) {
+        // Update the target player position to the closest detected player
+        enemy->m_TargetPlayerPosition = enemy->m_DetectedPlayers.front()->GetWorldPosition();
+    }
 
     if (enemy->m_TargetPlayerPosition != glm::vec3(0, 0, 0)) {
         glm::vec3 direction = enemy->m_TargetPlayerPosition - enemy->m_CurrentPosition;
         const float distance = glm::length(direction);
 
         if (distance > 1.0f) {
-            // Move towards the player
+            // Continue pursuing the player
             enemy->MoveToNextWaypointTowards(enemy->m_TargetPlayerPosition);
         }
         else {
-            enemy->m_TargetPlayerPosition = glm::vec3(0, 0, 0); // Reset target position
-        }
-    }
-
-    // Decrement the pursuit timer
-    enemy->m_GhostModePursuitTimer -= dae::GameTime::GetDeltaTime();
-
-    if (enemy->m_GhostModePursuitTimer <= 0.0f) {
-        // Time has elapsed, move to the closest valid space
-        const glm::vec3 nearestValidSpot = enemy->FindNearestValidSpot();
-        if (nearestValidSpot != enemy->m_CurrentPosition) {
-            enemy->m_Destination = nearestValidSpot;
-            enemy->MoveToNextWaypointTowards(enemy->m_Destination);
-        }
-        else {
-            enemy->m_Destination = enemy->m_CurrentPosition; // Stay in current position if no valid spot
-        }
-
-        // Update to continue moving towards the nearest valid spot
-        enemy->MoveToNextWaypointTowards(enemy->m_Destination);
-
-        // Check if the destination has been reached
-        if (enemy->ReachedDestination()) {
+            // Player reached, transition to wandering state
             enemy->SetState(std::make_unique<EnemyWandering>());
         }
     }
 }
 
-
 void EnemyGhostState::Exit(EnemyComponent* enemy) {
     enemy->DisableGhostMode();
 }
+
 
 void EnemyWandering::Enter(EnemyComponent* enemy) {
     if (auto fygarComponent = enemy->m_Owner->GetComponent<FygarComponent>()) {
@@ -149,20 +160,21 @@ void EnemyPumpedState::Enter(EnemyComponent* Enemy) {
 
     // Play the corresponding animation based on the number of hits
     switch (Enemy->m_PumpHits) {
-    case 1:
+    case 2:
         Enemy->m_Owner->GetComponent<dae::AnimationComponent>()->Play("Pumped1", true);
         break;
-    case 2:
+    case 3:
         Enemy->m_Owner->GetComponent<dae::AnimationComponent>()->Play("Pumped2", true);
         break;
-    case 3:
+    case 4:
         Enemy->m_Owner->GetComponent<dae::AnimationComponent>()->Play("Pumped3", true);
         break;
-    case 4:
+    case 5:
         Enemy->m_Owner->GetComponent<dae::AnimationComponent>()->Play("Pumped4", true);
         Enemy->m_Owner->GetComponent<HitBox>()->Disable();
         m_Pumped4Duration = Enemy->m_Owner->GetComponent<dae::AnimationComponent>()->GetAnimationDuration();
         break;
+default: break;
     }
     Enemy->StartDeflationTimer();
 
@@ -174,7 +186,7 @@ void EnemyPumpedState::Enter(EnemyComponent* Enemy) {
 void EnemyPumpedState::Update(EnemyComponent* enemy) {
 
     // If Pump hits is 4, track the elapsed time to switch to dead state
-    if (enemy->m_PumpHits == 4) {
+    if (enemy->m_PumpHits == 5) {
         m_ElapsedTime += dae::GameTime::GetDeltaTime();
         if (m_ElapsedTime >= static_cast<float>(m_Pumped4Duration)) {
             enemy->SetState(std::make_unique<EnemyDeadState>());

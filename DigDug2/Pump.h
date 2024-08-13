@@ -10,18 +10,20 @@ public:
     void Render() const override;
     void Activate();
     bool IsActive() const { return m_isActive; }
+    dae::GameObject* GetPumpObject() const { return m_pumpObject.get(); }
     void Deactivate();
     void SetTexture(const dae::Texture2D* texture) const;
     void SetPosition(const glm::vec3& position);
     void SetDirection(const glm::vec3& direction);
     static float GetRotationFromDirection(const glm::vec3& direction);
     void SetLifetime(float lifetime);
+    bool IsCollidingWithEnemy();
+    void PumpEnemy();
+
 
     std::type_info const& GetComponentType() const override { return typeid(Pump); }
 
 private:
-    void PumpEnemy();
-    bool IsCollidingWithEnemy();
 
     dae::GameObject* m_owner;
     std::unique_ptr<dae::GameObject> m_pumpObject;

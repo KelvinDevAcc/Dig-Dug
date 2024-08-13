@@ -1,6 +1,7 @@
 #include "GameData.h"
 
 #include <chrono>
+#include <ranges>
 #include <thread>
 #include <vector>
 
@@ -41,6 +42,14 @@ void GameData::ResetPlayerData(int playerID)
 {
     if (m_playerData.contains(playerID)) {
         m_playerData[playerID] = PlayerData();
+    }
+}
+
+void GameData::ResetAllPlayerData()
+{
+    for (auto& data : m_playerData | std::views::values)
+    {
+        data = PlayerData(); // Assuming PlayerData() initializes to default values
     }
 }
 

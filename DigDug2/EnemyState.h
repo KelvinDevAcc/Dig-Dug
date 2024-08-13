@@ -19,14 +19,6 @@ protected:
     EnemyState() = default;
 };
 
-class EnemyNormalState final: public EnemyState {
-public:
-    void Enter(EnemyComponent* enemy) override;
-    void Update(EnemyComponent* enemy) override;
-    void Exit(EnemyComponent* enemy) override;
-};
-
-
 class EnemyGhostState final: public EnemyState {
 public:
     void Enter(EnemyComponent* enemy) override;

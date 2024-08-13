@@ -10,7 +10,6 @@ enum class Direction { Up, Down, Left, Right };
 
 class EnemyComponent : public dae::Component {
 
-    friend class EnemyNormalState;
     friend class EnemyGhostState;
     friend class EnemyWandering;
     friend class EnemyPumpedState;
@@ -57,7 +56,8 @@ public:
     virtual bool ShouldEnterGhostMode();
     virtual void UpdateTimer();
     void StartDeflationTimer();
-
+    bool IsAtWalkthroughLocation();
+    glm::vec3 GetWalkthroughCenter();
     // Component type information
     std::type_info const& GetComponentType() const override { return typeid(EnemyComponent); }
 

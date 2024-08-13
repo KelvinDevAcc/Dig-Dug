@@ -354,7 +354,7 @@ void NavigateDownLetterCommand::Execute() {
     if (const auto selectName = FindSelectNameComponent()) {
         dae::Message message;
         message.type = dae::PlaySoundMessageType::Sound;
-        message.arguments.emplace_back(static_cast<sound_id>(15)); 
+        message.arguments.emplace_back(static_cast<sound_id>(14));
         dae::EventQueue::Broadcast(message);
         selectName->SubtractLetter();
     }
@@ -379,7 +379,7 @@ void SelectOptionLetterCommand::Execute() {
     if (const auto selectName = FindSelectNameComponent()) {
         dae::Message message;
         message.type = dae::PlaySoundMessageType::Sound;
-        message.arguments.emplace_back(static_cast<sound_id>(15)); 
+        message.arguments.emplace_back(static_cast<sound_id>(15));
         dae::EventQueue::Broadcast(message);
         selectName->ConfirmLetter();
     }

@@ -11,7 +11,7 @@
 EnemyComponent::EnemyComponent(dae::GameObject* owner)
     : m_CurrentState(std::make_unique<EnemyWandering>()), m_Destination(0, 0, 0), m_Owner(owner),
     m_GhostModeTimer(0.0f), m_GhostModeInterval(10.0f), m_LastGhostModeChange(0), m_GhostModeEnabled(false),m_TargetPlayerPosition(0, 0, 0),m_GhostModePursuitTimer(0.0f)
-	,m_GhostModePursuitDuration(5.0f),m_PumpHits(0),m_DeflationTimeLimit(0)
+	,m_GhostModePursuitDuration(4.0f),m_PumpHits(0),m_DeflationTimeLimit(0)
 {
     m_startPosition = m_Owner->GetWorldPosition();
     m_CurrentPosition = m_Owner->GetWorldPosition(); // Initialize the position
@@ -20,7 +20,7 @@ EnemyComponent::EnemyComponent(dae::GameObject* owner)
     // Initialize the ghost mode timer with a random interval
     static std::random_device rd;
     static std::mt19937 gen(rd());
-    std::uniform_real_distribution<float> dis(5.0f, 15.0f); // Interval between 50 and 150 seconds
+    std::uniform_real_distribution<float> dis(5.0f, 15.0f);
     m_GhostModeInterval = dis(gen);
     m_GhostModeTimer = m_GhostModeInterval;
 }
@@ -145,11 +145,11 @@ glm::vec3 GridToPosition(const glm::ivec2& gridCoords)
 }
 
 glm::vec3 EnemyComponent::FindNearestValidSpot() {
-    const float maxSearchDistance = SceneHelpers::GetCellSize().x * 5; // Maximum distance to search
+    const float maxSearchDistance = SceneHelpers::GetCellSize().x * 2; // Maximum distance to search
     const float stepSize = SceneHelpers::GetCellSize().x; // Step size in grid (assumes square cells)
 
     // Calculate the grid origin in 2D space
-    glm::ivec2 currentGridPos = PositionToGrid(m_Owner->GetWorldPosition());
+    const glm::ivec2 currentGridPos = PositionToGrid(m_Owner->GetWorldPosition());
 
     float searchRange = stepSize;
 
@@ -158,10 +158,11 @@ glm::vec3 EnemyComponent::FindNearestValidSpot() {
         for (float x = -searchRange; x <= searchRange; x += stepSize) {
             for (float y = -searchRange; y <= searchRange; y += stepSize) {
                 glm::ivec2 potentialGridPos = currentGridPos + glm::ivec2(x / stepSize, y / stepSize);
-                glm::vec3 potentialSpot = GridToPosition(potentialGridPos);
+                const glm::vec3 potentialSpot = GridToPosition(potentialGridPos);
 
                 // Check if the center of the tile is walkable
-                if (dae::SceneData::GetInstance().CanEnemyMove(potentialSpot.x, potentialSpot.y, *m_Owner)) {
+                const auto center = SceneHelpers::GetCenterOfTile(glm::vec3(potentialGridPos, 0.f));
+                if (dae::SceneData::GetInstance().CanEnemyMove(center.x, center.y, *m_Owner)) {
                     return potentialSpot;
                 }
             }
@@ -337,7 +338,7 @@ bool EnemyComponent::ShouldEnterGhostMode() {
 
 void EnemyComponent::HitByPump(dae::GameObject* lastatacker) {
     ++m_PumpHits;
-    if (m_PumpHits <= 4)
+    if (m_PumpHits <= 5)
     {
         SetState(std::make_unique<EnemyPumpedState>());
     }
@@ -345,7 +346,7 @@ void EnemyComponent::HitByPump(dae::GameObject* lastatacker) {
 }
 
 void EnemyComponent::StartDeflationTimer() {
-    m_DeflationTimeLimit = 5.0f; // Set the deflation time limit (e.g., 5 seconds)
+    m_DeflationTimeLimit = 4.0f; // Set the deflation time limit 
 }
 
 void EnemyComponent::OnCrushed() {
@@ -396,4 +397,40 @@ void EnemyComponent::ReSpawn() {
     m_PumpHits = 0;
     // Reset to Wandering state
     SetState(std::make_unique<EnemyWandering>());
+}
+
+bool EnemyComponent::IsAtWalkthroughLocation() {
+    // Implement logic to check if the enemy is at a walkthrough location
+    // This could involve checking collision with special triggers or locations in the game
+
+    if (dae::SceneData::GetInstance().IsOnwalkthrough(*m_Owner))
+    {
+        return true;
+    }
+    return false;
+}
+
+glm::vec3 EnemyComponent::GetWalkthroughCenter()
+{
+    const auto& walkthroughs = dae::SceneData::GetInstance().GetWalkThrough();
+
+    glm::vec3 currentPosition = m_Owner->GetWorldPosition();
+    glm::vec3 closestCenter = currentPosition; // Default to current position if no walkthroughs are found
+    float closestDistance = std::numeric_limits<float>::max();
+
+    for (const auto& walkthrough : walkthroughs) {
+        // Assuming each walkthrough has a method to get its center
+        glm::vec3 walkthroughpsition = walkthrough->GetWorldPosition();
+        
+        // Calculate the distance to the current position
+        float distance = glm::length(currentPosition - walkthroughpsition);
+
+        // Check if this walkthrough is the closest one
+        if (distance < closestDistance) {
+            closestDistance = distance;
+            closestCenter = walkthroughpsition;
+        }
+    }
+
+    return closestCenter;
 }

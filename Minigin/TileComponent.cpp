@@ -74,7 +74,7 @@ void TileComponent::UpdateTexture(const std::string& name)
 {
     if (m_spriterenderer)
     {
-        m_spriterenderer->SetTexture(dae::ResourceManager::GetTexture(name));
+        m_spriterenderer->SetTexture(dae::ResourceManager::GetTexture(dae::HashString(name)));
         m_spriterenderer->SetDimensions(40, 40);
     }
 }

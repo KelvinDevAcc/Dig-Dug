@@ -25,7 +25,7 @@ dae::Scene* SceneHelpers::m_scene = nullptr;
 
 void CreateGameObject(dae::Scene* scene, const std::string& textureName, float x, float y, glm::vec2 scale, dae::GameObjectType type) {
     auto gameObject = std::make_unique<dae::GameObject>();
-    auto spriteRenderer = std::make_unique<dae::SpriteRendererComponent>(gameObject.get(), dae::ResourceManager::GetTexture(textureName));
+    auto spriteRenderer = std::make_unique<dae::SpriteRendererComponent>(gameObject.get(), dae::ResourceManager::GetTexture(dae::HashString(textureName)));
     spriteRenderer->SetDimensions(scale.x, scale.y);
     gameObject->AddComponent(std::move(spriteRenderer));
     gameObject->SetLocalPosition(glm::vec3(x, y, 0.0f));
@@ -42,7 +42,7 @@ void CreateTile(dae::Scene* scene, const std::string& textureName, float x, floa
 	auto gameObject = std::make_unique<dae::GameObject>();
 
     // Add sprite renderer component
-    auto spriteRenderer = std::make_unique<dae::SpriteRendererComponent>(gameObject.get(), dae::ResourceManager::GetTexture(textureName));
+    auto spriteRenderer = std::make_unique<dae::SpriteRendererComponent>(gameObject.get(), dae::ResourceManager::GetTexture(dae::HashString(textureName)));
     spriteRenderer->SetDimensions(scale.x, scale.y);
     gameObject->AddComponent(std::move(spriteRenderer));
     gameObject->SetLocalPosition(glm::vec3(x, y, 0.0f));
@@ -89,7 +89,7 @@ void SceneHelpers::CreateEmpty(dae::Scene* scene, float x, float y, glm::vec2 sc
 void SceneHelpers::SpawnPooka(dae::Scene* scene, float x, float y, glm::vec2 scale)
 {
        auto PookaObject = std::make_unique<dae::GameObject>();
-       auto spriterenderComponent2 = std::make_unique<dae::SpriteRendererComponent>(PookaObject.get(), dae::ResourceManager::GetSprite("enemy"));
+       auto spriterenderComponent2 = std::make_unique<dae::SpriteRendererComponent>(PookaObject.get(), dae::ResourceManager::GetSprite(dae::HashString("enemy")));
        spriterenderComponent2->SetDimensions(40, 40);
        PookaObject->AddComponent(std::move(spriterenderComponent2));
 
@@ -113,7 +113,7 @@ void SceneHelpers::SpawnPooka(dae::Scene* scene, float x, float y, glm::vec2 sca
 void SceneHelpers::SpawnFygar(dae::Scene* scene, float x, float y, glm::vec2 scale)
 {
        auto fygarObject = std::make_unique<dae::GameObject>();
-      auto spriterenderComponent3 = std::make_unique<dae::SpriteRendererComponent>(fygarObject.get(), dae::ResourceManager::GetSprite("Fygar"));
+      auto spriterenderComponent3 = std::make_unique<dae::SpriteRendererComponent>(fygarObject.get(), dae::ResourceManager::GetSprite(dae::HashString("Fygar")));
       spriterenderComponent3->SetDimensions(40, 40);
       fygarObject->AddComponent(std::move(spriterenderComponent3));
 
@@ -138,7 +138,7 @@ void SceneHelpers::SpawnStone(dae::Scene* scene, float x, float y, glm::vec2 sca
 {
     auto RockObject = std::make_unique<dae::GameObject>();
 
-    auto spriterenderComponent4 = std::make_unique<dae::SpriteRendererComponent>(RockObject.get(), dae::ResourceManager::GetSprite("Rock"));
+    auto spriterenderComponent4 = std::make_unique<dae::SpriteRendererComponent>(RockObject.get(), dae::ResourceManager::GetSprite(dae::HashString("Rock")));
     spriterenderComponent4->SetDimensions(40, 40);
     RockObject->AddComponent(std::move(spriterenderComponent4));
 
@@ -182,7 +182,7 @@ void SceneHelpers::SpawnPlayer(dae::Scene* scene, float x, float y, glm::vec2 sc
     auto Character1Health = std::make_unique<dae::HealthComponent>(100, lives);
     PlayerObject->AddComponent(std::move(Character1Health));
 
-    auto spriteRenderComponent = std::make_unique<dae::SpriteRendererComponent>(PlayerObject.get(), dae::ResourceManager::GetSprite("Player"));
+    auto spriteRenderComponent = std::make_unique<dae::SpriteRendererComponent>(PlayerObject.get(), dae::ResourceManager::GetSprite(dae::HashString("Player")));
     spriteRenderComponent->SetDimensions(40, 40);
     PlayerObject->AddComponent(std::move(spriteRenderComponent));
 
@@ -223,7 +223,7 @@ void SceneHelpers::SpawnPlayerEnemy(dae::Scene* scene, float x, float y, glm::ve
     auto Character1points = std::make_unique<dae::PointComponent>(0);
     PlayerObject->AddComponent(std::move(Character1points));
 
-    auto spriterenderComponent = std::make_unique<dae::SpriteRendererComponent>(PlayerObject.get(), dae::ResourceManager::GetSprite("Fygar"));
+    auto spriterenderComponent = std::make_unique<dae::SpriteRendererComponent>(PlayerObject.get(), dae::ResourceManager::GetSprite(dae::HashString("Fygar")));
     spriterenderComponent->SetDimensions(40, 40);
     PlayerObject->AddComponent(std::move(spriterenderComponent));
 
@@ -262,6 +262,16 @@ void SceneHelpers::LoadMapIntoScene(const LoadMap& loadMap, dae::Scene* scene, c
         {'_', "floorblock03"}, {'7', "floorblock041"}, {'8', "floorblock042"},
         {'9', "floorblock043"}, {'0', "floorblock044"}, {'-', "floorblock045"},
         {'=', "floorblock046"}, {'u', "floorblock04"}
+
+        // New mappings
+     /*   ,{'i', "2skyFloor"}, {'j', "2floorblock01"}, {'k', "2floorblock02"},
+        {'l', "2floorblock021"}, {'m', "2floorblock022"}, {'n', "2floorblock023"},
+        {'o', "2floorblock024"}, {'p', "2floorblock025"}, {'q', "2floorblock026"},
+        {'r', "2floorblock03"}, {'t', "2floorblock031"}, {'y', "2floorblock032"},
+        {'u', "2floorblock033"}, {'v', "2floorblock034"}, {'w', "2floorblock035"},
+        {'x', "2floorblock036"}, {'z', "2floorblock04"}, {'A', "2floorblock041"},
+        {'B', "2floorblock042"}, {'C', "2floorblock043"}, {'D', "2floorblock044"},
+        {'E', "2floorblock045"}, {'F', "2floorblock046"}*/
     };
 
     const float startX = startPos.x;

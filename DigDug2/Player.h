@@ -74,8 +74,6 @@ namespace game
         void UpdatePumpTimer(float deltaTime);
         void AddPumpPart();
         void UpdatePumpTextures() const;
-        static bool IsCollidingWithSomething(const glm::vec3& position);
-        std::unique_ptr<Pump> GetInactivePump();
         void UpdateTunnelType(const glm::vec3& position, bool isHorizontal, bool isPositiveDirection);
         void CheckAndSetCornerTypes(const glm::vec3& position, bool isHorizontal, bool isPositiveDirection);
         void SnapToGrid() const;
@@ -93,7 +91,7 @@ namespace game
         std::vector<std::unique_ptr<Pump>> m_pumps;
         std::vector<std::unique_ptr<Pump>> m_pumpPool;
         glm::vec3 pumpDirection{ 1, 0, 0 };
-        size_t m_maxPumps;
+        int m_maxPumps;
 
         glm::vec3 m_TargetPosition;
         bool m_IsMoving = false;

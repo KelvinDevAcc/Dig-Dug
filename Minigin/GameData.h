@@ -27,6 +27,7 @@ public:
     int GetNumberOfPlayers() const;
 
     void ResetPlayerData(int playerID);
+    void ResetAllPlayerData();
     void CheckGameState();
 
     void LoadNextScene();

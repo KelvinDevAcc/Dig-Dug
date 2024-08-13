@@ -61,7 +61,7 @@ namespace dae
             for (int i = currentSpriteCount; i < lives; ++i)
             {
                 auto lifeSprite = std::make_unique<GameObject>();
-                if (auto texture = ResourceManager::GetInstance().GetTexture(m_textureName))
+                if (auto texture = ResourceManager::GetInstance().GetTexture(dae::HashString(m_textureName)))
                 {
                     if (auto spriteComponent = std::make_unique<SpriteRendererComponent>(lifeSprite.get(), texture))
                     {
