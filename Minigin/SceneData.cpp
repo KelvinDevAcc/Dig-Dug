@@ -195,8 +195,8 @@ namespace dae {
 
         if (checkCollisionsWithObjects(m_rocks))
             return true;
-        if (checkCollisionsWithObjects(m_empty))
-            return true;
+        //if (checkCollisionsWithObjects(m_empty))
+        //    return true;
 
         return false;
     }

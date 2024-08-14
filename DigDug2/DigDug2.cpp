@@ -38,7 +38,7 @@ void loadResources()
 #endif
     auto& ss = servicelocator::get_sound_system();
 
-    ss.setVolume(0.f);
+    ss.setVolume(0.5f);
     ss.register_sound_file("../Data/Sounds/02-GameStartMusic.mp3");
     ss.register_sound_file("../Data/Sounds/12-HighScoreMusic.mp3");
     ss.register_sound_file("../Data/Sounds/13-NameEntryMusic.mp3");

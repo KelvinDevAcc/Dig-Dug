@@ -1,7 +1,5 @@
 #include "Player.h"
 #include "EnemyComponent.h"
-#include <iostream>
-
 #include "GameData.h"
 #include "GameTime.h"
 #include "ResourceManager.h"
@@ -15,7 +13,7 @@ namespace game
         : m_GameObject(gameObject),
         m_timeSinceLastAction(0.0f), m_inactivityThreshold(6.0f),
         m_CurrentAnimationState(AnimationState::Idle),
-        pumpDirection(glm::vec3(1, 0, 0)),m_deathTimer(0),m_isDying(false),m_maxPumps(4)
+        pumpDirection(glm::vec3(1, 0, 0)),m_maxPumps(4),m_deathTimer(0),m_isDying(false)
     {
         m_animationComponent = m_GameObject->GetComponent<dae::AnimationComponent>();
         m_healthComponent = m_GameObject->GetComponent<dae::HealthComponent>();
@@ -23,7 +21,6 @@ namespace game
         m_startPosition = m_GameObject->GetWorldPosition();
 
         SetAnimationState(AnimationState::Idle);
-        m_GameObject->GetComponent<HitBox>()->Disable();
     }
 
     void Player::Update()
@@ -300,7 +297,7 @@ namespace game
         return {
             (cellSizeX * gridCoords.x) + gridStartX,
             (cellSizeY * gridCoords.y) + gridStartY,
-            0.0f
+            1.0f
         };
     }
 
@@ -347,174 +344,135 @@ namespace game
         m_GameObject->SetLocalPosition(glm::vec3(position.x, newPosY, position.z));
     }
 
-    void Player::UpdateTunnelType(const glm::vec3& position, bool isHorizontal, bool isPositiveDirection)
-    {
+    void Player::UpdateTunnelType(const glm::vec3& position, bool isHorizontal, bool isPositiveDirection) {
         const TunnelType currentTile = SceneHelpers::GetTileTypeAtPosition(position);
 
-        if (currentTile == TunnelType::Empty)
-        {
-            // Set the new type based on direction
-            SceneHelpers::SetTileTypeAtPosition(position, isHorizontal ? (isPositiveDirection ? TunnelType::rightEnd : TunnelType::leftEnd)
-                : (isPositiveDirection ? TunnelType::bottomEnd : TunnelType::topEnd));
+        if (currentTile == TunnelType::Empty) {
+            SetEndType(position, isHorizontal, isPositiveDirection);
         }
-        else if (isHorizontal)
-        {
-            glm::vec3 previousPosition;
-            TunnelType previousTile;
-            if (currentTile == TunnelType::rightEnd)
-            {
-                previousPosition = position + glm::vec3(-SceneHelpers::GetCellSize().x, 0, 0);
-                previousTile = SceneHelpers::GetTileTypeAtPosition(previousPosition);
-                if (previousTile == TunnelType::walkThroughUp)
-                {
-                    SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::MiddleBlock);
-                }
-                if (previousTile == TunnelType::rightEnd)
-                {
-                    SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::walkThroughLeft);
-                }
-                SceneHelpers::SetTileTypeAtPosition(position, TunnelType::rightEnd);
-            }
-            else if (currentTile == TunnelType::leftEnd)
-            {
-                previousPosition = position + glm::vec3(SceneHelpers::GetCellSize().x, 0, 0);
-                previousTile = SceneHelpers::GetTileTypeAtPosition(previousPosition);
-                if (previousTile == TunnelType::walkThroughUp)
-                {
-                    SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::MiddleBlock);
-                }
-                if (previousTile == TunnelType::leftEnd)
-                {
-                    SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::walkThroughLeft);
-                }
-                SceneHelpers::SetTileTypeAtPosition(position, TunnelType::leftEnd);
-            }
+        else if (isHorizontal) {
+            HandleHorizontalTunnel(position, currentTile);
         }
-        else
-        {
-            glm::vec3 previousPosition;
-            TunnelType previousTile;
-            if (currentTile == TunnelType::topEnd)
-            {
-                previousPosition = position + glm::vec3(0, SceneHelpers::GetCellSize().y, 0);
-                previousTile = SceneHelpers::GetTileTypeAtPosition(previousPosition);
-                if (previousTile == TunnelType::walkThroughLeft)
-                {
-                    SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::MiddleBlock);
-                }
-                if (previousTile == TunnelType::topEnd)
-                {
-                    SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::walkThroughUp);
-                }
-                SceneHelpers::SetTileTypeAtPosition(position, TunnelType::topEnd);
-            }
-            else if (currentTile == TunnelType::bottomEnd)
-            {
-                previousPosition = position + glm::vec3(0, -SceneHelpers::GetCellSize().y, 0);
-                previousTile = SceneHelpers::GetTileTypeAtPosition(previousPosition);
-                if (previousTile == TunnelType::walkThroughLeft)
-                {
-                    SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::MiddleBlock);
-                }
-                if (previousTile == TunnelType::bottomEnd)
-                {
-                    SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::walkThroughUp);
-                }
-                SceneHelpers::SetTileTypeAtPosition(position, TunnelType::bottomEnd);
-            }
+        else {
+            HandleVerticalTunnel(position, currentTile);
         }
+
         CheckAndSetCornerTypes(position, isHorizontal, isPositiveDirection);
     }
 
-    void Player::CheckAndSetCornerTypes(const glm::vec3& position, bool isHorizontal, bool isPositiveDirection)
-    {
-    	const glm::vec3 above = position + glm::vec3(0, -SceneHelpers::GetCellSize().y, 0);
-        glm::vec3 below = position + glm::vec3(0, SceneHelpers::GetCellSize().y, 0);
-        const glm::vec3 left = position + glm::vec3(-SceneHelpers::GetCellSize().x, 0, 0);
-        const glm::vec3 right = position + glm::vec3(SceneHelpers::GetCellSize().x, 0, 0);
+    void Player::SetEndType(const glm::vec3& position, bool isHorizontal, bool isPositiveDirection) {
+        TunnelType endType = isHorizontal ? (isPositiveDirection ? TunnelType::rightEnd : TunnelType::leftEnd)
+            : (isPositiveDirection ? TunnelType::bottomEnd : TunnelType::topEnd);
+        SceneHelpers::SetTileTypeAtPosition(position, endType);
+    }
 
-
-        // Check for corner types
-        if (isHorizontal && SceneHelpers::GetTileTypeAtPosition(left) == TunnelType::topEnd && isPositiveDirection)
-        {
-            const glm::vec3 previousPosition = position + glm::vec3(-SceneHelpers::GetCellSize().x, 0, 0);
-            SceneHelpers::SetTileTypeAtPosition(previousPosition,  TunnelType::UpRight);
-            SceneHelpers::SetTileTypeAtPosition(position, TunnelType::rightEnd);
+    void Player::HandleHorizontalTunnel(const glm::vec3& position, TunnelType currentTile) {
+        if (currentTile == TunnelType::rightEnd) {
+            AdjustPreviousTileForHorizontal(position, glm::vec3(-SceneHelpers::GetCellSize().x, 0, 0));
         }
-        if (isHorizontal && SceneHelpers::GetTileTypeAtPosition(right) == TunnelType::topEnd && !isPositiveDirection)
-        {
-            const glm::vec3 previousPosition = position + glm::vec3(SceneHelpers::GetCellSize().y, 0, 0);
-            SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::UpLeft);
-            SceneHelpers::SetTileTypeAtPosition(position, TunnelType::leftEnd);
+        else if (currentTile == TunnelType::leftEnd) {
+            AdjustPreviousTileForHorizontal(position, glm::vec3(SceneHelpers::GetCellSize().x, 0, 0));
         }
+    }
 
-        // Check for corner types
-        if (isHorizontal && SceneHelpers::GetTileTypeAtPosition(left) == TunnelType::bottomEnd && isPositiveDirection)
-        {
-            const glm::vec3 previousPosition = position + glm::vec3(-SceneHelpers::GetCellSize().x, 0, 0);
-            SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::UpRight);
-            SceneHelpers::SetTileTypeAtPosition(position, TunnelType::rightEnd);
+    void Player::HandleVerticalTunnel(const glm::vec3& position, TunnelType currentTile) {
+        if (currentTile == TunnelType::topEnd) {
+            AdjustPreviousTileForVertical(position, glm::vec3(0, SceneHelpers::GetCellSize().y, 0));
         }
-        if (isHorizontal && SceneHelpers::GetTileTypeAtPosition(right) == TunnelType::bottomEnd && !isPositiveDirection)
-        {
-            const glm::vec3 previousPosition = position + glm::vec3(SceneHelpers::GetCellSize().y, 0, 0);
-            SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::UpLeft);
-            SceneHelpers::SetTileTypeAtPosition(position, TunnelType::leftEnd);
+        else if (currentTile == TunnelType::bottomEnd) {
+            AdjustPreviousTileForVertical(position, glm::vec3(0, -SceneHelpers::GetCellSize().y, 0));
         }
+    }
 
-        // Check for corner types
-        //if (!isHorizontal && SceneHelpers::GetTileTypeAtPosition(below) == TunnelType::leftEnd )
-        //{
-        //    const glm::vec3 previousPosition = position + glm::vec3(0, -SceneHelpers::GetCellSize().y, 0);
-        //    SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::UpRight);
-        //    SceneHelpers::SetTileTypeAtPosition(position, TunnelType::rightEnd);
-        //}
-        //if (!isHorizontal && SceneHelpers::GetTileTypeAtPosition(right) == TunnelType::leftEnd && !isPositiveDirection)
-        //{
-        //    const glm::vec3 previousPosition = position + glm::vec3(SceneHelpers::GetCellSize().y, 0, 0);
-        //    SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::UpLeft);
-        //    SceneHelpers::SetTileTypeAtPosition(position, TunnelType::leftEnd);
-        //}
+    void Player::AdjustPreviousTileForHorizontal(const glm::vec3& position, const glm::vec3& offset) {
+        glm::vec3 previousPosition = position + offset;
+        TunnelType previousTile = SceneHelpers::GetTileTypeAtPosition(previousPosition);
+        AdjustTileTypeForHorizontal(previousPosition, previousTile);
+        SceneHelpers::SetTileTypeAtPosition(position, TunnelType::rightEnd);
+    }
 
-        //// Check for corner types
-        //if (!isHorizontal && SceneHelpers::GetTileTypeAtPosition(left) == TunnelType::rightEnd && isPositiveDirection)
-        //{
-        //    const glm::vec3 previousPosition = position + glm::vec3(-SceneHelpers::GetCellSize().x, 0, 0);
-        //    SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::UpRight);
-        //    SceneHelpers::SetTileTypeAtPosition(position, TunnelType::rightEnd);
-        //}
-        //if (!isHorizontal && SceneHelpers::GetTileTypeAtPosition(right) == TunnelType::rightEnd && !isPositiveDirection)
-        //{
-        //    const glm::vec3 previousPosition = position + glm::vec3(SceneHelpers::GetCellSize().y, 0, 0);
-        //    SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::UpLeft);
-        //    SceneHelpers::SetTileTypeAtPosition(position, TunnelType::leftEnd);
-        //}
-
-
-
-
-        if (isHorizontal && SceneHelpers::GetTileTypeAtPosition(right) == TunnelType::walkThroughUp)
-        {
-            const glm::vec3 previousPosition = position + glm::vec3(-SceneHelpers::GetCellSize().x,0, 0);
-            SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::walkThroughLeft);
+    void Player::AdjustTileTypeForHorizontal(const glm::vec3& position, TunnelType previousTile) {
+        if (previousTile == TunnelType::walkThroughUp) {
+            SceneHelpers::SetTileTypeAtPosition(position, TunnelType::MiddleBlock);
+        }
+        else if (previousTile == TunnelType::rightEnd || previousTile == TunnelType::leftEnd) {
             SceneHelpers::SetTileTypeAtPosition(position, TunnelType::walkThroughLeft);
         }
-        if (isHorizontal && SceneHelpers::GetTileTypeAtPosition(left) == TunnelType::walkThroughUp)
-        {
-            const glm::vec3 previousPosition = position + glm::vec3(SceneHelpers::GetCellSize().x, 0, 0);
-            SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::walkThroughLeft);
-            SceneHelpers::SetTileTypeAtPosition(position, TunnelType::walkThroughLeft);
+    }
+
+    void Player::AdjustPreviousTileForVertical(const glm::vec3& position, const glm::vec3& offset) {
+        glm::vec3 previousPosition = position + offset;
+        TunnelType previousTile = SceneHelpers::GetTileTypeAtPosition(previousPosition);
+        AdjustTileTypeForVertical(previousPosition, previousTile);
+        SceneHelpers::SetTileTypeAtPosition(position, TunnelType::topEnd);
+    }
+
+    void Player::AdjustTileTypeForVertical(const glm::vec3& position, TunnelType previousTile) {
+        if (previousTile == TunnelType::walkThroughLeft) {
+            SceneHelpers::SetTileTypeAtPosition(position, TunnelType::MiddleBlock);
         }
-        if (!isHorizontal && SceneHelpers::GetTileTypeAtPosition(above) == TunnelType::walkThroughLeft)
-        {
-            const glm::vec3 previousPosition = position + glm::vec3(0, -SceneHelpers::GetCellSize().y, 0);
-            SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::walkThroughUp);
+        else if (previousTile == TunnelType::topEnd || previousTile == TunnelType::bottomEnd) {
             SceneHelpers::SetTileTypeAtPosition(position, TunnelType::walkThroughUp);
         }
-        if (!isHorizontal && SceneHelpers::GetTileTypeAtPosition(below) == TunnelType::walkThroughLeft)
-        {
-            const glm::vec3 previousPosition = position + glm::vec3(0, SceneHelpers::GetCellSize().y, 0);
-            SceneHelpers::SetTileTypeAtPosition(previousPosition, TunnelType::walkThroughUp);
+    }
+
+    void Player::CheckAndSetCornerTypes(const glm::vec3& position, bool isHorizontal, bool isPositiveDirection) {
+        glm::vec3 left = position + glm::vec3(-SceneHelpers::GetCellSize().x, 0, 0);
+        glm::vec3 right = position + glm::vec3(SceneHelpers::GetCellSize().x, 0, 0);
+        glm::vec3 above = position + glm::vec3(0, -SceneHelpers::GetCellSize().y, 0);
+        glm::vec3 below = position + glm::vec3(0, SceneHelpers::GetCellSize().y, 0);
+
+        if (isHorizontal) {
+            CheckHorizontalCorners(position, left, right, isPositiveDirection);
+        }
+        else {
+            CheckVerticalCorners(position, above, below, isPositiveDirection);
+        }
+    }
+
+    void Player::CheckHorizontalCorners(const glm::vec3& position, const glm::vec3& left, const glm::vec3& right, bool isPositiveDirection) {
+        if (isPositiveDirection && SceneHelpers::GetTileTypeAtPosition(left) == TunnelType::topEnd) {
+            SceneHelpers::SetTileTypeAtPosition(left, TunnelType::UpRight);
+        }
+        else if (!isPositiveDirection && SceneHelpers::GetTileTypeAtPosition(right) == TunnelType::topEnd) {
+            SceneHelpers::SetTileTypeAtPosition(right, TunnelType::UpLeft);
+        }
+
+        if (isPositiveDirection && SceneHelpers::GetTileTypeAtPosition(left) == TunnelType::bottomEnd) {
+            SceneHelpers::SetTileTypeAtPosition(left, TunnelType::UpRight);
+        }
+        else if (!isPositiveDirection && SceneHelpers::GetTileTypeAtPosition(right) == TunnelType::bottomEnd) {
+            SceneHelpers::SetTileTypeAtPosition(right, TunnelType::UpLeft);
+        }
+
+        CheckHorizontalWalkThrough(position, left, right);
+    }
+
+    void Player::CheckVerticalCorners(const glm::vec3& position, const glm::vec3& above, const glm::vec3& below, bool /*isPositiveDirection*/) {
+        // You can apply the same pattern here as in CheckHorizontalCorners
+        CheckVerticalWalkThrough(position, above, below);
+    }
+
+    void Player::CheckHorizontalWalkThrough(const glm::vec3& position, const glm::vec3& left, const glm::vec3& right) {
+        if (SceneHelpers::GetTileTypeAtPosition(right) == TunnelType::walkThroughUp) {
+            SceneHelpers::SetTileTypeAtPosition(left, TunnelType::walkThroughLeft);
+            SceneHelpers::SetTileTypeAtPosition(position, TunnelType::walkThroughLeft);
+        }
+
+        if (SceneHelpers::GetTileTypeAtPosition(left) == TunnelType::walkThroughUp) {
+            SceneHelpers::SetTileTypeAtPosition(right, TunnelType::walkThroughLeft);
+            SceneHelpers::SetTileTypeAtPosition(position, TunnelType::walkThroughLeft);
+        }
+    }
+
+    void Player::CheckVerticalWalkThrough(const glm::vec3& position, const glm::vec3& above, const glm::vec3& below) {
+        if (SceneHelpers::GetTileTypeAtPosition(above) == TunnelType::walkThroughLeft) {
+            SceneHelpers::SetTileTypeAtPosition(below, TunnelType::walkThroughUp);
+            SceneHelpers::SetTileTypeAtPosition(position, TunnelType::walkThroughUp);
+        }
+
+        if (SceneHelpers::GetTileTypeAtPosition(below) == TunnelType::walkThroughLeft) {
+            SceneHelpers::SetTileTypeAtPosition(above, TunnelType::walkThroughUp);
             SceneHelpers::SetTileTypeAtPosition(position, TunnelType::walkThroughUp);
         }
     }

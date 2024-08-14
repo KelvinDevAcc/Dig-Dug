@@ -6,6 +6,7 @@
 #include "LoadMap.h"
 #include "PointComponent.h"
 #include "Pump.h"
+#include "TunnelType.h"
 
 namespace game
 {
@@ -75,9 +76,21 @@ namespace game
         void AddPumpPart();
         void UpdatePumpTextures() const;
         void UpdateTunnelType(const glm::vec3& position, bool isHorizontal, bool isPositiveDirection);
-        void CheckAndSetCornerTypes(const glm::vec3& position, bool isHorizontal, bool isPositiveDirection);
         void SnapToGrid() const;
-        static glm::ivec2 PositionToGrid(const glm::vec3& position);
+        void SetEndType(const glm::vec3& position, bool isHorizontal, bool isPositiveDirection);
+        void HandleHorizontalTunnel(const glm::vec3& position, TunnelType currentTile);
+        void HandleVerticalTunnel(const glm::vec3& position, TunnelType currentTile);
+        void AdjustPreviousTileForHorizontal(const glm::vec3& position, const glm::vec3& offset);
+        void AdjustTileTypeForHorizontal(const glm::vec3& position, TunnelType previousTile);
+        void AdjustPreviousTileForVertical(const glm::vec3& position, const glm::vec3& offset);
+        void AdjustTileTypeForVertical(const glm::vec3& position, TunnelType previousTile);
+        void CheckAndSetCornerTypes(const glm::vec3& position, bool isHorizontal, bool isPositiveDirection);
+        void CheckHorizontalCorners(const glm::vec3& position, const glm::vec3& left, const glm::vec3& right, bool isPositiveDirection);
+        void CheckVerticalCorners(const glm::vec3& position, const glm::vec3& above, const glm::vec3& below, bool isPositiveDirection);
+        void CheckHorizontalWalkThrough(const glm::vec3& position, const glm::vec3& left, const glm::vec3& right);
+        void CheckVerticalWalkThrough(const glm::vec3& position, const glm::vec3& above, const glm::vec3& below);
+
+    	static glm::ivec2 PositionToGrid(const glm::vec3& position);
         static glm::vec3 GridToPosition(const glm::ivec2& gridCoords);
         static float SnapToGridLineY(float yPosition);
         static float SnapToGridLineX(float xPosition);

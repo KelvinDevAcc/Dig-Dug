@@ -55,14 +55,7 @@ void MoveCommand::Execute()
         {
             playerComponent->Move(m_deltaX, m_deltaY);
         }
-        else
-        {
-            std::cerr << "No Player component found on GameObject.\n";
-        }
-    }
-    else
-    {
-        std::cerr << "Cannot execute MoveCommand: GameObject is null.\n";
+        
     }
 }
 

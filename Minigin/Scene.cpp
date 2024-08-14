@@ -48,10 +48,6 @@ namespace dae
             {
                 object->Update();
             }
-            else
-            {
-                std::cerr << "Null object found in Scene::Update\n";
-            }
         }
 
         if (m_sortedObjects.size() < m_objects.size() )
